@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Opening a database checks SQLite `>=3.45.0` for JSONB and raises an actionable `ConnectionError` with the macOS `Database.setCustomSQLite()` remedy on older engines.
 - Retry classification now reads SQLite's numeric `errno`, including extended BUSY/LOCKED/I/O codes, so `defaultShouldRetry` recognizes real lock failures.
 - `collection.removeAllListeners()` now removes listeners for every event on Bun 1.4, matching Node EventEmitter semantics.
 

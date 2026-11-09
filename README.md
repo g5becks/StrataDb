@@ -33,6 +33,12 @@ bun add stratadb
 
 Requires [Bun](https://bun.com) runtime.
 
+SQLite **3.45.0 or newer** is required for JSONB support. StrataDB checks the
+engine version when opening a database and throws `ConnectionError` for older
+engines. Bun uses the system SQLite on macOS; if it is too old, call
+`Database.setCustomSQLite('/path/to/libsqlite3.dylib')` from `bun:sqlite` before
+creating any database connections to load a newer library.
+
 > **Note:** StrataDB is ESM-only. It does not provide CommonJS exports.
 
 ## Quick Start
