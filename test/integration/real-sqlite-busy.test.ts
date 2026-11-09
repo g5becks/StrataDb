@@ -9,7 +9,6 @@ import {
   type Document,
   Strata,
 } from "../../src/index.js"
-import { defaultShouldRetry } from "../../src/retry-utils.js"
 
 test("A7: real SQLITE_BUSY retries after another connection releases its lock", async () => {
   const directory = await mkdtemp(join(tmpdir(), "stratadb-busy-"))
@@ -43,7 +42,6 @@ test("A7: real SQLITE_BUSY retries after another connection releases its lock", 
           retries: 10,
           minTimeout: 5,
           maxTimeout: 5,
-          shouldRetry: defaultShouldRetry,
           onFailedAttempt: ({ error }) => {
             expect(error).toBeInstanceOf(ConnectionError)
             expect(error.cause).toBeInstanceOf(SQLiteError)

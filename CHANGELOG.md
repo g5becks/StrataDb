@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- Enabled retries now use `defaultShouldRetry` when no predicate is supplied. Validation, constraint, query and unknown errors stop after the first attempt; real transient SQLite lock failures still retry. Supply a custom `shouldRetry` for application-specific transient errors. Retries remain disabled until configured.
+
 See [Migrating to 0.6](docs/guide/migrating-to-0.6.md) for before/after examples and the [semantics guide](docs/guide/mongodb-differences.md) for scalar query rules.
 
 - StrataDB now requires Bun `>=1.4.4`. Upgrade the application runtime before upgrading StrataDB. CI and the local fallback verify the 1.4.4 floor and latest Bun, alongside TypeScript 5.9/6.0/7.0 compatibility.

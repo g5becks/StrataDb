@@ -133,7 +133,7 @@ const results = await users.find(
 
 ## Automatic Retries
 
-Retries are disabled until configured. Configure retry behavior at database, collection, or operation level. The exported `defaultShouldRetry` policy recognizes transient SQLite `errno` values and excludes validation, constraint and unknown errors:
+Retries are disabled until configured. Configure retry behavior at database, collection, or operation level. Enabled retries use the exported `defaultShouldRetry` policy automatically: it recognizes transient SQLite `errno` values and excludes validation, constraint and unknown errors. A custom `shouldRetry` overrides that policy:
 
 ```typescript
 import { defaultShouldRetry } from 'stratadb'
@@ -145,7 +145,7 @@ const db = new Strata({
     retries: 3,
     minTimeout: 100,
     maxRetryTime: 5000,
-    shouldRetry: defaultShouldRetry
+    shouldRetry: defaultShouldRetry // Optional: this is already the default
   }
 })
 

@@ -207,7 +207,7 @@ test("A4 [TASK-232] transaction collection forwards options", async () => {
   let validations = 0
   using db = new Strata({
     database: ":memory:",
-    retry: { retries: 1, minTimeout: 1 },
+    retry: { retries: 1, minTimeout: 1, shouldRetry: () => true },
   })
   const invalidSchema = createSchema<Item>()
     .validate((_value): _value is Item => {

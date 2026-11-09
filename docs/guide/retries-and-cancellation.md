@@ -257,9 +257,9 @@ await users.insertOne(userData, {
 })
 ```
 
-### Retry Classification
+### Default Retry Behavior
 
-Retries are disabled unless configured. The exported `defaultShouldRetry` policy classifies these failures as retryable; pass it as `shouldRetry` when configuring a retry policy:
+Retries are disabled unless configured. Enabled retries automatically use the exported `defaultShouldRetry` policy, which classifies these failures as retryable. A custom `shouldRetry` predicate overrides it:
 
 - **ConnectionError** - Database connection issues
 - **TransactionError** - Transaction conflicts

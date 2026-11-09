@@ -86,7 +86,7 @@ export function defaultShouldRetry(context: RetryContext): boolean {
  * @example
  * ```typescript
  * const result = await withRetry(
- *   async () => db.execute('SELECT * FROM users'),
+ *   () => users.find({}),
  *   { retries: 3, signal: abortController.signal }
  * )
  * ```
@@ -102,6 +102,7 @@ export async function withRetry<T>(
 
   const pRetryOptions: Record<string, unknown> = {
     retries: options.retries,
+    shouldRetry: options.shouldRetry ?? defaultShouldRetry,
   }
 
   if (options.factor !== undefined) {
@@ -121,9 +122,6 @@ export async function withRetry<T>(
   }
   if (options.onFailedAttempt !== undefined) {
     pRetryOptions.onFailedAttempt = options.onFailedAttempt
-  }
-  if (options.shouldRetry !== undefined) {
-    pRetryOptions.shouldRetry = options.shouldRetry
   }
   if (options.shouldConsumeRetry !== undefined) {
     pRetryOptions.shouldConsumeRetry = options.shouldConsumeRetry

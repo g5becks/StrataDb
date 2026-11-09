@@ -173,4 +173,21 @@ if (error instanceof ConnectionError && error.errno !== undefined) {
 }
 ```
 
-Retries remain disabled until configured. Use the exported `defaultShouldRetry` policy to classify transient failures and exclude validation, constraint and unknown errors; custom `shouldRetry` predicates can override the policy. See [retries and cancellation](/guide/retries-and-cancellation). Reserved `TypeMismatchError` and `TransactionAbortedError` exports remain available and are deprecated.
+Retries remain disabled until configured. Enabled retries now use `defaultShouldRetry` automatically, excluding validation, constraint and unknown errors. Existing custom predicates retain precedence.
+
+```typescript
+// Before: enabling retries without a predicate retried unknown errors too.
+await withRetry(operation, { retries: 3 })
+
+// After: the same options stop after the first unknown/validation failure.
+await withRetry(operation, { retries: 3 })
+
+// Add an explicit predicate for application-specific transient errors.
+await withRetry(operation, {
+  retries: 3,
+  shouldRetry: (context) => defaultShouldRetry(context) ||
+    context.error instanceof ApplicationTransientError,
+})
+```
+
+See [retries and cancellation](/guide/retries-and-cancellation). Reserved `TypeMismatchError` and `TransactionAbortedError` exports remain available and are deprecated.
