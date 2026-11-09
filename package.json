@@ -61,7 +61,7 @@
     "lint:fix": "ultracite fix",
     "format": "ultracite fix",
     "check": "bun run typecheck && bun run lint",
-    "prepare": "bun run check && bun run build",
+    "prepare": "lefthook install",
     "bench": "bun run bench/query-translation.bench.ts",
     "bench:crud": "bun run bench/crud-operations.bench.ts",
     "bench:batch": "bun run bench/batch-throughput.bench.ts",
