@@ -3,11 +3,11 @@ id: TASK-262
 title: >-
   Release: GitHub Actions publish workflow with npm trusted publishing (OIDC)
   and provenance
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T17:47:00Z'
-updated_date: '2026-11-09T20:32:00Z'
+updated_date: '2026-11-09T20:34:00Z'
 labels:
   - build-release
 milestone: m-1
@@ -31,7 +31,7 @@ Add .github/workflows/release.yml, triggered by v* tags. Steps: checkout at the 
 - [x] #2 The job runs the full quality gate and the consumer smoke test before publishing
 - [x] #3 The job fails when the tag does not match package.json version
 - [x] #4 The job skips publishing, without failing, when that version is already on npm
-- [ ] #5 Publishing uses OIDC trusted publishing with --provenance; no long-lived token is referenced; actionlint passes; CONTRIBUTING.md documents trusted-publisher setup, ci-local fallback and manual publishing
+- [x] #5 Publishing uses OIDC trusted publishing with --provenance; no long-lived token is referenced; actionlint passes; CONTRIBUTING.md documents trusted-publisher setup, ci-local fallback and manual publishing
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -49,4 +49,6 @@ Add .github/workflows/release.yml, triggered by v* tags. Steps: checkout at the 
 - Exact published-version matches produce a notice and skip; only an E404 permits publication, while malformed registry responses/network errors fail. The workflow packs with Bun and requests provenance/public access through trusted publishing, with no npm secret. Publication was not executed.
 - CONTRIBUTING.md documents the one-time npm publisher fields, direct-publish authorization, GitHub-hosted runner requirement, billing/local-CI fallback and maintainer-only interactive-2FA manual procedure. Setup-node v6 SHA verified against the official repository; npm requirements verified against official trusted-publisher documentation.
 - Breaking change: none. Host gates PASS (882 pass, 2 existing skips, 0 fail; TS 5.9.3/6.0.3/7.0.2; lint/build/type tests/consumer). actionlint PASS; workflow contents reviewed against all acceptance criteria. Local CI pending committed SHA; GitHub execution unavailable due to billing lock.
+
+- Verified with scripts/ci-local.sh (b569870410c9f90be15a576c753f41905764fd1f, PASS); GitHub Actions unavailable (billing lock). All macOS/Linux Bun and required/advisory TypeScript jobs passed. Workflow acceptance verified by contents and actionlint; no GitHub workflow execution or npm publication was performed.
 <!-- SECTION:NOTES:END -->
