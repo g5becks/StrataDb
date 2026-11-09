@@ -31,7 +31,7 @@ Unlike MongoDB or other client-server databases, StrataDB runs **in-process** wi
 bun add stratadb
 ```
 
-Requires [Bun](https://bun.com) runtime.
+Requires [Bun](https://bun.com) **1.4.4 or newer**. StrataDB uses `bun:sqlite` and runs on Bun.
 
 SQLite **3.45.0 or newer** is required for JSONB support. StrataDB checks the
 engine version when opening a database and throws `ConnectionError` for older

@@ -1,9 +1,11 @@
 ---
 id: TASK-240
 title: 'Build: raise Bun floor to >=1.4.4 (engines + CI matrix)'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-11-09T04:01:00Z'
+updated_date: '2026-11-09T20:09:00Z'
 labels:
   - build-release
 milestone: m-1
@@ -30,7 +32,23 @@ Decision baked in from audit 1B-B4: StrataDB 0.6.0 requires Bun >= 1.4.4. That r
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 package.json engines.bun is >=1.4.4 and README states the requirement
+- [x] #1 package.json engines.bun is >=1.4.4 and README states the requirement
 - [ ] #2 CI tests on Bun 1.4.4 and the latest Bun
-- [ ] #3 CHANGELOG.md has an entry under ## [Unreleased] describing the change (Breaking changes section)
+- [x] #3 CHANGELOG.md has an entry under ## [Unreleased] describing the change (Breaking changes section)
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Confirm the declared engine, CI/local-runner matrices and any older-runtime compatibility code.
+2. Set engines.bun >=1.4.4 and document the Bun-only minimum and migration.
+3. Run the full host gate, actionlint and committed local CI; record the existing floor/latest matrix verification.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+- Set package engines.bun to >=1.4.4 and state the minimum in README Installation. CI and ci-local already specify floor 1.4.4 plus latest, so neither workflow nor runner required a change. No older-Bun runtime compatibility fallbacks were found. The SQLite >=3.45 engine guard remains required independently of the Bun version.
+- Breaking change: applications must upgrade Bun before StrataDB 0.6.0. Output names remain dist/index.mjs and dist/index.d.mts. CHANGELOG updated.
+- Host gate PASS: typecheck TS 7.0.2; lint 103 files; 874 pass/2 existing skips/0 fail; build; type tests; consumer TS 6/7 and CRUD; source TS 5.9.3/6.0.3; actionlint PASS. Local CI pending committed SHA.
+<!-- SECTION:NOTES:END -->
