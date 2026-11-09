@@ -1,11 +1,11 @@
 ---
 id: TASK-235
 title: 'Feature fix: actually create compound indexes (unique and non-unique)'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T18:30:00Z'
+updated_date: '2026-11-09T18:32:00Z'
 labels:
   - api
 milestone: m-1
@@ -33,7 +33,7 @@ type: bug
 <!-- AC:BEGIN -->
 - [x] #1 Regression case A8 passes: PRAGMA index_list shows the compound index, and a unique compound index rejects duplicates with UniqueConstraintError
 - [x] #2 Compound indexes over dotted (nested) fields are created and used (EXPLAIN QUERY PLAN test)
-- [ ] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #4 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
 
@@ -52,4 +52,6 @@ type: bug
 - A8 cases now pass as normal tests. Regression-first new suite had 3 failures before; now validates ordered PRAGMA index_xinfo columns, unique nested expression enforcement, hostile/colliding names, and EXPLAIN QUERY PLAN use of the actual translated dotted-field query.
 - Breaking change: formerly ignored unique compound declarations now enforce constraints; existing duplicate tuples must be cleaned before reopening. SQLite NULL uniqueness semantics are retained. Bound JSON-path filters can limit expression-index matching; mark constituent fields indexed to use full compound keys in translated queries.
 - Host gate PASS: typecheck TS 7.0.2; lint 98 files; 863 pass/3 existing skips/0 fail; build; type tests; consumer TS 6/7 and CRUD; source TS 5.9.3/6.0.3. Local CI pending committed SHA. Follow-ups: none.
+
+Verified with scripts/ci-local.sh (c434dad208d904ca6b0589f242ca0a84636eacd9, PASS); GitHub Actions unavailable (billing lock). macOS/Linux pinned/latest Bun 1.4.4 PASS; TS 5.9.3/6.0.3/7.0.2 source/type tests PASS; TS 7.1.0-beta advisory PASS. Logs: /Users/takinprofit/Dev/StrataDb-release/ci-local/c434dad/logs. Self-review complete.
 <!-- SECTION:NOTES:END -->
