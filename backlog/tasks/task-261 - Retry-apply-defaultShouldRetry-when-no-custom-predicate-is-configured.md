@@ -1,11 +1,11 @@
 ---
 id: TASK-261
 title: 'Retry: apply defaultShouldRetry when no custom predicate is configured'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T13:23:00Z'
-updated_date: '2026-11-09T20:28:00Z'
+updated_date: '2026-11-09T20:31:00Z'
 labels:
   - api
 milestone: m-1
@@ -44,4 +44,6 @@ During TASK-223, source inspection confirmed withRetry forwards shouldRetry only
 - Preserved the retry-consumption unit test by explicitly allowing its intentionally unknown error. Strengthened the transaction-option forwarding fixture with a custom database predicate, so retry:false forwarding remains independently verified after the new default.
 - Breaking change: enabling retries no longer retries every error by default. Updated README, retry guide, migration before/after examples and CHANGELOG.
 - Host gate PASS: typecheck TS 7.0.2; lint 104 files; 882 pass/2 existing skips/0 fail; build; type tests; consumer TS 6/7 and CRUD; source TS 5.9.3/6.0.3. Focused retry/lock/transaction cases rerun after test-strengthening. Local CI pending committed SHA.
+
+- Verified with scripts/ci-local.sh (0033bda2753cfee168365b57f2b5e1f4cc5412ee, PASS); GitHub Actions unavailable (billing lock). macOS/Linux Bun pinned/latest 1.4.4 and TypeScript 5.9.3/6.0.3/7.0.2 plus advisory 7.1.0-beta all pass.
 <!-- SECTION:NOTES:END -->
