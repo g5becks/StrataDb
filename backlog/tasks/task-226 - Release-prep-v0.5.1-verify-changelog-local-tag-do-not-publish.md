@@ -5,9 +5,9 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T14:43:00Z'
+updated_date: '2026-11-09T14:44:00Z'
 labels:
-  - build-release
+  - blocked
 milestone: m-0
 dependencies:
   - TASK-214
@@ -104,4 +104,9 @@ The npm invocation is a maintainer-only provenance publication command documente
 - Resumed mission: all Step 0 checks passed (GIT_OK, CACHE_OK, WT_DIR_OK; npm identity takinprofit; active GitHub account g5becks; git push --dry-run origin HEAD exit 0 with hooks). Removed historical blocked label. Initial branch clean at 97921dd, no PRs, npm latest 0.5.0, local tags unchanged. Maintainer pre-granted this release plan and publication authorization.
 
 - R(0.5.1) step 1 passed at annotated tag v0.5.1 / 73bf38c in /Users/takinprofit/Dev/StrataDb-release/v0.5.1 on Bun 1.4.4: frozen install; typecheck (TS 7.0.2); lint (84 files); bun test (733 pass, 3 existing skips, 0 fail, 2117 assertions); build; test:types; packed consumer TS 6.0.3/7.0.2 with skipLibCheck:false and CRUD; source tsc 5.9.3 and 6.0.3. package version 0.5.1 and dated CHANGELOG section confirmed. Tag remains unchanged; subsequent commits are backlog-only.
+
+- STOPPED at R(0.5.1) step 3 (required PR CI) on 2026-11-09. Release PR: https://github.com/g5becks/StrataDb/pull/1, head d8c8cf12b9ddbc5411e5887570c200e58c347c80. Push and PR CI runs both concluded failure: https://github.com/g5becks/StrataDb/actions/runs/42637495374 and https://github.com/g5becks/StrataDb/actions/runs/42637526452. Every job failed with no steps executed. GitHub check-run annotations for jobs 129229445871 and 129229446117 state: "The job was not started because your account is locked due to a billing issue." This requires account-owner action; changing code cannot fix it. No CI fix commits, bypass, merge, publication, remote tag push, or GitHub release was attempted. TASK-226 remains In Progress and is labeled blocked. No new task was completed or follow-up task created. Phases B/C were not started because later milestones depend on this release.
+- Required log command was attempted for both runs: gh run view <id> --log-failed exited 1, reporting "failed to get run log: creating cache entry: open /Users/takinprofit/.cache/gh/run-log-<id>-<timestamp>.zip: operation not permitted". No cache relocation or permission workaround was attempted. Read-only gh api check-run annotations exposed the billing failure; gh run view --json confirmed all jobs have steps: [].
+- Final local verification: R step 1 passed completely as recorded above; bunx --bun actionlint also exited 0. Existing tests: 733 passing, 3 existing skips, 0 failures; no test.failing in test/. Appendix A regression suite TASK-227 is not started. Milestones: m-0 12/13, m-1 0/17, m-2 0/18 done. Source and type tests TS 7.0.2 passed; source TS 5.9.3/6.0.3 and packed-consumer TS 6.0.3/7.0.2 passed. Version/changelog confirmed at unchanged local v0.5.1 tag 73bf38c. Scratch worktree remains at the verified tag for resumption; merged-branch cleanup is deferred.
+- Exact next step: account owner must resolve the GitHub Actions billing lock. Then inspect actual state and rerun Step 0; push any local backlog bookkeeping commit on release/v0.5.1 if needed, rerun required CI for PR #1, and require every job to pass before R step 4. Keep v0.5.1 at 73bf38c while changes remain backlog-only. No merge commit, npm tarball URL, GitHub release URL or release-workflow run exists for 0.5.1 yet. Maintainer publish authorization persists.
 <!-- SECTION:NOTES:END -->
