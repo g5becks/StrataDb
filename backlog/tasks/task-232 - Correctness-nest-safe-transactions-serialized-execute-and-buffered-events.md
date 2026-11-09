@@ -1,11 +1,11 @@
 ---
 id: TASK-232
 title: 'Correctness: nest-safe transactions, serialized execute() and buffered events'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T18:16:00Z'
+updated_date: '2026-11-09T18:17:00Z'
 labels:
   - api
 milestone: m-1
@@ -41,7 +41,7 @@ updateMany and deleteMany issue their own `BEGIN TRANSACTION`, so they fail insi
 - [x] #1 Every write method works inside db.execute(), and nested execute() calls commit/roll back independently via savepoints (tests)
 - [x] #2 Regression case A4 passes: an outside write during a pending execute() survives that execute()'s rollback
 - [x] #3 No collection events are emitted for writes that are rolled back; events for committed writes are emitted after commit (tests)
-- [ ] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #5 CHANGELOG.md has an entry under ## [Unreleased] describing the change (Breaking changes section)
 <!-- AC:END -->
 
@@ -62,4 +62,6 @@ updateMany and deleteMany issue their own `BEGIN TRANSACTION`, so they fail insi
 - Breaking change: events are committed-only and outside operations wait; synchronous manual transaction or collection creation cannot join another pending execute and raises TransactionError. Create collections beforehand/inside the callback. Await every transaction operation.
 - Regression-first evidence: 16 new cases originally failed; 17 now pass, covering all 11 write methods, nested independent commit/rollback, sibling execution, queue order, event commit state, manual disposal, options, and outside DDL safety. All four A4 variants are normal passing tests.
 - Host full gate PASS: TS 7.0.2 typecheck, lint 93 files, 849 pass/3 existing skips/0 fail, build, type tests, consumer TS 6/7 and CRUD, source TS 5.9.3/6.0.3. Focused transaction/regression checks rerun after final synchronous-access guard review. Local CI pending committed SHA.
+
+Verified with scripts/ci-local.sh (9eec24bdfe56e6d312b43290fe3a7338b81423c4, PASS); GitHub Actions unavailable (billing lock). macOS/Linux pinned/latest Bun 1.4.4 PASS; TS 5.9.3/6.0.3/7.0.2 source/type tests PASS; TS 7.1.0-beta advisory PASS. Logs: /Users/takinprofit/Dev/StrataDb-release/ci-local/9eec24b/logs. Self-review complete; no follow-up required.
 <!-- SECTION:NOTES:END -->
