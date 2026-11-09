@@ -489,16 +489,16 @@ describe("SQLiteQueryTranslator - Existence Operators", () => {
     const filter: QueryFilter<User> = { name: { $exists: true } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe('(json_type("_name") IS NOT NULL)')
-    expect(result.params).toEqual([])
+    expect(result.sql).toBe("(json_type(body, ?) IS NOT NULL)")
+    expect(result.params).toEqual(["$.name"])
   })
 
   it("should translate $exists: false", () => {
     const filter: QueryFilter<User> = { name: { $exists: false } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe('(json_type("_name") IS NULL)')
-    expect(result.params).toEqual([])
+    expect(result.sql).toBe("(json_type(body, ?) IS NULL)")
+    expect(result.params).toEqual(["$.name"])
   })
 })
 

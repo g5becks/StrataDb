@@ -6,6 +6,8 @@ StrataDB provides a MongoDB-style API for developers familiar with MongoDB who w
 
 StrataDB matches explicit JSON `null` and missing fields with `{ nick: null }` or `{ nick: { $eq: null } }`. A document property set to `undefined` is omitted during serialization and therefore counts as missing. An `undefined` query operand is invalid and raises `QueryError`.
 
+`$exists: true` matches every present field, including explicit JSON null. `$exists: false` matches only missing fields. These rules apply to indexed and dotted fields with query caching enabled or disabled.
+
 `$ne: null` requires a present, non-null value. `$ne: 'B'` and `$nin: ['B']` include null and missing fields as well as other values. This follows the scalar null-query patterns described in [MongoDB's null-field reference](https://www.mongodb.com/docs/v7.0/tutorial/query-for-null-fields/).
 
 | Stored `nick` | `nick: null` | `$ne: null` | `$ne: 'B'` / `$nin: ['B']` |

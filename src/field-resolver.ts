@@ -57,6 +57,19 @@ export function resolveField(
   return `jsonb_extract(body, ${bind(path, params)})`
 }
 
+export function resolvePresence(
+  name: string,
+  params: SQLiteBindValue[]
+): string {
+  const path = fieldPath(name)
+  if (name === "_id" || name === "createdAt" || name === "updatedAt") {
+    return quoteIdent(name)
+  }
+  // Inspect the original JSON: extraction and generated columns conflate
+  // explicit JSON null with missing paths, and extracted text isn't JSON.
+  return `json_type(body, ${bind(path, params)})`
+}
+
 // SQLite forbids parameters in generated-column/index DDL. Only this validated
 // path-literal builder may embed a JSON path in DDL.
 export function ddlField(name: string): string {

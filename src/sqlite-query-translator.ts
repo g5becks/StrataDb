@@ -7,6 +7,7 @@ import {
   fieldPath,
   positional,
   resolveField,
+  resolvePresence,
 } from "./field-resolver.js"
 import type { QueryOptions } from "./query-options-types.js"
 import {
@@ -295,7 +296,7 @@ export class SQLiteQueryTranslator<T extends Document>
   }
 
   /**
-   * Generates a cache key from query structure (ignoring actual values).
+   * Generates a cache key from query structure, retaining SQL-dependent values.
    *
    * @param value - Any query value
    * @returns Cache key string representing the structure
@@ -314,7 +315,11 @@ export class SQLiteQueryTranslator<T extends Document>
     if (typeof value === "object") {
       const obj = value as Record<string, unknown>
       const keys = Object.keys(obj)
-      const parts = keys.map((k) => `${k}:${this.generateCacheKey(obj[k])}`)
+      const parts = keys.map((k) =>
+        k === "$exists"
+          ? `${k}:${String(obj[k])}`
+          : `${k}:${this.generateCacheKey(obj[k])}`
+      )
       return `{${parts.join(",")}}`
     }
 
@@ -369,6 +374,12 @@ export class SQLiteQueryTranslator<T extends Document>
         )
         paths.push(...subPaths)
       } else if (this.isOperatorObject(value)) {
+        if (
+          "$exists" in value &&
+          !["_id", "createdAt", "updatedAt"].includes(key)
+        ) {
+          paths.push(`!path:${key}`)
+        }
         // Operator object like { $gt: 18, $lt: 65 }
         for (const [op, opValue] of Object.entries(
           value as Record<string, unknown>
@@ -604,7 +615,10 @@ export class SQLiteQueryTranslator<T extends Document>
       const operatorSql = this.translateFieldOperators(
         fieldSql,
         value as Record<string, unknown>,
-        params
+        params,
+        "$exists" in value
+          ? resolvePresence(String(fieldName), params)
+          : undefined
       )
       return operatorSql || null
     }
@@ -625,7 +639,8 @@ export class SQLiteQueryTranslator<T extends Document>
   private translateFieldOperators(
     fieldSql: string,
     operators: Record<string, unknown>,
-    params: SQLiteBindValue[]
+    params: SQLiteBindValue[],
+    presenceSql?: string | undefined
   ): string {
     const conditions: string[] = []
 
@@ -636,6 +651,7 @@ export class SQLiteQueryTranslator<T extends Document>
         value,
         operators,
         params,
+        presenceSql,
       })
       if (condition) {
         conditions.push(condition)
@@ -659,6 +675,7 @@ export class SQLiteQueryTranslator<T extends Document>
     value: unknown
     operators: Record<string, unknown>
     params: SQLiteBindValue[]
+    presenceSql?: string | undefined
   }): string | null {
     const { fieldSql, op, value, params } = context
     switch (op) {
@@ -717,7 +734,10 @@ export class SQLiteQueryTranslator<T extends Document>
         return this.translateIndexOperator(fieldSql, value, params)
 
       case "$exists":
-        return this.translateExistsOperator(fieldSql, value)
+        return this.translateExistsOperator(
+          context.presenceSql ?? `json_type(${fieldSql})`,
+          value
+        )
 
       // Additional operators will be added in subsequent tasks
 
@@ -998,7 +1018,7 @@ export class SQLiteQueryTranslator<T extends Document>
   /**
    * Translates $exists operator to SQL.
    *
-   * @param fieldSql - The SQL representation of the field
+   * @param presenceSql - A nullable expression indicating field presence
    * @param shouldExist - Whether field should exist (true) or not (false)
    * @returns SQL string fragment
    *
@@ -1009,15 +1029,15 @@ export class SQLiteQueryTranslator<T extends Document>
    * @internal
    */
   private translateExistsOperator(
-    fieldSql: string,
+    presenceSql: string,
     shouldExist: unknown
   ): string {
     if (shouldExist === true) {
       // Field exists if json_type is not NULL
-      return `json_type(${fieldSql}) IS NOT NULL`
+      return `${presenceSql} IS NOT NULL`
     }
     // Field doesn't exist if json_type is NULL
-    return `json_type(${fieldSql}) IS NULL`
+    return `${presenceSql} IS NULL`
   }
 
   /**

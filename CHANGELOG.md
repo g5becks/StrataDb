@@ -31,6 +31,8 @@ See [Migrating to 0.6](docs/guide/migrating-to-0.6.md) for before/after examples
 
 ### Fixed
 
+- `$exists` distinguishes present JSON null from missing fields, handles string values without parsing errors, and preserves true/false semantics across cached queries. Indexed and nested fields use the same presence rules.
+
 - `find()` supports `skip` without `limit`, including zero and past-end offsets, with a bound offset and SQLite's unlimited `LIMIT -1` form.
 
 - `timestamps(false)` now omits `createdAt` and `updatedAt` from all returned documents and event payloads, including projections and upserts. Timestamp columns remain populated internally, and default/enabled timestamp behavior is preserved.

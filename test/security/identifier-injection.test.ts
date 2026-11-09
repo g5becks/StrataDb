@@ -112,7 +112,7 @@ test("A16 [TASK-228] collection names are quoted as complete identifiers", async
 })
 
 test("A1 [TASK-228] repeated bound paths, cache hits, distinct, sort and cursor preserve binding order", async () => {
-  using db = new Strata({ database: ":memory:" })
+  using db = new Strata({ database: ":memory:", enableCache: true })
   const items = db.collection("items", createSchema<Item>().build())
   await items.insertMany([
     { _id: "a", name: "alpha", values: [1, 2], profile: { city: "Austin" } },

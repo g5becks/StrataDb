@@ -95,7 +95,7 @@ for (const input of malformedFilters) {
 }
 
 test("A2 [TASK-229] cache hits cannot bypass value validation", async () => {
-  using db = new Strata({ database: ":memory:" })
+  using db = new Strata({ database: ":memory:", enableCache: true })
   const items = db.collection("items", createSchema<Item>().build())
   await items.insertOne({ name: "kept", count: 1, values: [1] })
   expect(await items.count({ values: { $size: 1 } })).toBe(1)
