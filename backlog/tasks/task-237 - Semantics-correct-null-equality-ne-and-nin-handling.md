@@ -1,9 +1,11 @@
 ---
 id: TASK-237
 title: 'Semantics: correct null equality, $ne and $nin handling'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-11-09T04:01:00Z'
+updated_date: '2026-11-09T18:39:00Z'
 labels:
   - api
 milestone: m-1
@@ -31,8 +33,26 @@ type: bug
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Regression case A11 passes and the previously skipped null/undefined integration test is enabled and passes
-- [ ] #2 Documented semantics for null, missing fields, $ne and $nin exist in docs/guide and match tests
+- [x] #1 Regression case A11 passes and the previously skipped null/undefined integration test is enabled and passes
+- [x] #2 Documented semantics for null, missing fields, $ne and $nin exist in docs/guide and match tests
 - [ ] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
-- [ ] #4 CHANGELOG.md has an entry under ## [Unreleased] describing the change (Breaking changes section)
+- [x] #4 CHANGELOG.md has an entry under ## [Unreleased] describing the change (Breaking changes section)
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Add indexed/unindexed/cache tests for null, missing, negative equality and membership, and enable the existing null integration case before fixing.
+2. Emit explicit IS NULL/IS NOT NULL branches and define null-containing $nin semantics; retain correct cache binding paths.
+3. Convert A11, document semantics and migration with primary MongoDB references, and run all quality gates plus local CI.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+- Null equality/$eq now use IS NULL and match explicit null plus missing fields. $ne:null uses IS NOT NULL; $ne:non-null and non-null $nin lists include null/missing values. Empty $nin matches all; null-containing lists exclude null/missing and their other values. This scalar membership choice is explicitly documented.
+- Corrected cache parameter descriptors for omitted null operands and filtered null entries, including repeated field paths. A11 cases and the previously skipped integration test now run as normal tests.
+- Regression-first matrix: four failures before; now indexed/unindexed and cached/uncached queries agree across 15 cases, repeated cache hits and a bulk update. Exact SQL/parameter assertions updated and preserved.
+- Breaking change: bulk filters may match additional null/missing documents; review filters during migration. Added the Semantics vs MongoDB guide section with primary MongoDB documentation links and explicit StrataDB decisions.
+- Host gate PASS: typecheck TS 7.0.2; lint 100 files; 871 pass/2 existing skips/0 fail; build; type tests; consumer TS 6/7 and CRUD; source TS 5.9.3/6.0.3. Local CI pending committed SHA. Follow-ups: none.
+<!-- SECTION:NOTES:END -->

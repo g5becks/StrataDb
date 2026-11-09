@@ -375,18 +375,23 @@ export class SQLiteQueryTranslator<T extends Document>
             // Skip $exists (no value)
             continue
           }
+          if ((op === "$eq" || op === "$ne") && opValue === null) {
+            continue
+          }
 
           if (Array.isArray(opValue)) {
             // Array values like $in: [1, 2, 3]
             for (let i = 0; i < opValue.length; i++) {
+              if (op === "$nin" && opValue[i] === null) {
+                continue
+              }
               paths.push(JSON.stringify([...currentPath, op, String(i)]))
             }
           } else {
             paths.push(JSON.stringify([...currentPath, op]))
           }
         }
-      } else {
-        // Direct value comparison like { name: "Alice" }
+      } else if (value !== null) {
         paths.push(JSON.stringify(currentPath))
       }
     }
@@ -579,10 +584,12 @@ export class SQLiteQueryTranslator<T extends Document>
     params: SQLiteBindValue[]
   ): string | null {
     const fieldSql = this.resolveFieldName(fieldName, params)
+    if (value === null) {
+      return `${fieldSql} IS NULL`
+    }
 
     // Direct value comparison (e.g., { name: 'Alice' })
     if (
-      value === null ||
       typeof value === "string" ||
       typeof value === "number" ||
       typeof value === "boolean"
@@ -654,10 +661,14 @@ export class SQLiteQueryTranslator<T extends Document>
     const { fieldSql, op, value, params } = context
     switch (op) {
       case "$eq":
-        return `${fieldSql} = ${bind(this.toBindValue(value), params)}`
+        return value === null
+          ? `${fieldSql} IS NULL`
+          : `${fieldSql} = ${bind(this.toBindValue(value), params)}`
 
       case "$ne":
-        return `${fieldSql} != ${bind(this.toBindValue(value), params)}`
+        return value === null
+          ? `${fieldSql} IS NOT NULL`
+          : `(${fieldSql} IS NULL OR ${fieldSql} != ${bind(this.toBindValue(value), params)})`
 
       case "$gt":
         return `${fieldSql} > ${bind(this.toBindValue(value), params)}`
@@ -774,10 +785,17 @@ export class SQLiteQueryTranslator<T extends Document>
       return "1=1"
     }
 
-    const placeholders = valuesArray
+    const nonNullValues = valuesArray.filter((value) => value !== null)
+    if (nonNullValues.length === 0) {
+      return `${fieldSql} IS NOT NULL`
+    }
+    const placeholders = nonNullValues
       .map((value) => bind(this.toBindValue(value), params))
       .join(", ")
-    return `${fieldSql} NOT IN (${placeholders})`
+    const exclusion = `${fieldSql} NOT IN (${placeholders})`
+    return valuesArray.includes(null)
+      ? `(${fieldSql} IS NOT NULL AND ${exclusion})`
+      : `(${fieldSql} IS NULL OR ${exclusion})`
   }
 
   /**
@@ -928,6 +946,9 @@ export class SQLiteQueryTranslator<T extends Document>
     // For generated columns: json_extract(_field, '$[index]')
     // For non-indexed: json_extract(jsonb_extract(body, '$.field'), '$[index]')
     const elementSql = arrayElement(fieldSql, index, params)
+    if (condition === null) {
+      return `${elementSql} IS NULL`
+    }
 
     // Handle the condition on that element
     if (

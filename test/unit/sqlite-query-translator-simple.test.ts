@@ -83,8 +83,8 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     const filter: QueryFilter<User> = { status: null }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("jsonb_extract(body, ?) = ?")
-    expect(result.params).toEqual(["$.status", null])
+    expect(result.sql).toBe("jsonb_extract(body, ?) IS NULL")
+    expect(result.params).toEqual(["$.status"])
   })
 
   it("should translate $eq operator", () => {
@@ -99,8 +99,10 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     const filter: QueryFilter<User> = { status: { $ne: "inactive" } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(jsonb_extract(body, ?) != ?)")
-    expect(result.params).toEqual(["$.status", "inactive"])
+    expect(result.sql).toBe(
+      "((jsonb_extract(body, ?) IS NULL OR jsonb_extract(body, ?) != ?))"
+    )
+    expect(result.params).toEqual(["$.status", "$.status", "inactive"])
   })
 
   it("should translate $gt operator", () => {
@@ -157,8 +159,15 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(jsonb_extract(body, ?) NOT IN (?, ?))")
-    expect(result.params).toEqual(["$.status", "inactive", "suspended"])
+    expect(result.sql).toBe(
+      "((jsonb_extract(body, ?) IS NULL OR jsonb_extract(body, ?) NOT IN (?, ?)))"
+    )
+    expect(result.params).toEqual([
+      "$.status",
+      "$.status",
+      "inactive",
+      "suspended",
+    ])
   })
 
   it("should handle empty $in array", () => {
@@ -377,7 +386,7 @@ describe("SQLiteQueryTranslator - Nested Queries", () => {
     // - NOT: NOT (condition) without extra outer parens
     // This ensures predictable SQL generation with proper precedence
     expect(result.sql).toBe(
-      '(("_name" != ?) AND ((("_age" >= ?) AND ("_age" < ?)) OR NOT (jsonb_extract(body, ?) = ?)))'
+      '((("_name" IS NULL OR "_name" != ?)) AND ((("_age" >= ?) AND ("_age" < ?)) OR NOT (jsonb_extract(body, ?) = ?)))'
     )
     expect(result.params).toEqual(["System", 18, 65, "$.status", "suspended"])
   })

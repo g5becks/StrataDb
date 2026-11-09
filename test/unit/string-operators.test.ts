@@ -196,11 +196,12 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "((jsonb_extract(body, ?) LIKE ?) AND (jsonb_extract(body, ?) != ?))"
+      "((jsonb_extract(body, ?) LIKE ?) AND ((jsonb_extract(body, ?) IS NULL OR jsonb_extract(body, ?) != ?)))"
     )
     expect(result.params).toEqual([
       "$.description",
       "%urgent%",
+      "$.status",
       "$.status",
       "inactive",
     ])

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- Null equality now matches explicit null and missing fields. `$ne: null` requires a non-null value; `$ne: value` and non-null `$nin` lists include missing/null fields. A `null` entry in `$nin` excludes both null and missing values; an empty list matches all documents. Review bulk-write filters that previously relied on SQL NULL comparisons dropping rows. See the [scalar semantics table](docs/guide/mongodb-differences.md#semantics-vs-mongodb-null-and-missing-scalar-fields).
+
 - Unique compound indexes are now enforced. Remove duplicate tuples before reopening an existing database with a unique compound index declaration that earlier versions ignored.
 
 - `execute()` calls and operations issued outside an active `execute()` now queue in call order. Await every transaction operation; outside writes survive a transaction rollback. Nested calls use savepoints, and events fire only after the outer commit (rolled-back events are discarded). Synchronous transaction/collection creation cannot join another caller's pending `execute()`; create collections beforehand or inside its callback. Transaction collection access now forwards collection options.

@@ -226,7 +226,7 @@ test.failing("A10 [TASK-243] reopened collection adds indexed field", async () =
   }
 })
 
-test.failing("A11 [TASK-237] null equality includes null and missing", async () => {
+test("A11 [TASK-237] null equality includes null and missing", async () => {
   const matches = await users.find({ nick: null })
   expect(matches.map((document) => document.name).sort()).toEqual([
     "50% off",
@@ -235,13 +235,13 @@ test.failing("A11 [TASK-237] null equality includes null and missing", async () 
   ])
 })
 
-test.failing("A11 [TASK-237] $ne null matches present non-null values", async () => {
+test("A11 [TASK-237] $ne null matches present non-null values", async () => {
   expect(
     (await users.find({ nick: { $ne: null } })).map((doc) => doc.name)
   ).toEqual(["bob"])
 })
 
-test.failing("A11 [TASK-237] $ne includes missing and null for non-null operand", async () => {
+test("A11 [TASK-237] $ne includes missing and null for non-null operand", async () => {
   expect(await users.count({ nick: { $ne: "B" } })).toBe(3)
 })
 
