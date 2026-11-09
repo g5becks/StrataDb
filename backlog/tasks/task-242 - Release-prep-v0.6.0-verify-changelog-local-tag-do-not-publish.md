@@ -4,12 +4,13 @@ title: 'Release prep: v0.6.0 (verify, changelog, local tag; do not publish)'
 status: To Do
 assignee: []
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T13:53:00Z'
+updated_date: '2026-11-09T17:47:00Z'
 labels:
   - build-release
 milestone: m-1
 dependencies:
   - TASK-241
+  - TASK-262
 documentation:
   - stratadb-audit.md
 priority: medium
@@ -43,4 +44,6 @@ Package the safety/correctness release. Publishing is done by the maintainer.
 
 <!-- SECTION:NOTES:BEGIN -->
 - Maintainer authorization (2026-11-09 mission): pushing, merging and publishing stratadb 0.5.1, 0.6.0 and 0.7.0 are explicitly authorized. This overrides earlier do-not-publish/local-tag-only wording in TASK-226, TASK-242 and TASK-260. Follow mission release procedure R, including local npm publish without --provenance before pushing tags, passing PR CI and merge without squash/rebase. Plan approval is pre-granted. All mission hard rules remain in force.
+
+Current mission overrides local-tag-only wording: push v0.6.0 and merge release/v0.6.0 via normal merge PR after local CI PASS; npm publish is maintainer-only, never run by this agent. TASK-262 is additionally required.
 <!-- SECTION:NOTES:END -->
