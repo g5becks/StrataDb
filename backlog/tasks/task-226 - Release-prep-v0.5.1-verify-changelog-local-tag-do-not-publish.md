@@ -5,9 +5,8 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T14:44:00Z'
-labels:
-  - blocked
+updated_date: '2026-11-09T17:30:00Z'
+labels: []
 milestone: m-0
 dependencies:
   - TASK-214
@@ -56,10 +55,11 @@ Package the non-breaking guardrail work as v0.5.1. Publishing is done by the mai
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
-1. Reverify the unchanged v0.5.1 tag in the authorized scratch worktree with the full release quality gate.
-2. Push release/v0.5.1, create the release PR, require passing CI, merge without squash, and fast-forward main.
-3. Pack and publish stratadb@0.5.1 locally from the tag, push v0.5.0/v0.5.1, verify the registry and isolated consumer, and create the GitHub release.
-4. Record release evidence, close TASK-226 on main, push bookkeeping, and clean local release worktrees/branches.
+1. Reverify the unchanged v0.5.1 tag in the existing scratch worktree.
+2. Run scripts/ci-local.sh against the tag and committed release branch; require RESULT: PASS for both and validate workflows with actionlint.
+3. Push release/v0.5.1, post both local CI tables to PR #1, verify GitHub failures are billing-only, and merge without squash or admin overrides.
+4. Fast-forward main, publish once from the tag, push only the authorized tags, verify registry and runtime CRUD, and create the GitHub release.
+5. Close TASK-226 with release evidence, push main bookkeeping, and clean merged local branches/worktree.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -109,4 +109,6 @@ The npm invocation is a maintainer-only provenance publication command documente
 - Required log command was attempted for both runs: gh run view <id> --log-failed exited 1, reporting "failed to get run log: creating cache entry: open /Users/takinprofit/.cache/gh/run-log-<id>-<timestamp>.zip: operation not permitted". No cache relocation or permission workaround was attempted. Read-only gh api check-run annotations exposed the billing failure; gh run view --json confirmed all jobs have steps: [].
 - Final local verification: R step 1 passed completely as recorded above; bunx --bun actionlint also exited 0. Existing tests: 733 passing, 3 existing skips, 0 failures; no test.failing in test/. Appendix A regression suite TASK-227 is not started. Milestones: m-0 12/13, m-1 0/17, m-2 0/18 done. Source and type tests TS 7.0.2 passed; source TS 5.9.3/6.0.3 and packed-consumer TS 6.0.3/7.0.2 passed. Version/changelog confirmed at unchanged local v0.5.1 tag 73bf38c. Scratch worktree remains at the verified tag for resumption; merged-branch cleanup is deferred.
 - Exact next step: account owner must resolve the GitHub Actions billing lock. Then inspect actual state and rerun Step 0; push any local backlog bookkeeping commit on release/v0.5.1 if needed, rerun required CI for PR #1, and require every job to pass before R step 4. Keep v0.5.1 at 73bf38c while changes remain backlog-only. No merge commit, npm tarball URL, GitHub release URL or release-workflow run exists for 0.5.1 yet. Maintainer publish authorization persists.
+
+- Mission resumed with maintainer-approved local CI replacement: scripts/ci-local.sh is the release CI gate while GitHub Actions jobs carry billing-lock annotations. CI/workflow acceptance criteria use the local runner and actionlint; never claim remote jobs ran. Step 0 passed: GIT_OK, CACHE_OK, WT_DIR_OK, Docker OSType linux via existing Colima socket, npm identity takinprofit, GitHub identity g5becks, dry-run push exit 0 with hooks. Initial clean HEAD 761088d; PR #1 open; npm versions end at 0.5.0; tag v0.5.1 remains 73bf38c. Removed historical blocked label. Existing scratch worktree is clean at the correct tag. Latest Bun resolves to 1.4.4, matching the pinned version.
 <!-- SECTION:NOTES:END -->
