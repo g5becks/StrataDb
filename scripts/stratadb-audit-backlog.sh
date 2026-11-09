@@ -32,6 +32,16 @@ if [[ ! -f "$AUDIT_DOC" ]]; then
   echo "warning: $AUDIT_DOC not found at repo root; tasks reference it by section id" >&2
 fi
 
+# Guard: this script is a one-time population step. Re-running it would duplicate
+# every task, so stop if the first task already exists.
+# (Capture output first: `cmd | grep -q` under `set -o pipefail` reports failure
+# when grep exits early and cmd gets SIGPIPE.)
+EXISTING_TASKS="$($BACKLOG task list --plain 2>/dev/null || true)"
+if [[ "$EXISTING_TASKS" == *"CI: add quality-gate workflow"* ]]; then
+  echo "backlog already populated from $AUDIT_DOC (found the first audit task); nothing to do."
+  exit 0
+fi
+
 # --- helpers -----------------------------------------------------------------
 # mk <VAR> <title> [backlog task create options...]
 # Creates a task and stores its id (e.g. TASK-214) in the shell variable <VAR>.
