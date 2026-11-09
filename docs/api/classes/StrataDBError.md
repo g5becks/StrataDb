@@ -2,7 +2,7 @@
 
 # Abstract Class: StrataDBError
 
-Defined in: [src/errors.ts:35](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/errors.ts#L35)
+Defined in: [src/errors.ts:35](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L35)
 
 Abstract base class for all StrataDB errors.
 
@@ -60,7 +60,7 @@ try {
 new StrataDBError(message): StrataDBError;
 ```
 
-Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/errors.ts#L46)
+Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L46)
 
 #### Parameters
 
@@ -84,7 +84,7 @@ Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/bfe87286
 abstract readonly category: "validation" | "query" | "database" | "transaction";
 ```
 
-Defined in: [src/errors.ts:40](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/errors.ts#L40)
+Defined in: [src/errors.ts:40](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L40)
 
 Error category for grouping related error types
 
@@ -112,7 +112,7 @@ The cause of the error.
 abstract readonly code: string;
 ```
 
-Defined in: [src/errors.ts:37](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/errors.ts#L37)
+Defined in: [src/errors.ts:37](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L37)
 
 Unique error code for programmatic identification
 

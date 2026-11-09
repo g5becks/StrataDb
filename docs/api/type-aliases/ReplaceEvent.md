@@ -6,7 +6,7 @@
 type ReplaceEvent<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:144](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-events.ts#L144)
+Defined in: [src/collection-events.ts:144](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L144)
 
 Event payload for replace operations.
 
@@ -42,7 +42,7 @@ The document type extending Document
 readonly document: T | null;
 ```
 
-Defined in: [src/collection-events.ts:148](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-events.ts#L148)
+Defined in: [src/collection-events.ts:148](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L148)
 
 The document after replacement, or null if not found
 
@@ -54,6 +54,6 @@ The document after replacement, or null if not found
 readonly filter: string | QueryFilter<T>;
 ```
 
-Defined in: [src/collection-events.ts:146](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-events.ts#L146)
+Defined in: [src/collection-events.ts:146](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L146)
 
 The filter used to find the document

@@ -6,7 +6,7 @@
 type SchemaField<T, K> = object;
 ```
 
-Defined in: [src/schema-types.ts:111](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/schema-types.ts#L111)
+Defined in: [src/schema-types.ts:111](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/schema-types.ts#L111)
 
 Schema field definition for document properties.
 
@@ -70,7 +70,7 @@ The field key within the document type
 readonly default?: T[K];
 ```
 
-Defined in: [src/schema-types.ts:139](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/schema-types.ts#L139)
+Defined in: [src/schema-types.ts:139](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/schema-types.ts#L139)
 
 Default value when field is not provided on insert
 
@@ -82,7 +82,7 @@ Default value when field is not provided on insert
 readonly indexed?: boolean;
 ```
 
-Defined in: [src/schema-types.ts:133](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/schema-types.ts#L133)
+Defined in: [src/schema-types.ts:133](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/schema-types.ts#L133)
 
 Whether to create an index on this field for faster queries
 
@@ -94,7 +94,7 @@ Whether to create an index on this field for faster queries
 readonly name: K;
 ```
 
-Defined in: [src/schema-types.ts:113](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/schema-types.ts#L113)
+Defined in: [src/schema-types.ts:113](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/schema-types.ts#L113)
 
 The field name as it appears in the TypeScript type
 
@@ -106,7 +106,7 @@ The field name as it appears in the TypeScript type
 readonly nullable?: boolean;
 ```
 
-Defined in: [src/schema-types.ts:130](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/schema-types.ts#L130)
+Defined in: [src/schema-types.ts:130](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/schema-types.ts#L130)
 
 Whether the field can be null (default: true for optional fields)
 
@@ -118,7 +118,7 @@ Whether the field can be null (default: true for optional fields)
 readonly path?: JsonPath;
 ```
 
-Defined in: [src/schema-types.ts:120](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/schema-types.ts#L120)
+Defined in: [src/schema-types.ts:120](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/schema-types.ts#L120)
 
 JSON path for extracting the value from the document.
 Defaults to `$.{name}` if omitted (top-level field).
@@ -132,7 +132,7 @@ Only specify for nested properties or custom mappings.
 readonly type: TypeScriptToSQLite<T[K]>;
 ```
 
-Defined in: [src/schema-types.ts:127](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/schema-types.ts#L127)
+Defined in: [src/schema-types.ts:127](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/schema-types.ts#L127)
 
 SQLite column type for the generated column.
 Must be compatible with the TypeScript type of the field.
@@ -146,6 +146,6 @@ Compile-time type checking ensures type safety.
 readonly unique?: boolean;
 ```
 
-Defined in: [src/schema-types.ts:136](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/schema-types.ts#L136)
+Defined in: [src/schema-types.ts:136](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/schema-types.ts#L136)
 
 Whether to enforce uniqueness constraint on this field

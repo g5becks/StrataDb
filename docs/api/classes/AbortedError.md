@@ -2,7 +2,7 @@
 
 # Class: AbortedError
 
-Defined in: [src/errors.ts:460](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/errors.ts#L460)
+Defined in: [src/errors.ts:460](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L460)
 
 Error thrown when an operation is aborted via AbortSignal.
 
@@ -40,7 +40,7 @@ try {
 new AbortedError(message, reason?): AbortedError;
 ```
 
-Defined in: [src/errors.ts:467](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/errors.ts#L467)
+Defined in: [src/errors.ts:467](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L467)
 
 #### Parameters
 
@@ -68,7 +68,7 @@ Defined in: [src/errors.ts:467](https://github.com/g5becks/StrataDb/blob/bfe8728
 readonly category: "database";
 ```
 
-Defined in: [src/errors.ts:461](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/errors.ts#L461)
+Defined in: [src/errors.ts:461](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L461)
 
 Error category for grouping related error types
 
@@ -100,7 +100,7 @@ The cause of the error.
 readonly code: "OPERATION_ABORTED" = "OPERATION_ABORTED";
 ```
 
-Defined in: [src/errors.ts:462](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/errors.ts#L462)
+Defined in: [src/errors.ts:462](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L462)
 
 Unique error code for programmatic identification
 
@@ -144,7 +144,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 readonly reason?: unknown;
 ```
 
-Defined in: [src/errors.ts:465](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/errors.ts#L465)
+Defined in: [src/errors.ts:465](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L465)
 
 The abort reason from the AbortSignal
 

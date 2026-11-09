@@ -7,8 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-09
+
+### Added
+
+- Linux/macOS quality-gate CI on pinned/latest Bun with immutable action references, frozen installs, coverage, and enabled pre-push tests. Installation only prepares Git hooks; docs deployment pins Bun.
+- Isolated packed-tarball consumer checks with production dependencies, strict TS 6/7 declaration checks, a negative type assertion, and runtime CRUD verification.
+
 ### Changed
 
+- Explicit Bun ambient types with pinned `@types/bun@1.4.4` and declared `@types/node@^26`, preserving listener introspection types under the newer Node declarations.
 - Publish complete MIT/repository metadata, a `stratadb/package.json` export, and source files for working source-map navigation. The v0.5.1 package declares Bun `>=1.3.14`.
 - API documentation regenerates in a private TypeScript 6 package. Remove this workaround when TypeDoc supports the TypeScript 7 compiler API.
 - Type assertions now run directly against source with expect-type under every supported compiler, without a build or tsd's bundled compiler.
