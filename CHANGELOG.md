@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Query field paths now require identifier segments (`A-Z`, `a-z`, `_`, then letters, digits or `_`). Invalid filter, sort, search, distinct and schema paths raise `QueryError`; rename keys containing punctuation and use dotted paths for nested fields. Numeric `limit`, `skip` and `$index.index` must be nonnegative safe integers. JSON paths and numeric options are bound, and collection/index/column identifiers are quoted, preventing SQL injection. Collection names such as `order` and `user-data` now work; empty/NUL names are rejected. Dotted indexed fields use distinct generated-column names; reopen existing databases after migrating any manually created generated columns.
 
+### Fixed
+
+- Single-document updates, replacements, `findOneAnd*` operations and upserts now select and write inside a synchronous SQLite immediate transaction. Conditional transitions have one winner, independent concurrent updates persist, and concurrent matching upserts insert once. Deep merges still replace arrays and preserve explicit null values. Document metadata is stored in its dedicated columns and hydrated on reads; writes remove duplicate metadata from JSON bodies.
+
 ## [0.5.1] - 2026-11-09
 
 ### Added

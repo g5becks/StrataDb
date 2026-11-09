@@ -1,11 +1,11 @@
 ---
 id: TASK-230
 title: 'Correctness: async methods always reject instead of throwing synchronously'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T18:03:00Z'
+updated_date: '2026-11-09T18:04:00Z'
 labels:
   - api
 milestone: m-1

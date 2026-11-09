@@ -85,7 +85,7 @@ test("A2 [TASK-229] unknown operator cannot delete documents", async () => {
   expect(await users.count({})).toBe(4)
 })
 
-test.failing("A3 [TASK-231] concurrent conditional updateOne has one winner", async () => {
+test("A3 [TASK-231] concurrent conditional updateOne has one winner", async () => {
   const results = await Promise.all([
     users.updateOne({ name: "alice", role: "admin" }, { role: "running" }),
     users.updateOne({ name: "alice", role: "admin" }, { role: "running" }),
@@ -93,7 +93,7 @@ test.failing("A3 [TASK-231] concurrent conditional updateOne has one winner", as
   expect(results.filter(Boolean)).toHaveLength(1)
 })
 
-test.failing("A3 [TASK-231] concurrent updateOne preserves both fields", async () => {
+test("A3 [TASK-231] concurrent updateOne preserves both fields", async () => {
   await Promise.all([
     users.updateOne({ name: "alice" }, { a: 1 }),
     users.updateOne({ name: "alice" }, { b: 2 }),
