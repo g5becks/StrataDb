@@ -238,19 +238,19 @@ export type SelectSpec<T> = readonly (keyof T)[]
 export type OmitSpec<T> = readonly (keyof T)[]
 
 /**
- * Text search configuration for multi-field full-text searching.
+ * Text search configuration for literal multi-field substring searching.
  *
  * @typeParam T - The document type being searched
  *
  * @remarks
  * Enables searching across multiple document fields simultaneously using
- * case-insensitive LIKE patterns. This is useful for implementing search
+ * literal text with optional ASCII case folding. This supports search
  * boxes, autocomplete, and filtering features.
  *
  * **How it works:**
- * - The `text` value is wrapped with `%` wildcards for substring matching
+ * - Percent, underscore and backslash in `text` remain literal
  * - All specified `fields` are searched with OR logic (match any field)
- * - By default, search is case-insensitive (uses SQLite COLLATE NOCASE)
+ * - By default, search folds ASCII case; non-ASCII case is preserved
  * - Set `caseSensitive: true` for exact case matching
  *
  * **Field paths:**
@@ -309,7 +309,7 @@ export type OmitSpec<T> = readonly (keyof T)[]
  * ```
  */
 export type TextSearchSpec<T> = {
-  /** The search text to find (wrapped with % wildcards for substring matching) */
+  /** Literal substring text; percent, underscore and backslash stay literal */
   readonly text: string
 
   /**

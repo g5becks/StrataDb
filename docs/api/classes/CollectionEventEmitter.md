@@ -2,7 +2,7 @@
 
 # Class: CollectionEventEmitter&lt;T&gt;
 
-Defined in: [src/collection-events.ts:424](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L424)
+Defined in: [src/collection-events.ts:424](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L424)
 
 Typed EventEmitter for collection events.
 
@@ -74,8 +74,8 @@ Defined in: node\_modules/@types/node/events.d.ts:54
 
 ```ts
 [captureRejectionSymbol]?(
-   error, 
-   event, 
+   error,
+   event,
    ...args
 ): void;
 ```
@@ -185,6 +185,38 @@ v0.1.26
 #### Inherited from
 
 `EventEmitter.addListener`
+
+***
+
+### dispatch()
+
+```ts
+dispatch<E>(event, payload): void;
+```
+
+Defined in: [src/collection-events.ts:428](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L428)
+
+Invoke a registration snapshot in order, retaining once-wrapper behavior.
+
+#### Type Parameters
+
+##### E
+
+`E` *extends* keyof [`CollectionEventMap`](../type-aliases/CollectionEventMap.md)&lt;[`Document`](../type-aliases/Document.md)&gt;
+
+#### Parameters
+
+##### event
+
+`E`
+
+##### payload
+
+[`CollectionEventMap`](../type-aliases/CollectionEventMap.md)&lt;`T`&gt;\[`E`\]\[`0`\]
+
+#### Returns
+
+`void`
 
 ***
 
@@ -871,8 +903,8 @@ emitter.emit('log');
   \| `"findOneAndReplace"`
   \| `"drop"`
   \| `"error"`
-  \| keyof EventEmitterEventMap
   \| `E`
+  \| keyof EventEmitterEventMap
 
 #### Returns
 

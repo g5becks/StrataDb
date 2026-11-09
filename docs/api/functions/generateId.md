@@ -6,7 +6,7 @@
 function generateId(): string;
 ```
 
-Defined in: [src/id-generator.ts:68](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/id-generator.ts#L68)
+Defined in: [src/id-generator.ts:68](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/id-generator.ts#L68)
 
 Default ID generator for StrataDB documents.
 

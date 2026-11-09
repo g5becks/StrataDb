@@ -6,7 +6,7 @@
 type StringOperator = object;
 ```
 
-Defined in: [src/query-types.ts:163](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-types.ts#L163)
+Defined in: [src/query-types.ts:163](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-types.ts#L163)
 
 String-specific query operators for pattern matching.
 
@@ -18,10 +18,10 @@ type safety. Only available for string fields to prevent runtime errors.
 For complex pattern matching that would typically use regular expressions,
 consider using these alternatives:
 - `$like`: For SQL-style pattern matching with % wildcards (case-sensitive)
-- `$ilike`: For SQL-style pattern matching with % wildcards (case-insensitive)
-- `$contains`: For substring containment (sugar for `$like: '%value%'`)
-- `$startsWith`: For prefix matching (more efficient than regex)
-- `$endsWith`: For suffix matching (more efficient than regex)
+- `$ilike`: For SQL-style patterns with ASCII case folding
+- `$contains`: For case-sensitive literal substring containment
+- `$startsWith`: For case-sensitive literal prefix matching
+- `$endsWith`: For case-sensitive literal suffix matching
 
 ## Example
 
@@ -38,7 +38,7 @@ const caseInsensitiveQuery: StringOperator = {
   $ilike: '%alice%'          // Matches 'Alice', 'ALICE', 'alice', etc.
 };
 
-// ✅ Substring containment (sugar for $like: '%value%')
+// ✅ Literal substring containment
 const containsQuery: StringOperator = {
   $contains: 'admin'         // Equivalent to: $like: '%admin%'
 };
@@ -65,19 +65,14 @@ const complexStringQuery: StringOperator = {
 readonly $contains?: string;
 ```
 
-Defined in: [src/query-types.ts:232](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-types.ts#L232)
+Defined in: [src/query-types.ts:227](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-types.ts#L227)
 
 Substring containment check (case-sensitive).
 
 #### Remarks
 
-The `$contains` operator is syntactic sugar for `$like: '%value%'`.
-It checks if the field value contains the specified substring anywhere
-within the string. The search is case-sensitive.
-
-This is a convenience operator that saves you from manually adding
-the `%` wildcards. Internally, the query translator wraps your value
-with `%` wildcards and uses SQL LIKE for the match.
+Checks for a literal substring with exact case. Percent, underscore and
+backslash are ordinary characters; the translator uses SQLite instr().
 
 For case-insensitive containment checks, combine with `$ilike`:
 `{ field: { $ilike: '%value%' } }`
@@ -112,7 +107,7 @@ const filtered = await collection.find({
 readonly $endsWith?: string;
 ```
 
-Defined in: [src/query-types.ts:238](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-types.ts#L238)
+Defined in: [src/query-types.ts:233](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-types.ts#L233)
 
 String ends with the specified suffix
 
@@ -124,14 +119,14 @@ String ends with the specified suffix
 readonly $ilike?: string;
 ```
 
-Defined in: [src/query-types.ts:194](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-types.ts#L194)
+Defined in: [src/query-types.ts:194](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-types.ts#L194)
 
 SQL-style LIKE pattern matching (case-insensitive).
 
 #### Remarks
 
 The `$ilike` operator performs case-insensitive pattern matching using
-SQLite's `COLLATE NOCASE`. Use the same `%` and `_` wildcards as `$like`:
+ASCII case folding. Use the same `%` and `_` wildcards as `$like`:
 - `%` matches zero or more characters
 - `_` matches exactly one character
 
@@ -162,7 +157,7 @@ const gmailUsers = await collection.find({
 readonly $like?: string;
 ```
 
-Defined in: [src/query-types.ts:165](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-types.ts#L165)
+Defined in: [src/query-types.ts:165](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-types.ts#L165)
 
 SQL-style LIKE pattern matching (case-sensitive)
 
@@ -174,6 +169,6 @@ SQL-style LIKE pattern matching (case-sensitive)
 readonly $startsWith?: string;
 ```
 
-Defined in: [src/query-types.ts:235](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-types.ts#L235)
+Defined in: [src/query-types.ts:230](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-types.ts#L230)
 
 String starts with the specified prefix

@@ -6,7 +6,7 @@
 function isValidTimestamp(value): value is number;
 ```
 
-Defined in: [src/timestamps.ts:233](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/timestamps.ts#L233)
+Defined in: [src/timestamps.ts:233](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/timestamps.ts#L233)
 
 Type guard to check if a value is a valid timestamp.
 

@@ -54,6 +54,30 @@ await db.execute(async (tx) => {
 // Commits on success, rolls back on error
 ```
 
+## Nested Transactions and Concurrent Work
+
+Nested `execute()` calls and manual transaction handles use savepoints. A failed inner call rolls back its own changes; catch that error inside the outer callback to continue and commit the remaining changes. Every write method, including batch operations and `drop()`, works inside `execute()`.
+
+```typescript
+await db.execute(async () => {
+  await users.insertOne(firstUser)
+  try {
+    await db.execute(async () => {
+      await users.insertOne(secondUser)
+      throw new Error('Discard the second user')
+    })
+  } catch {
+    // The first insert remains in the outer transaction.
+  }
+})
+```
+
+Competing `execute()` calls run in call order. Operations issued outside a pending callback wait until it completes, so its rollback cannot capture another caller's write. Operations awaited inside the callback join its transaction, including calls on an existing collection instance. Create collections beforehand or inside the callback; synchronous collection/transaction creation cannot enter another caller's pending `execute()`.
+
+Await every transaction operation. Await independent queued work after the transaction finishes. Use `execute()` for concurrent application work; complete manual handles in nesting order. Committing, rolling back and disposing a completed handle are idempotent.
+
+Collection events wait for the outermost commit. Savepoint rollback discards its events, and outer rollback discards all buffered events. See [event delivery guarantees](/guide/events#event-timing).
+
 ## Error Handling
 
 ```typescript
@@ -115,9 +139,9 @@ await db.execute(async (tx) => {
 })
 ```
 
-## Nested Transactions
+## Sharing a Transaction Handle
 
-SQLite doesn't support true nested transactions. Calling `transaction()` while already in a transaction will use the existing transaction:
+StrataDB nests transactions with savepoints. Pass a transaction handle to share its scope, or call `execute()` again to create an independently rollbackable savepoint. See [nested transactions and concurrent work](#nested-transactions-and-concurrent-work).
 
 ```typescript
 await db.execute(async (tx) => {

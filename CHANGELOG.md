@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+See [Migrating to 0.6](docs/guide/migrating-to-0.6.md) for before/after examples and the [semantics guide](docs/guide/mongodb-differences.md) for scalar query rules.
+
 - StrataDB now requires Bun `>=1.4.4`. Upgrade the application runtime before upgrading StrataDB. CI and the local fallback verify the 1.4.4 floor and latest Bun, alongside TypeScript 5.9/6.0/7.0 compatibility.
 
 - `$like`, `$contains`, `$startsWith` and `$endsWith` are case-sensitive. Substring/prefix/suffix and search text treat `%`, `_` and backslash literally. `$like`/`$ilike` retain `%`/`_` pattern wildcards with backslash escaping; `$ilike` and default search fold ASCII case only. Use `$ilike` or default search when ASCII-insensitive matching is required. `search({ caseSensitive: true })` now performs exact matching.

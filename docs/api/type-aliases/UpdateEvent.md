@@ -6,7 +6,7 @@
 type UpdateEvent<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:85](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L85)
+Defined in: [src/collection-events.ts:85](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L85)
 
 Event payload for single document update operations.
 
@@ -45,7 +45,7 @@ The document type extending Document
 readonly document: T | null;
 ```
 
-Defined in: [src/collection-events.ts:91](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L91)
+Defined in: [src/collection-events.ts:91](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L91)
 
 The document after update, or null if not found (without upsert)
 
@@ -57,7 +57,7 @@ The document after update, or null if not found (without upsert)
 readonly filter: string | QueryFilter<T>;
 ```
 
-Defined in: [src/collection-events.ts:87](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L87)
+Defined in: [src/collection-events.ts:87](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L87)
 
 The filter used to find the document (string ID or QueryFilter)
 
@@ -69,7 +69,7 @@ The filter used to find the document (string ID or QueryFilter)
 readonly update: Partial<T>;
 ```
 
-Defined in: [src/collection-events.ts:89](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L89)
+Defined in: [src/collection-events.ts:89](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L89)
 
 The update that was applied
 
@@ -81,6 +81,6 @@ The update that was applied
 readonly upserted: boolean;
 ```
 
-Defined in: [src/collection-events.ts:93](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L93)
+Defined in: [src/collection-events.ts:93](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L93)
 
 Whether this was an upsert (document was created)

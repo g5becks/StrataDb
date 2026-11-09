@@ -13,12 +13,12 @@ Unlike MongoDB or other client-server databases, StrataDB runs **in-process** wi
 
 ## Features
 
-- **Embedded SQLite** - Runs in-process via `bun:sqlite`, no external dependencies
-- **Full Type Safety** - Compile-time validation of queries, schemas, and results
+- **Embedded SQLite** - Runs in-process via `bun:sqlite`, with no database server
+- **Typed Queries** - Compile-time checks for query values, declared field types, and results
 - **MongoDB-like API** - Familiar operators: `$eq`, `$gt`, `$in`, `$and`, `$or`, etc.
 - **JSONB Storage** - Flexible documents with indexed generated columns
 - **Portable** - Single file database, easy to backup and deploy
-- **Text Search** - Multi-field search with case-insensitive matching
+- **Text Search** - Literal multi-field search with ASCII case folding or exact case
 - **Cursor Pagination** - Efficient, stable pagination for large datasets
 - **Field Projection** - Clean `select`/`omit` helpers for controlling returned fields
 - **Operation Cancellation** - AbortSignal support for canceling long-running operations
@@ -56,6 +56,7 @@ const schema = createSchema<User>()
   .field('name', { type: 'TEXT', indexed: true })
   .field('email', { type: 'TEXT', indexed: true, unique: true })
   .field('age', { type: 'INTEGER', indexed: true })
+  .compoundIndex('name_age', ['name', 'age'])
   .timestamps(true)
   .build()
 
@@ -93,8 +94,14 @@ const page2 = await users.find(
 
 // Field projection
 const names = await users.find({}, { select: ['name', 'email'] })
-const safe = await users.find({}, { omit: ['password'] })
+const safe = await users.find({}, { omit: ['age'] })
 ```
+
+Compound indexes are created in SQLite. Use `{ unique: true }` to enforce a unique tuple; remove existing duplicates before opening that schema. Declare constituent fields indexed when full compound-key query-plan use is required.
+
+Timestamps are enabled by default. `.timestamps(false)` omits `createdAt` and `updatedAt` from returned documents and event documents; timestamp columns remain internal. Updates preserve deep-merge behavior, replace arrays, and keep explicit null values.
+
+`$like`, `$contains`, `$startsWith` and `$endsWith` match case exactly. The latter three accept literal text. `$like` and `$ilike` accept `%`/`_` wildcards with backslash escaping; `$ilike` folds ASCII case. Search text is literal, with optional `caseSensitive: true`. See [query semantics](docs/guide/mongodb-differences.md) and [Migrating to 0.6](docs/guide/migrating-to-0.6.md).
 
 ## Operation Cancellation
 
@@ -126,16 +133,19 @@ const results = await users.find(
 
 ## Automatic Retries
 
-Configure retry behavior at database, collection, or operation level:
+Retries are disabled until configured. Configure retry behavior at database, collection, or operation level. The exported `defaultShouldRetry` policy recognizes transient SQLite `errno` values and excludes validation, constraint and unknown errors:
 
 ```typescript
+import { defaultShouldRetry } from 'stratadb'
+
 // Database-level: applies to all collections
 const db = new Strata({
   database: 'app.db',
   retry: {
     retries: 3,
     minTimeout: 100,
-    maxRetryTime: 5000
+    maxRetryTime: 5000,
+    shouldRetry: defaultShouldRetry
   }
 })
 
@@ -170,19 +180,20 @@ await users.find(
 
 React to document changes with type-safe event listeners:
 
+Events run synchronously after the outermost commit, in registration order, at most once per registration/event. Rollback discards buffered events. Throwing listeners and async rejections are reported to `error` observers (or logged) and never reject or retry a committed write; later listeners still run. Async listener completion is not awaited.
+
 ```typescript
 const users = db.collection('users', schema)
 
 // Listen for inserts
 users.on('insert', (event) => {
   console.log('New user:', event.document._id)
-  auditLog.record('user.created', event.document)
 })
 
 // Listen for updates
 users.on('update', (event) => {
   if (event.document) {
-    cache.invalidate(`user:${event.document._id}`)
+    console.log('Updated user:', event.document._id)
   }
 })
 
@@ -197,15 +208,19 @@ users.once('insert', (event) => {
 })
 
 // Remove listeners
-users.off('insert', myListener)
 users.removeAllListeners('update')
+users.removeAllListeners() // Clear every event
+
+users.on('error', ({ operation, error }) => {
+  console.error('Listener failed for', operation, error)
+})
 ```
 
 Available events: `insert`, `insertMany`, `update`, `updateMany`, `replace`, `delete`, `deleteMany`, `findOneAndDelete`, `findOneAndUpdate`, `findOneAndReplace`, `drop`, `error`
 
 ## Type Safety
 
-TypeScript validates schema types against field definitions:
+TypeScript checks query values and declared SQL field types. Runtime query validation rejects unknown operators, malformed values and invalid field-path segments. In 0.6, schema field-name spelling still requires care: the builder accepts syntactically valid strings.
 
 ```typescript
 // Correct - types match
@@ -221,6 +236,9 @@ db.collection<User>('users')
 ```
 
 ## Documentation
+
+- [Migrating to 0.6](docs/guide/migrating-to-0.6.md)
+- [Semantics vs MongoDB](docs/guide/mongodb-differences.md)
 
 See the [documentation](https://g5becks.github.io/StrataDb/) for complete guides:
 

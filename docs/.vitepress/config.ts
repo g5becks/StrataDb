@@ -53,6 +53,11 @@ export default defineConfigWithTheme<ThemeConfig>({
             { text: "FAQ", link: "/guide/faq" },
             { text: "Troubleshooting", link: "/guide/troubleshooting" },
             { text: "Migration", link: "/guide/migration" },
+            { text: "Migrating to 0.6", link: "/guide/migrating-to-0.6" },
+            {
+              text: "Semantics vs MongoDB",
+              link: "/guide/mongodb-differences",
+            },
             { text: "Security", link: "/guide/security" },
             { text: "Testing", link: "/guide/testing" },
             { text: "Quick Reference", link: "/guide/quick-reference" },

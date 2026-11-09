@@ -6,7 +6,7 @@
 type CursorSpec = object;
 ```
 
-Defined in: [src/query-options-types.ts:395](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L395)
+Defined in: [src/query-options-types.ts:395](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-options-types.ts#L395)
 
 Cursor-based pagination specification for efficient large dataset navigation.
 
@@ -91,7 +91,7 @@ const backToFirstPage = await users.find(
 readonly after?: string;
 ```
 
-Defined in: [src/query-options-types.ts:400](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L400)
+Defined in: [src/query-options-types.ts:400](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-options-types.ts#L400)
 
 Get items after this cursor (forward pagination).
 Value is the `_id` of the boundary document.
@@ -104,7 +104,7 @@ Value is the `_id` of the boundary document.
 readonly before?: string;
 ```
 
-Defined in: [src/query-options-types.ts:406](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L406)
+Defined in: [src/query-options-types.ts:406](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-options-types.ts#L406)
 
 Get items before this cursor (backward pagination).
 Value is the `_id` of the boundary document.

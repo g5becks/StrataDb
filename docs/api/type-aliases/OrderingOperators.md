@@ -6,7 +6,7 @@
 type OrderingOperators<T> = T extends number | Date ? object : never;
 ```
 
-Defined in: [src/query-types.ts:62](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-types.ts#L62)
+Defined in: [src/query-types.ts:62](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-types.ts#L62)
 
 Ordering comparison operators (greater than, less than).
 

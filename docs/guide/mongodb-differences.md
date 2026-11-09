@@ -1,6 +1,6 @@
 # MongoDB Compatibility Guide
 
-StrataDB provides a MongoDB-compatible API for developers familiar with MongoDB who want the simplicity and performance of SQLite. This guide explains the philosophy, what's the same, key differences, and migration considerations.
+StrataDB provides a MongoDB-style API for developers familiar with MongoDB who want an embedded SQLite database. This guide defines its scalar semantics, shared operations, differences and migration considerations.
 
 ## Semantics vs MongoDB: null and missing scalar fields
 

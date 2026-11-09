@@ -6,20 +6,20 @@
 type TextSearchSpec<T> = object;
 ```
 
-Defined in: [src/query-options-types.ts:311](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L311)
+Defined in: [src/query-options-types.ts:311](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-options-types.ts#L311)
 
-Text search configuration for multi-field full-text searching.
+Text search configuration for literal multi-field substring searching.
 
 ## Remarks
 
 Enables searching across multiple document fields simultaneously using
-case-insensitive LIKE patterns. This is useful for implementing search
+literal text with optional ASCII case folding. This supports search
 boxes, autocomplete, and filtering features.
 
 **How it works:**
-- The `text` value is wrapped with `%` wildcards for substring matching
+- Percent, underscore and backslash in `text` remain literal
 - All specified `fields` are searched with OR logic (match any field)
-- By default, search is case-insensitive (uses SQLite COLLATE NOCASE)
+- By default, search folds ASCII case; non-ASCII case is preserved
 - Set `caseSensitive: true` for exact case matching
 
 **Field paths:**
@@ -94,7 +94,7 @@ The document type being searched
 readonly caseSensitive?: boolean;
 ```
 
-Defined in: [src/query-options-types.ts:322](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L322)
+Defined in: [src/query-options-types.ts:322](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-options-types.ts#L322)
 
 Whether to perform case-sensitive matching. Default: false (case-insensitive)
 
@@ -106,7 +106,7 @@ Whether to perform case-sensitive matching. Default: false (case-insensitive)
 readonly fields: readonly (keyof T | string)[];
 ```
 
-Defined in: [src/query-options-types.ts:319](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L319)
+Defined in: [src/query-options-types.ts:319](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-options-types.ts#L319)
 
 Fields to search. Use field names for top-level, dot notation for nested.
 All fields are searched with OR logic (match any).
@@ -119,6 +119,6 @@ All fields are searched with OR logic (match any).
 readonly text: string;
 ```
 
-Defined in: [src/query-options-types.ts:313](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L313)
+Defined in: [src/query-options-types.ts:313](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-options-types.ts#L313)
 
-The search text to find (wrapped with % wildcards for substring matching)
+Literal substring text; percent, underscore and backslash stay literal

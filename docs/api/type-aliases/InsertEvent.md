@@ -6,7 +6,7 @@
 type InsertEvent<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:35](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L35)
+Defined in: [src/collection-events.ts:35](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L35)
 
 Event payload for single document insert operations.
 
@@ -39,6 +39,6 @@ The document type extending Document
 readonly document: T;
 ```
 
-Defined in: [src/collection-events.ts:37](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L37)
+Defined in: [src/collection-events.ts:37](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L37)
 
 The inserted document with generated _id

@@ -2,7 +2,7 @@
 
 # Class: UniqueConstraintError
 
-Defined in: [src/errors.ts:360](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L360)
+Defined in: [src/errors.ts:371](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L371)
 
 Error thrown when unique constraint is violated.
 
@@ -33,14 +33,14 @@ try {
 
 ```ts
 new UniqueConstraintError(
-   message, 
-   field?, 
-   value?, 
+   message,
+   field?,
+   value?,
    sqliteCode?
 ): UniqueConstraintError;
 ```
 
-Defined in: [src/errors.ts:373](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L373)
+Defined in: [src/errors.ts:384](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L384)
 
 #### Parameters
 
@@ -76,7 +76,7 @@ Defined in: [src/errors.ts:373](https://github.com/g5becks/StrataDb/blob/324b1e8
 readonly category: "database";
 ```
 
-Defined in: [src/errors.ts:361](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L361)
+Defined in: [src/errors.ts:372](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L372)
 
 Error category for grouping related error types
 
@@ -89,10 +89,10 @@ Error category for grouping related error types
 ### cause?
 
 ```ts
-cause?: unknown;
+readonly cause?: unknown;
 ```
 
-Defined in: docs/node\_modules/typescript/lib/lib.es2022.error.d.ts:24
+Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L45)
 
 The cause of the error.
 
@@ -108,7 +108,7 @@ The cause of the error.
 readonly code: "UNIQUE_CONSTRAINT_ERROR" = "UNIQUE_CONSTRAINT_ERROR";
 ```
 
-Defined in: [src/errors.ts:362](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L362)
+Defined in: [src/errors.ts:373](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L373)
 
 Unique error code for programmatic identification
 
@@ -118,13 +118,41 @@ Unique error code for programmatic identification
 
 ***
 
+### context?
+
+```ts
+readonly context?: SQLiteErrorContext;
+```
+
+Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L44)
+
+#### Inherited from
+
+[`StrataDBError`](StrataDBError.md).[`context`](StrataDBError.md#context)
+
+***
+
+### errno?
+
+```ts
+readonly errno?: number;
+```
+
+Defined in: [src/errors.ts:42](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L42)
+
+#### Inherited from
+
+[`StrataDBError`](StrataDBError.md).[`errno`](StrataDBError.md#errno)
+
+***
+
 ### field?
 
 ```ts
 readonly field?: string;
 ```
 
-Defined in: [src/errors.ts:368](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L368)
+Defined in: [src/errors.ts:379](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L379)
 
 The field with unique constraint violation
 
@@ -164,9 +192,23 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 readonly sqliteCode?: number;
 ```
 
-Defined in: [src/errors.ts:365](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L365)
+Defined in: [src/errors.ts:376](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L376)
 
 SQLite error code (if available)
+
+***
+
+### sqliteCodeName?
+
+```ts
+readonly sqliteCodeName?: string;
+```
+
+Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L43)
+
+#### Inherited from
+
+[`StrataDBError`](StrataDBError.md).[`sqliteCodeName`](StrataDBError.md#sqlitecodename)
 
 ***
 
@@ -190,7 +232,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1076
 readonly value?: unknown;
 ```
 
-Defined in: [src/errors.ts:371](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L371)
+Defined in: [src/errors.ts:382](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L382)
 
 The value that violated the unique constraint
 

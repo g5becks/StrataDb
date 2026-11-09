@@ -2,7 +2,7 @@
 
 # Class: AbortedError
 
-Defined in: [src/errors.ts:460](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L460)
+Defined in: [src/errors.ts:472](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L472)
 
 Error thrown when an operation is aborted via AbortSignal.
 
@@ -40,7 +40,7 @@ try {
 new AbortedError(message, reason?): AbortedError;
 ```
 
-Defined in: [src/errors.ts:467](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L467)
+Defined in: [src/errors.ts:479](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L479)
 
 #### Parameters
 
@@ -68,7 +68,7 @@ Defined in: [src/errors.ts:467](https://github.com/g5becks/StrataDb/blob/324b1e8
 readonly category: "database";
 ```
 
-Defined in: [src/errors.ts:461](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L461)
+Defined in: [src/errors.ts:473](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L473)
 
 Error category for grouping related error types
 
@@ -81,10 +81,10 @@ Error category for grouping related error types
 ### cause?
 
 ```ts
-cause?: unknown;
+readonly cause?: unknown;
 ```
 
-Defined in: docs/node\_modules/typescript/lib/lib.es2022.error.d.ts:24
+Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L45)
 
 The cause of the error.
 
@@ -100,13 +100,41 @@ The cause of the error.
 readonly code: "OPERATION_ABORTED" = "OPERATION_ABORTED";
 ```
 
-Defined in: [src/errors.ts:462](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L462)
+Defined in: [src/errors.ts:474](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L474)
 
 Unique error code for programmatic identification
 
 #### Overrides
 
 [`StrataDBError`](StrataDBError.md).[`code`](StrataDBError.md#code)
+
+***
+
+### context?
+
+```ts
+readonly context?: SQLiteErrorContext;
+```
+
+Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L44)
+
+#### Inherited from
+
+[`StrataDBError`](StrataDBError.md).[`context`](StrataDBError.md#context)
+
+***
+
+### errno?
+
+```ts
+readonly errno?: number;
+```
+
+Defined in: [src/errors.ts:42](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L42)
+
+#### Inherited from
+
+[`StrataDBError`](StrataDBError.md).[`errno`](StrataDBError.md#errno)
 
 ***
 
@@ -144,9 +172,23 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 readonly reason?: unknown;
 ```
 
-Defined in: [src/errors.ts:465](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L465)
+Defined in: [src/errors.ts:477](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L477)
 
 The abort reason from the AbortSignal
+
+***
+
+### sqliteCodeName?
+
+```ts
+readonly sqliteCodeName?: string;
+```
+
+Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L43)
+
+#### Inherited from
+
+[`StrataDBError`](StrataDBError.md).[`sqliteCodeName`](StrataDBError.md#sqlitecodename)
 
 ***
 
