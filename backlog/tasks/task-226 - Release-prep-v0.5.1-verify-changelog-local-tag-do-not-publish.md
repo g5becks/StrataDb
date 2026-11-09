@@ -5,10 +5,9 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T13:53:00Z'
+updated_date: '2026-11-09T14:43:00Z'
 labels:
   - build-release
-  - blocked
 milestone: m-0
 dependencies:
   - TASK-214
@@ -57,9 +56,10 @@ Package the non-breaking guardrail work as v0.5.1. Publishing is done by the mai
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
-1. Finalize the 0.5.1 changelog, bump package version, refresh lockfiles, and regenerate API docs.
-2. Run frozen installs, coverage suite on current/floor Bun, blocking TypeScript source/type-test matrix, lint, build, docs, consumer smoke, workflow validation and pack review.
-3. Record exact maintainer publish commands and create local annotated v0.5.0/v0.5.1 tags; commit release prep while leaving this task In Progress, then stop.
+1. Reverify the unchanged v0.5.1 tag in the authorized scratch worktree with the full release quality gate.
+2. Push release/v0.5.1, create the release PR, require passing CI, merge without squash, and fast-forward main.
+3. Pack and publish stratadb@0.5.1 locally from the tag, push v0.5.0/v0.5.1, verify the registry and isolated consumer, and create the GitHub release.
+4. Record release evidence, close TASK-226 on main, push bookkeeping, and clean local release worktrees/branches.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -100,4 +100,8 @@ The npm invocation is a maintainer-only provenance publication command documente
 - Exact next step: maintainer must restore normal access to the existing npm cache (and ensure the execution environment permits that access), then rerun all Step 0 checks; npm whoami must succeed as takinprofit. Once all pass, remove blocked label via Backlog CLI and resume R(0.5.1) step 1 at the unchanged v0.5.1 tag. Do not bypass npm preflight or use an alternative cache or credentials.
 
 - Maintainer authorization (2026-11-09 mission): pushing, merging and publishing stratadb 0.5.1, 0.6.0 and 0.7.0 are explicitly authorized. This overrides earlier do-not-publish/local-tag-only wording in TASK-226, TASK-242 and TASK-260. Follow mission release procedure R, including local npm publish without --provenance before pushing tags, passing PR CI and merge without squash/rebase. Plan approval is pre-granted. All mission hard rules remain in force.
+
+- Resumed mission: all Step 0 checks passed (GIT_OK, CACHE_OK, WT_DIR_OK; npm identity takinprofit; active GitHub account g5becks; git push --dry-run origin HEAD exit 0 with hooks). Removed historical blocked label. Initial branch clean at 97921dd, no PRs, npm latest 0.5.0, local tags unchanged. Maintainer pre-granted this release plan and publication authorization.
+
+- R(0.5.1) step 1 passed at annotated tag v0.5.1 / 73bf38c in /Users/takinprofit/Dev/StrataDb-release/v0.5.1 on Bun 1.4.4: frozen install; typecheck (TS 7.0.2); lint (84 files); bun test (733 pass, 3 existing skips, 0 fail, 2117 assertions); build; test:types; packed consumer TS 6.0.3/7.0.2 with skipLibCheck:false and CRUD; source tsc 5.9.3 and 6.0.3. package version 0.5.1 and dated CHANGELOG section confirmed. Tag remains unchanged; subsequent commits are backlog-only.
 <!-- SECTION:NOTES:END -->
