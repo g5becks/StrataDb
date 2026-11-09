@@ -196,7 +196,7 @@ test("A8 [TASK-235] unique compound index rejects duplicate tuple", async () => 
   expect(await collection.count({})).toBe(1)
 })
 
-test.failing("A9 [TASK-236] timestamps(false) omits timestamp fields", async () => {
+test("A9 [TASK-236] timestamps(false) omits timestamp fields", async () => {
   const collection = db.collection(
     "no_timestamps",
     createSchema<User>().timestamps(false).build()

@@ -243,13 +243,22 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     )
   }
 
-  private hydrate(row: StoredRow): T {
-    return {
+  private visibleDocument(doc: T): T {
+    if (this.schema.timestamps !== false) {
+      return doc
+    }
+    const { createdAt: _createdAt, updatedAt: _updatedAt, ...visible } = doc
+    return visible as T
+  }
+
+  private hydrate(row: StoredRow, internal = false): T {
+    const doc = {
       ...JSON.parse(row.body),
       _id: row._id,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     } as T
+    return internal ? doc : this.visibleDocument(doc)
   }
 
   private validateMutationDocument(doc: T): void {
@@ -285,7 +294,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         `SELECT _id, json(body) AS body, createdAt, updatedAt FROM ${this.tableSql} WHERE ${translated.sql} ${options.sql}`
       )
       .get(...translated.params, ...options.params)
-    return row ? this.hydrate(row) : null
+    return row ? this.hydrate(row, true) : null
   }
 
   private buildMutationDocument(context: {
@@ -363,7 +372,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
   ): MutationResult<T> {
     assertDatabaseOpen(this.db)
     throwIfAborted(options?.signal)
-    return this.db
+    const result = this.db
       .transaction(() => {
         const before = this.readOneSync(filter, options?.sort)
         if (kind === "delete") {
@@ -390,6 +399,11 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         return { before, after, upserted: !before }
       })
       .immediate()
+    return {
+      before: result.before ? this.visibleDocument(result.before) : null,
+      after: result.after ? this.visibleDocument(result.after) : null,
+      upserted: result.upserted,
+    }
   }
 
   /**
@@ -1238,9 +1252,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           stmt.run(docId, body, now, now)
 
           // Emit insert event after successful operation
-          this.emitEvent("insert", () => ({ document: fullDoc }))
+          const document = this.visibleDocument(fullDoc)
+          this.emitEvent("insert", () => ({ document }))
 
-          return Promise.resolve(fullDoc)
+          return Promise.resolve(document)
         } catch (error) {
           if (error instanceof UniqueConstraintError && error.field) {
             Object.assign(error, {
@@ -1562,7 +1577,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
                 const body = this.serializeDocument(fullDoc)
                 stmt.run(docId, body, now, now)
 
-                insertedDocs.push(fullDoc)
+                insertedDocs.push(this.visibleDocument(fullDoc))
                 insertedIds.push(_id)
               } catch (error) {
                 const err = this.handleInsertError(error, i, doc, errors)
@@ -1670,7 +1685,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
               assertDatabaseOpen(this.db)
               throwIfAborted(options?.signal)
 
-              const existingDoc = this.hydrate(row)
+              const existingDoc = this.hydrate(row, true)
               const mergedDoc = mergeDocumentUpdate<
                 T,
                 typeof update & { _id: string; updatedAt: number }
