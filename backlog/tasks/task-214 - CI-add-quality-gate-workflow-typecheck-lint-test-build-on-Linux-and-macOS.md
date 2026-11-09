@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T12:44:00Z'
+updated_date: '2026-11-09T12:46:00Z'
 labels:
   - build-release
 milestone: m-0
@@ -69,4 +69,10 @@ TypeScript version matrix (added by a later task).
 - Stop state: release/v0.5.1 exists and is checked out. No commits were created because hook installation is blocked. The reviewable CI implementation and CLI-managed task metadata remain uncommitted; a clean working tree cannot be delivered while retaining this work under the current hook restriction.
 
 - Resumed after maintainer repaired permissions and installed hooks. Committing the prepared CI changes with TASK-214 still In Progress; criterion 5 will be verified after TASK-215 under the authorized exception.
+
+- Resume results (2026-11-09): committed the prepared CI implementation as f1095ad with installed Git hooks; TASK-214 remains In Progress and the blocked label was removed as requested. TASK-215 implementation committed as d44a0a8 and is now Done.
+- Post-fix local verification: typecheck, lint, bun test --coverage (713 pass, 3 existing skips, 0 failures), build, and test:types pass.
+- Criterion 5 remains unchecked: the required frozen installation fails under the still-active execution sandbox. Default command: cannot write files to cache directory /Users/takinprofit/.cache/.bun/install/cache/: EPERM. With BUN_INSTALL_CACHE_DIR=/tmp/stratadb-bun-cache, installation reaches prepare but lefthook install fails: could not replace the hook: remove .git/hooks/commit-msg: operation not permitted. Initial shell git add also failed creating .git/index.lock; Git connector commits work with the installed hooks.
+- The supported Serena shell fallback still returns: MCP tool call requires approval, but approval policy is never. No hook bypass, install-script suppression, or permission escalation was used. No local-green claim is made for the complete CI sequence. Remote CI run pending maintainer push.
+- Stopping before TASK-216 because the only authorized parallel In Progress exception was TASK-215; TASK-214 cannot be completed until frozen install succeeds. No new follow-up tasks, dependency changes, tags, pushes, or publishing.
 <!-- SECTION:NOTES:END -->

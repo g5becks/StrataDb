@@ -1,7 +1,7 @@
 ---
 id: TASK-215
 title: Fix removeAllListeners() with no argument (Bun 1.4 EventEmitter semantics)
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
