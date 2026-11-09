@@ -920,11 +920,11 @@ export class SQLiteQueryTranslator<T extends Document>
     // Handle the condition on that element
     if (
       condition === null ||
-      typeof condition === "string" ||
-      typeof condition === "number" ||
-      typeof condition === "boolean"
+      typeof condition !== "object" ||
+      (Object.getPrototypeOf(condition) !== Object.prototype &&
+        Object.getPrototypeOf(condition) !== null)
     ) {
-      params.push(condition)
+      params.push(this.toBindValue(condition))
       return `${elementSql} = ?`
     }
 
@@ -1039,13 +1039,13 @@ export class SQLiteQueryTranslator<T extends Document>
 
     // Handle limit (LIMIT clause)
     if (options.limit !== undefined) {
-      params.push(options.limit)
+      params.push(this.toBindValue(options.limit))
       clauses.push("LIMIT ?")
     }
 
     // Handle skip (OFFSET clause)
     if (options.skip !== undefined) {
-      params.push(options.skip)
+      params.push(this.toBindValue(options.skip))
       clauses.push("OFFSET ?")
     }
 

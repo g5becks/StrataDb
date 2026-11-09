@@ -6,7 +6,7 @@
 function dateToTimestamp(date): number;
 ```
 
-Defined in: [src/timestamps.ts:137](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/timestamps.ts#L137)
+Defined in: [src/timestamps.ts:137](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/timestamps.ts#L137)
 
 Convert a JavaScript Date object to a StrataDB timestamp.
 

@@ -6,7 +6,7 @@
 type QueryOptions<T> = object;
 ```
 
-Defined in: [src/query-options-types.ts:773](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L773)
+Defined in: [src/query-options-types.ts:773](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L773)
 
 Complete query options for controlling result set behavior.
 
@@ -146,10 +146,10 @@ The document type being queried
 ### cursor?
 
 ```ts
-readonly optional cursor: CursorSpec;
+readonly cursor?: CursorSpec;
 ```
 
-Defined in: [src/query-options-types.ts:812](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L812)
+Defined in: [src/query-options-types.ts:812](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L812)
 
 Cursor-based pagination configuration.
 Requires `sort` to be set. More efficient than skip/limit for large datasets.
@@ -159,10 +159,10 @@ Requires `sort` to be set. More efficient than skip/limit for large datasets.
 ### limit?
 
 ```ts
-readonly optional limit: number;
+readonly limit?: number;
 ```
 
-Defined in: [src/query-options-types.ts:778](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L778)
+Defined in: [src/query-options-types.ts:778](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L778)
 
 Maximum number of documents to return
 
@@ -171,10 +171,10 @@ Maximum number of documents to return
 ### omit?
 
 ```ts
-readonly optional omit: OmitSpec<T>;
+readonly omit?: OmitSpec<T>;
 ```
 
-Defined in: [src/query-options-types.ts:793](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L793)
+Defined in: [src/query-options-types.ts:793](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L793)
 
 Array of fields to exclude from results.
 Mutually exclusive with `select` and `projection`.
@@ -184,10 +184,10 @@ Mutually exclusive with `select` and `projection`.
 ### projection?
 
 ```ts
-readonly optional projection: ProjectionSpec<T>;
+readonly projection?: ProjectionSpec<T>;
 ```
 
-Defined in: [src/query-options-types.ts:799](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L799)
+Defined in: [src/query-options-types.ts:799](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L799)
 
 Which fields to include (1) or exclude (0) from results.
 Mutually exclusive with `select` and `omit`.
@@ -197,10 +197,10 @@ Mutually exclusive with `select` and `omit`.
 ### retry?
 
 ```ts
-readonly optional retry: RetryOptions | false;
+readonly retry?: RetryOptions | false;
 ```
 
-Defined in: [src/query-options-types.ts:825](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L825)
+Defined in: [src/query-options-types.ts:825](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L825)
 
 Retry configuration for this operation.
 Overrides collection and database-level retry settings.
@@ -211,10 +211,10 @@ Pass `false` to disable retries for this operation.
 ### search?
 
 ```ts
-readonly optional search: TextSearchSpec<T>;
+readonly search?: TextSearchSpec<T>;
 ```
 
-Defined in: [src/query-options-types.ts:806](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L806)
+Defined in: [src/query-options-types.ts:806](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L806)
 
 Multi-field text search configuration.
 Searches across specified fields with OR logic (match any field).
@@ -225,10 +225,10 @@ Combined with filter using AND logic.
 ### select?
 
 ```ts
-readonly optional select: SelectSpec<T>;
+readonly select?: SelectSpec<T>;
 ```
 
-Defined in: [src/query-options-types.ts:787](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L787)
+Defined in: [src/query-options-types.ts:787](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L787)
 
 Array of fields to include in results (plus _id).
 Mutually exclusive with `omit` and `projection`.
@@ -238,10 +238,10 @@ Mutually exclusive with `omit` and `projection`.
 ### signal?
 
 ```ts
-readonly optional signal: AbortSignal;
+readonly signal?: AbortSignal;
 ```
 
-Defined in: [src/query-options-types.ts:818](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L818)
+Defined in: [src/query-options-types.ts:818](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L818)
 
 AbortSignal for cancelling the operation.
 When the signal is aborted, the operation will throw an AbortedError.
@@ -251,10 +251,10 @@ When the signal is aborted, the operation will throw an AbortedError.
 ### skip?
 
 ```ts
-readonly optional skip: number;
+readonly skip?: number;
 ```
 
-Defined in: [src/query-options-types.ts:781](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L781)
+Defined in: [src/query-options-types.ts:781](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L781)
 
 Number of documents to skip (for pagination)
 
@@ -263,9 +263,9 @@ Number of documents to skip (for pagination)
 ### sort?
 
 ```ts
-readonly optional sort: SortSpec<T>;
+readonly sort?: SortSpec<T>;
 ```
 
-Defined in: [src/query-options-types.ts:775](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L775)
+Defined in: [src/query-options-types.ts:775](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L775)
 
 Sort order for results (MongoDB-style: 1 = asc, -1 = desc)

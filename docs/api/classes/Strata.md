@@ -2,7 +2,7 @@
 
 # Class: Strata
 
-Defined in: [src/stratadb.ts:55](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/stratadb.ts#L55)
+Defined in: [src/stratadb.ts:57](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/stratadb.ts#L57)
 
 Main StrataDB database class.
 
@@ -52,7 +52,7 @@ const users = db.collection('users', userSchema);
 new Strata(options): Strata;
 ```
 
-Defined in: [src/stratadb.ts:69](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/stratadb.ts#L69)
+Defined in: [src/stratadb.ts:71](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/stratadb.ts#L71)
 
 Creates a new StrataDB instance.
 
@@ -76,26 +76,24 @@ Database configuration options
 readonly sqliteDb: Database;
 ```
 
-Defined in: [src/stratadb.ts:56](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/stratadb.ts#L56)
+Defined in: [src/stratadb.ts:58](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/stratadb.ts#L58)
 
 Direct access to the underlying SQLite database.
 Use for advanced operations not covered by StrataDB API.
 
 #### Implementation of
 
-```ts
-StrataDBInterface.sqliteDb
-```
+`StrataDBInterface.sqliteDb`
 
 ## Methods
 
 ### \[dispose\]()
 
 ```ts
-dispose: void;
+[dispose](): void;
 ```
 
-Defined in: [src/stratadb.ts:217](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/stratadb.ts#L217)
+Defined in: [src/stratadb.ts:243](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/stratadb.ts#L243)
 
 Disposes the database (closes connection).
 
@@ -105,9 +103,7 @@ Disposes the database (closes connection).
 
 #### Implementation of
 
-```ts
-StrataDBInterface.[dispose]
-```
+`StrataDBInterface.[dispose]`
 
 ***
 
@@ -117,7 +113,7 @@ StrataDBInterface.[dispose]
 close(): void;
 ```
 
-Defined in: [src/stratadb.ts:209](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/stratadb.ts#L209)
+Defined in: [src/stratadb.ts:229](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/stratadb.ts#L229)
 
 Closes the database connection.
 
@@ -127,9 +123,7 @@ Closes the database connection.
 
 #### Implementation of
 
-```ts
-StrataDBInterface.close
-```
+`StrataDBInterface.close`
 
 ***
 
@@ -143,10 +137,11 @@ Implementation of overloaded collection method.
 collection<T>(
    name, 
    schema, 
-   options?): Collection<T>;
+   options?
+): Collection<T>;
 ```
 
-Defined in: [src/stratadb.ts:95](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/stratadb.ts#L95)
+Defined in: [src/stratadb.ts:112](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/stratadb.ts#L112)
 
 Gets or creates a collection with a pre-built schema.
 
@@ -176,9 +171,7 @@ Gets or creates a collection with a pre-built schema.
 
 ##### Implementation of
 
-```ts
-StrataDBInterface.collection
-```
+`StrataDBInterface.collection`
 
 #### Call Signature
 
@@ -186,7 +179,7 @@ StrataDBInterface.collection
 collection<T>(name): CollectionBuilder<T>;
 ```
 
-Defined in: [src/stratadb.ts:104](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/stratadb.ts#L104)
+Defined in: [src/stratadb.ts:121](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/stratadb.ts#L121)
 
 Creates a collection builder for fluent schema definition.
 
@@ -208,9 +201,7 @@ Creates a collection builder for fluent schema definition.
 
 ##### Implementation of
 
-```ts
-StrataDBInterface.collection
-```
+`StrataDBInterface.collection`
 
 ***
 
@@ -220,7 +211,7 @@ StrataDBInterface.collection
 execute<R>(fn, options?): Promise<R>;
 ```
 
-Defined in: [src/stratadb.ts:189](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/stratadb.ts#L189)
+Defined in: [src/stratadb.ts:209](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/stratadb.ts#L209)
 
 Executes a function within a transaction.
 
@@ -252,9 +243,7 @@ Result of the function
 
 #### Implementation of
 
-```ts
-StrataDBInterface.execute
-```
+`StrataDBInterface.execute`
 
 ***
 
@@ -264,7 +253,7 @@ StrataDBInterface.execute
 generateId(): string;
 ```
 
-Defined in: [src/stratadb.ts:88](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/stratadb.ts#L88)
+Defined in: [src/stratadb.ts:105](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/stratadb.ts#L105)
 
 Generates a new unique ID using the configured ID generator.
 
@@ -276,9 +265,7 @@ A new unique identifier string
 
 #### Implementation of
 
-```ts
-StrataDBInterface.generateId
-```
+`StrataDBInterface.generateId`
 
 ***
 
@@ -288,7 +275,7 @@ StrataDBInterface.generateId
 transaction(): Transaction;
 ```
 
-Defined in: [src/stratadb.ts:151](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/stratadb.ts#L151)
+Defined in: [src/stratadb.ts:170](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/stratadb.ts#L170)
 
 Creates a new transaction.
 
@@ -300,6 +287,4 @@ Transaction instance
 
 #### Implementation of
 
-```ts
-StrataDBInterface.transaction
-```
+`StrataDBInterface.transaction`

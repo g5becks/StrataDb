@@ -4,12 +4,14 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
+    "isolatedDeclarations": true,
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": false,
 
     // Module Configuration
     "lib": ["ESNext"],
+    "types": ["bun"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",

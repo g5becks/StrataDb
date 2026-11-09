@@ -6,7 +6,7 @@
 function defaultShouldRetry(context): boolean;
 ```
 
-Defined in: [src/retry-utils.ts:43](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/retry-utils.ts#L43)
+Defined in: [src/retry-utils.ts:43](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/retry-utils.ts#L43)
 
 Default retry logic for database operations.
 Determines which errors should trigger a retry attempt.

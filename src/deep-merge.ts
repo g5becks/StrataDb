@@ -67,19 +67,20 @@ import { deepmergeCustom } from "deepmerge-ts"
  * // }
  * ```
  */
-export const deepMerge = deepmergeCustom({
-  /**
-   * Replace arrays instead of concatenating them.
-   * This ensures array updates completely replace the old array.
-   */
-  mergeArrays: false,
+export const deepMerge: (...objects: readonly unknown[]) => unknown =
+  deepmergeCustom({
+    /**
+     * Replace arrays instead of concatenating them.
+     * This ensures array updates completely replace the old array.
+     */
+    mergeArrays: false,
 
-  /**
-   * Keep undefined values to allow field deletion.
-   * By default, deepmerge-ts filters out undefined.
-   */
-  filterValues: false,
-})
+    /**
+     * Keep undefined values to allow field deletion.
+     * By default, deepmerge-ts filters out undefined.
+     */
+    filterValues: false,
+  })
 
 /**
  * Type-safe deep merge function for document updates in collections.

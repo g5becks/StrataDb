@@ -6,7 +6,7 @@
 type QueryOptionsBase<T> = object;
 ```
 
-Defined in: [src/query-options-types.ts:540](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L540)
+Defined in: [src/query-options-types.ts:540](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L540)
 
 Base query options without projection (returns full document type).
 
@@ -23,10 +23,10 @@ The document type being queried
 ### cursor?
 
 ```ts
-readonly optional cursor: CursorSpec;
+readonly cursor?: CursorSpec;
 ```
 
-Defined in: [src/query-options-types.ts:561](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L561)
+Defined in: [src/query-options-types.ts:561](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L561)
 
 Cursor-based pagination configuration.
 Requires `sort` to be set. More efficient than skip/limit for large datasets.
@@ -36,10 +36,10 @@ Requires `sort` to be set. More efficient than skip/limit for large datasets.
 ### limit?
 
 ```ts
-readonly optional limit: number;
+readonly limit?: number;
 ```
 
-Defined in: [src/query-options-types.ts:545](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L545)
+Defined in: [src/query-options-types.ts:545](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L545)
 
 Maximum number of documents to return
 
@@ -48,10 +48,10 @@ Maximum number of documents to return
 ### retry?
 
 ```ts
-readonly optional retry: RetryOptions | false;
+readonly retry?: RetryOptions | false;
 ```
 
-Defined in: [src/query-options-types.ts:574](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L574)
+Defined in: [src/query-options-types.ts:574](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L574)
 
 Retry configuration for this operation.
 Overrides collection and database-level retry settings.
@@ -62,10 +62,10 @@ Pass `false` to disable retries for this operation.
 ### search?
 
 ```ts
-readonly optional search: TextSearchSpec<T>;
+readonly search?: TextSearchSpec<T>;
 ```
 
-Defined in: [src/query-options-types.ts:555](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L555)
+Defined in: [src/query-options-types.ts:555](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L555)
 
 Multi-field text search configuration.
 Searches across specified fields with OR logic (match any field).
@@ -76,10 +76,10 @@ Combined with filter using AND logic.
 ### signal?
 
 ```ts
-readonly optional signal: AbortSignal;
+readonly signal?: AbortSignal;
 ```
 
-Defined in: [src/query-options-types.ts:567](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L567)
+Defined in: [src/query-options-types.ts:567](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L567)
 
 AbortSignal for cancelling the operation.
 When the signal is aborted, the operation will throw an AbortedError.
@@ -89,10 +89,10 @@ When the signal is aborted, the operation will throw an AbortedError.
 ### skip?
 
 ```ts
-readonly optional skip: number;
+readonly skip?: number;
 ```
 
-Defined in: [src/query-options-types.ts:548](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L548)
+Defined in: [src/query-options-types.ts:548](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L548)
 
 Number of documents to skip (for pagination)
 
@@ -101,9 +101,9 @@ Number of documents to skip (for pagination)
 ### sort?
 
 ```ts
-readonly optional sort: SortSpec<T>;
+readonly sort?: SortSpec<T>;
 ```
 
-Defined in: [src/query-options-types.ts:542](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L542)
+Defined in: [src/query-options-types.ts:542](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L542)
 
 Sort order for results (MongoDB-style: 1 = asc, -1 = desc)

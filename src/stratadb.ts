@@ -6,12 +6,14 @@ import {
 } from "./collection-builder.js"
 import type { Collection } from "./collection-types.js"
 import type { Document } from "./core-types.js"
+import { assertDatabaseOpen, markDatabaseClosed } from "./database-state.js"
 import type {
   CollectionOptions,
   DatabaseOptions,
   StrataDB as StrataDBInterface,
   Transaction,
 } from "./database-types.js"
+import { ConnectionError } from "./errors.js"
 import { generateId } from "./id-generator.js"
 import type { RetryOptions } from "./retry-types.js"
 import type { SchemaDefinition } from "./schema-types.js"
@@ -74,6 +76,21 @@ export class Strata implements StrataDBInterface {
       this.sqliteDb = options.database
     }
 
+    assertDatabaseOpen(this.sqliteDb)
+    const version =
+      this.sqliteDb
+        .query<{ version: string }, []>("SELECT sqlite_version() AS version")
+        .get()?.version ?? "unknown"
+    const [major = 0, minor = 0] = version.split(".").map(Number)
+    if (!(major > 3 || (major === 3 && minor >= 45))) {
+      if (typeof options.database === "string") {
+        this.sqliteDb.close()
+      }
+      throw new ConnectionError(
+        `SQLite ${version} is unsupported; StrataDB requires SQLite >= 3.45.0 for JSONB. On macOS, call Database.setCustomSQLite() before opening a database to load a newer SQLite library.`
+      )
+    }
+
     this.idGeneratorFn = options.idGenerator ?? generateId
     this.onCloseCallback = options.onClose
     this.enableCacheDefault = options.enableCache ?? false
@@ -112,6 +129,7 @@ export class Strata implements StrataDBInterface {
     options?: CollectionOptions
   ): Collection<T> | CollectionBuilder<T> {
     if (!schema) {
+      assertDatabaseOpen(this.sqliteDb)
       // Return builder for fluent schema definition
       return new CollectionBuilderImpl<T>(
         this.sqliteDb,
@@ -125,6 +143,7 @@ export class Strata implements StrataDBInterface {
     if (existing) {
       return existing as Collection<T>
     }
+    assertDatabaseOpen(this.sqliteDb)
 
     // Determine cache setting: collection option > database default
     const enableCache = options?.enableCache ?? this.enableCacheDefault
@@ -149,6 +168,7 @@ export class Strata implements StrataDBInterface {
    * @returns Transaction instance
    */
   transaction(): Transaction {
+    assertDatabaseOpen(this.sqliteDb)
     this.sqliteDb.exec("BEGIN TRANSACTION")
 
     let committed = false
@@ -214,6 +234,7 @@ export class Strata implements StrataDBInterface {
 
     this.onCloseCallback?.()
     this.sqliteDb.close()
+    markDatabaseClosed(this.sqliteDb)
   }
 
   /**

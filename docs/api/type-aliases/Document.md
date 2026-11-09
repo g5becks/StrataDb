@@ -6,9 +6,17 @@
 type Document<T> = object & ReadonlyDeep<T>;
 ```
 
-Defined in: [src/core-types.ts:60](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/core-types.ts#L60)
+Defined in: [src/core-types.ts:60](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/core-types.ts#L60)
 
 Document type with immutable ID.
+
+## Type Parameters
+
+### T
+
+`T` = `Record`&lt;`string`, `unknown`&gt;
+
+The document shape (your custom fields)
 
 ## Type Declaration
 
@@ -19,14 +27,6 @@ readonly _id: string;
 ```
 
 Unique identifier for the document (immutable)
-
-## Type Parameters
-
-### T
-
-`T` = `Record`&lt;`string`, `unknown`&gt;
-
-The document shape (your custom fields)
 
 ## Remarks
 

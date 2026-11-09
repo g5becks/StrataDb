@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.5.1] - 2026-11-09
+
+### Added
+
+- Linux/macOS quality-gate CI on pinned/latest Bun with immutable action references, frozen installs, coverage, and enabled pre-push tests. Installation only prepares Git hooks; docs deployment pins Bun.
+- Isolated packed-tarball consumer checks with production dependencies, strict TS 6/7 declaration checks, a negative type assertion, and runtime CRUD verification.
+
+### Changed
+
+- Explicit Bun ambient types with pinned `@types/bun@1.4.4` and declared `@types/node@^26`, preserving listener introspection types under the newer Node declarations.
+- Publish complete MIT/repository metadata, a `stratadb/package.json` export, and source files for working source-map navigation. The v0.5.1 package declares Bun `>=1.3.14`.
+- API documentation regenerates in a private TypeScript 6 package. Remove this workaround when TypeDoc supports the TypeScript 7 compiler API.
+- Type assertions now run directly against source with expect-type under every supported compiler, without a build or tsd's bundled compiler.
+- Develop on TypeScript 7.0, with blocking TypeScript 5.9/6.0/7.0 compatibility checks and an advisory 7.1 beta CI check.
+- Build with tsdown 0.23 and oxc isolated declarations, preserving `dist/index.mjs` and `dist/index.d.mts`. Public declarations inline type-fest so consumers do not need that development dependency.
+
+### Fixed
+
+- `$index` conditions validate SQLite bind values consistently and reject unsupported `Date`, `Map`, `Promise`, and undefined values with `QueryError`.
+- Collection operations after `close()` report a typed `ConnectionError`, including fluent-builder collections; repeated close calls are safe. Documented Bun 1.4.4 direct-row `changes` counts.
+- Opening a database checks SQLite `>=3.45.0` for JSONB and raises an actionable `ConnectionError` with the macOS `Database.setCustomSQLite()` remedy on older engines.
+- Retry classification now reads SQLite's numeric `errno`, including extended BUSY/LOCKED/I/O codes, so `defaultShouldRetry` recognizes real lock failures.
+- `collection.removeAllListeners()` now removes listeners for every event on Bun 1.4, matching Node EventEmitter semantics.
+
 ## [0.5.0] - 2026-01-09
 
 ### Added

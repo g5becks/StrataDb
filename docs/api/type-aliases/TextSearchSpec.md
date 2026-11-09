@@ -6,7 +6,7 @@
 type TextSearchSpec<T> = object;
 ```
 
-Defined in: [src/query-options-types.ts:311](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L311)
+Defined in: [src/query-options-types.ts:311](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L311)
 
 Text search configuration for multi-field full-text searching.
 
@@ -91,10 +91,10 @@ The document type being searched
 ### caseSensitive?
 
 ```ts
-readonly optional caseSensitive: boolean;
+readonly caseSensitive?: boolean;
 ```
 
-Defined in: [src/query-options-types.ts:322](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L322)
+Defined in: [src/query-options-types.ts:322](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L322)
 
 Whether to perform case-sensitive matching. Default: false (case-insensitive)
 
@@ -106,7 +106,7 @@ Whether to perform case-sensitive matching. Default: false (case-insensitive)
 readonly fields: readonly (keyof T | string)[];
 ```
 
-Defined in: [src/query-options-types.ts:319](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L319)
+Defined in: [src/query-options-types.ts:319](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L319)
 
 Fields to search. Use field names for top-level, dot notation for nested.
 All fields are searched with OR logic (match any).
@@ -119,6 +119,6 @@ All fields are searched with OR logic (match any).
 readonly text: string;
 ```
 
-Defined in: [src/query-options-types.ts:313](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L313)
+Defined in: [src/query-options-types.ts:313](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-options-types.ts#L313)
 
 The search text to find (wrapped with % wildcards for substring matching)

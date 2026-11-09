@@ -1,12 +1,12 @@
 [stratadb](../index.md) / IdGenerator
 
-# Type Alias: IdGenerator()
+# Type Alias: IdGenerator
 
 ```ts
 type IdGenerator = () => string;
 ```
 
-Defined in: [src/id-generator.ts:111](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/id-generator.ts#L111)
+Defined in: [src/id-generator.ts:111](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/id-generator.ts#L111)
 
 Type definition for custom ID generator functions.
 

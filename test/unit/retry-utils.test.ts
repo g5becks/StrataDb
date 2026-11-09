@@ -1,3 +1,4 @@
+import { Database, SQLiteError } from "bun:sqlite"
 import { describe, expect, test } from "bun:test"
 import {
   ConnectionError,
@@ -12,6 +13,21 @@ import {
   mergeRetryOptions,
   withRetry,
 } from "../../src/retry-utils.js"
+
+function sqliteError(errno: number): SQLiteError {
+  using db = new Database(":memory:")
+  try {
+    db.exec("INVALID SQL")
+  } catch (error) {
+    if (!(error instanceof SQLiteError)) {
+      throw error
+    }
+    // Native errno is immutable; inherit the native error for fault-injected
+    // result-code variants that cannot safely be induced (e.g. NOMEM/IOERR).
+    return Object.create(error, { errno: { value: errno } }) as SQLiteError
+  }
+  throw new Error("Expected SQLiteError")
+}
 
 describe("withRetry", () => {
   test("executes operation once when retries is 0", async () => {
@@ -286,8 +302,8 @@ describe("defaultShouldRetry", () => {
     expect(result).toBe(true)
   })
 
-  test("returns true for SQLITE_BUSY (code 5)", () => {
-    const error = Object.assign(new Error("Database busy"), { code: 5 })
+  test("returns true for SQLITE_BUSY (errno 5)", () => {
+    const error = sqliteError(5)
     const result = defaultShouldRetry({
       error,
       attemptNumber: 1,
@@ -298,8 +314,8 @@ describe("defaultShouldRetry", () => {
     expect(result).toBe(true)
   })
 
-  test("returns true for SQLITE_LOCKED (code 6)", () => {
-    const error = Object.assign(new Error("Database locked"), { code: 6 })
+  test("returns true for SQLITE_LOCKED (errno 6)", () => {
+    const error = sqliteError(6)
     const result = defaultShouldRetry({
       error,
       attemptNumber: 1,
@@ -310,8 +326,8 @@ describe("defaultShouldRetry", () => {
     expect(result).toBe(true)
   })
 
-  test("returns true for SQLITE_NOMEM (code 7)", () => {
-    const error = Object.assign(new Error("Out of memory"), { code: 7 })
+  test("returns true for SQLITE_NOMEM (errno 7)", () => {
+    const error = sqliteError(7)
     const result = defaultShouldRetry({
       error,
       attemptNumber: 1,
@@ -322,8 +338,8 @@ describe("defaultShouldRetry", () => {
     expect(result).toBe(true)
   })
 
-  test("returns true for SQLITE_IOERR (code 10)", () => {
-    const error = Object.assign(new Error("I/O error"), { code: 10 })
+  test("returns true for SQLITE_IOERR (errno 10)", () => {
+    const error = sqliteError(10)
     const result = defaultShouldRetry({
       error,
       attemptNumber: 1,
@@ -332,6 +348,21 @@ describe("defaultShouldRetry", () => {
     })
 
     expect(result).toBe(true)
+  })
+
+  test.each([
+    517, 262, 266,
+  ])("returns true for extended SQLite errno %i", (errno) => {
+    const error = sqliteError(errno)
+    expect(error).toBeInstanceOf(SQLiteError)
+    expect(
+      defaultShouldRetry({
+        error,
+        attemptNumber: 1,
+        retriesLeft: 2,
+        retriesConsumed: 0,
+      })
+    ).toBe(true)
   })
 
   test("returns false for unknown errors", () => {
@@ -347,7 +378,7 @@ describe("defaultShouldRetry", () => {
   })
 
   test("returns false for non-retryable SQLite codes", () => {
-    const error = Object.assign(new Error("Other error"), { code: 99 })
+    const error = sqliteError(99)
     const result = defaultShouldRetry({
       error,
       attemptNumber: 1,

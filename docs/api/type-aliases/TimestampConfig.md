@@ -11,11 +11,13 @@ type TimestampConfig =
   | boolean;
 ```
 
-Defined in: [src/schema-types.ts:207](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/schema-types.ts#L207)
+Defined in: [src/schema-types.ts:207](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/schema-types.ts#L207)
 
 Configuration for automatic timestamp management.
 
-## Type Declaration
+## Union Members
+
+### Type Literal
 
 ```ts
 {
@@ -24,21 +26,23 @@ Configuration for automatic timestamp management.
 }
 ```
 
-### createdAt?
+#### createdAt?
 
 ```ts
-readonly optional createdAt: boolean;
+readonly createdAt?: boolean;
 ```
 
 Whether to automatically add createdAt timestamp on document creation
 
-### updatedAt?
+#### updatedAt?
 
 ```ts
-readonly optional updatedAt: boolean;
+readonly updatedAt?: boolean;
 ```
 
 Whether to automatically update updatedAt timestamp on document modification
+
+***
 
 `boolean`
 

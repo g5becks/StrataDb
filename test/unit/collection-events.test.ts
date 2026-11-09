@@ -238,6 +238,19 @@ describe("Collection Events - Registration Methods", () => {
   })
 
   describe("removeAllListeners()", () => {
+    it("A18: clears listener counts across event names without an argument", () => {
+      const events: unknown[] = []
+      collection.on("insert", (event) => events.push(event))
+      collection.on("update", (event) => events.push(event))
+      expect(collection.listenerCount("insert")).toBe(1)
+      expect(collection.listenerCount("update")).toBe(1)
+
+      expect(collection.removeAllListeners()).toBe(collection)
+
+      expect(collection.listenerCount("insert")).toBe(0)
+      expect(collection.listenerCount("update")).toBe(0)
+    })
+
     it("should remove all listeners for specific event", async () => {
       const events1: InsertEvent<TestUser>[] = []
       const events2: InsertEvent<TestUser>[] = []

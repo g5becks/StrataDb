@@ -3,10 +3,14 @@ import { defineConfig } from "tsdown"
 export default defineConfig({
   entry: ["src/index.ts"],
   format: ["esm"],
-  dts: true,
+  dts: { generator: "oxc" },
   clean: true,
-  platform: "node",
-  target: "node20",
+  platform: "neutral",
+  target: "esnext",
+  fixedExtension: true,
   sourcemap: true,
-  external: ["bun:sqlite"],
+  deps: {
+    neverBundle: ["bun:sqlite", /^node:/],
+    onlyBundle: ["type-fest", "tagged-tag"],
+  },
 })
