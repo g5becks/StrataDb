@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Reopening a collection adds newly declared indexed fields as virtual generated columns and creates their indexes atomically. Existing rows become queryable through the new fields; affected indexes left by earlier failed evolution attempts are rebuilt. Bun's query cache is cleared after DDL. Removed or type-changed stored generated columns are retained and reported through `onSchemaDrift` (default console warning); set it to `"error"` to require an explicit migration.
+
 ## [0.6.0] - 2026-11-09
 
 ### Breaking changes

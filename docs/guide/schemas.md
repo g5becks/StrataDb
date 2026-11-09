@@ -1,5 +1,21 @@
 # Schemas
 
+## Adding indexed fields to an existing collection
+
+Close and reopen the database with the updated schema. StrataDB adds missing
+virtual generated columns and their indexes in one transaction, including
+dotted fields, so existing documents are immediately queryable. An index failure
+(for example duplicate values under a new unique index) rolls the DDL back.
+
+Removed or type-changed stored generated columns are retained. By default,
+StrataDB logs a warning; configure `onSchemaDrift: change => report(change)` on
+the database to handle it, or `onSchemaDrift: "error"` to reject opening the
+collection. Drift reports identify the collection, stored column, kind, stored
+SQL type, and expected type when changed. BOOLEAN and INTEGER share SQLite's
+INTEGER representation. Unindexed document properties have no stored column
+declaration to compare. Renames, removals and type conversions require an
+explicit application migration; StrataDB does not rewrite stored data.
+
 Schemas define which fields get **generated columns** for fast querying. Fields not in the schema are still stored - they just live in the JSONB blob.
 
 ## How Storage Works

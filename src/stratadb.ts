@@ -17,6 +17,7 @@ import { ConnectionError } from "./errors.js"
 import { quoteIdent } from "./field-resolver.js"
 import { generateId } from "./id-generator.js"
 import type { RetryOptions } from "./retry-types.js"
+import { configureSchemaDrift } from "./schema-evolution.js"
 import type { SchemaDefinition } from "./schema-types.js"
 import { sqliteCall } from "./sqlite-boundary.js"
 import { SQLiteCollection } from "./sqlite-collection.js"
@@ -107,6 +108,7 @@ export class Strata implements StrataDBInterface {
     this.onCloseCallback = options.onClose
     this.enableCacheDefault = options.enableCache ?? false
     this.retryOptionsDefault = options.retry
+    configureSchemaDrift(this.sqliteDb, options.onSchemaDrift)
   }
 
   /**

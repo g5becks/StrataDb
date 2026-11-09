@@ -75,7 +75,6 @@ export type {
   StrataDB,
   Transaction,
 } from "./database-types.js"
-// Error types
 export {
   AbortedError,
   ConnectionError,
@@ -131,6 +130,8 @@ export {
 } from "./retry-utils.js"
 export { createSchema } from "./schema-builder.js"
 export type { SchemaBuilder } from "./schema-builder-types.js"
+// Error types
+export type { SchemaDrift, SchemaDriftHandler } from "./schema-evolution.js"
 // Schema types and builder
 export type {
   CompoundIndex,

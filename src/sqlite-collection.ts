@@ -49,9 +49,11 @@ import {
   type RetryableOptions,
   withRetry,
 } from "./retry-utils.js"
+import { evolveGeneratedColumns } from "./schema-evolution.js"
 import type { SchemaDefinition } from "./schema-types.js"
 import {
   SQLiteBoundary,
+  sqliteCall,
   sqliteOperation,
   wrapSqliteError,
 } from "./sqlite-boundary.js"
@@ -445,7 +447,14 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
     // Initialize table and indexes
     transactionManager(this.db).assertSynchronousAccess()
-    this.createTable()
+    sqliteCall(
+      () => this.db.transaction(() => this.createTable()).immediate(),
+      {
+        collection: this.name,
+        operation: "schema",
+      }
+    )
+    this.db.clearQueryCache()
   }
 
   /**
@@ -510,6 +519,13 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       )
     `
     this.sql.run(createTableSQL)
+
+    evolveGeneratedColumns({
+      database: this.db,
+      sql: this.sql,
+      collection: this.name,
+      schema: this.schema,
+    })
 
     // Create indexes
     this.createIndexes()

@@ -206,7 +206,7 @@ test("A9 [TASK-236] timestamps(false) omits timestamp fields", async () => {
   expect(inserted).not.toHaveProperty("updatedAt")
 })
 
-test.failing("A10 [TASK-243] reopened collection adds indexed field", async () => {
+test("A10 [TASK-243] reopened collection adds indexed field", async () => {
   const directory = mkdtempSync(join(tmpdir(), "stratadb-evolution-"))
   const filename = join(directory, "evolution.db")
   try {

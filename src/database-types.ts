@@ -3,6 +3,7 @@ import type { CollectionBuilder } from "./collection-builder.js"
 import type { Collection } from "./collection-types.js"
 import type { Document } from "./core-types.js"
 import type { RetryOptions } from "./retry-types.js"
+import type { SchemaDriftHandler } from "./schema-evolution.js"
 import type { SchemaDefinition } from "./schema-types.js"
 
 /**
@@ -19,6 +20,10 @@ import type { SchemaDefinition } from "./schema-types.js"
  * ```
  */
 export type DatabaseOptions = {
+  /** Report removed/type-changed generated columns; "error" rejects drift.
+   * Defaults to console.warn. Columns and their data are retained.
+   */
+  readonly onSchemaDrift?: SchemaDriftHandler
   /**
    * SQLite database path or ':memory:' for in-memory database.
    * Can also be an existing bun:sqlite Database instance.
