@@ -276,7 +276,7 @@ test("A13 [TASK-238] search honors caseSensitive", async () => {
   ).toEqual([])
 })
 
-test.failing("A14 [TASK-239] skip without limit returns remaining rows", async () => {
+test("A14 [TASK-239] skip without limit returns remaining rows", async () => {
   expect(
     (await users.find({}, { sort: { name: 1 }, skip: 1 })).map(
       (doc) => doc.name

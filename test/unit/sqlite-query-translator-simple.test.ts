@@ -445,7 +445,7 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const options: QueryOptions<User> = { skip: 20 }
     const result = userTranslator.translateOptions(options)
 
-    expect(result.sql).toBe("OFFSET ?")
+    expect(result.sql).toBe("LIMIT -1 OFFSET ?")
     expect(result.params).toEqual([20])
   })
 

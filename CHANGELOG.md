@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `find()` supports `skip` without `limit`, including zero and past-end offsets, with a bound offset and SQLite's unlimited `LIMIT -1` form.
+
 - `timestamps(false)` now omits `createdAt` and `updatedAt` from all returned documents and event payloads, including projections and upserts. Timestamp columns remain populated internally, and default/enabled timestamp behavior is preserved.
 
 - Declared compound indexes are now created, including unique and nested-field indexes. Index names encode the collection/name pair to prevent collisions. Existing duplicate tuples must be cleaned before opening a schema that declares a unique compound index. Generated columns are used for indexed fields, validated JSON expressions otherwise; declare constituent fields indexed when query-plan use of the full compound key is required. SQLite's standard NULL uniqueness behavior is retained.

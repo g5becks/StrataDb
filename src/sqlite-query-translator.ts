@@ -1089,6 +1089,9 @@ export class SQLiteQueryTranslator<T extends Document>
     // Handle skip (OFFSET clause)
     if (options.skip !== undefined) {
       assertNonNegativeInt(options.skip, "skip")
+      if (options.limit === undefined) {
+        clauses.push("LIMIT -1")
+      }
       clauses.push(`OFFSET ${bind(options.skip, params)}`)
     }
 
