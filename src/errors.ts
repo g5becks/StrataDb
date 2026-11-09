@@ -1,3 +1,9 @@
+export type SQLiteErrorContext = {
+  readonly sql?: string
+  readonly collection?: string
+  readonly operation?: string
+}
+
 /**
  * Abstract base class for all StrataDB errors.
  *
@@ -33,6 +39,10 @@
  * ```
  */
 export abstract class StrataDBError extends Error {
+  readonly errno?: number | undefined
+  readonly sqliteCodeName?: string | undefined
+  readonly context?: SQLiteErrorContext | undefined
+  override readonly cause?: unknown
   /** Unique error code for programmatic identification */
   abstract readonly code: string
 
@@ -208,6 +218,7 @@ export class InvalidQueryOperatorError extends StrataDBError {
  * }
  * ```
  */
+/** @deprecated Reserved for compatibility; validation uses ValidationError or QueryError. */
 export class TypeMismatchError extends StrataDBError {
   readonly category = "query" as const
   readonly code = "TYPE_MISMATCH"
@@ -429,6 +440,7 @@ export class TransactionError extends StrataDBError {
  * }
  * ```
  */
+/** @deprecated Use AbortedError for cancellation; retained for compatibility. */
 export class TransactionAbortedError extends StrataDBError {
   readonly category = "transaction" as const
   readonly code = "TRANSACTION_ABORTED"

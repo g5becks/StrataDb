@@ -47,14 +47,13 @@ import {
   withRetry,
 } from "./retry-utils.js"
 import type { SchemaDefinition } from "./schema-types.js"
+import {
+  SQLiteBoundary,
+  sqliteOperation,
+  wrapSqliteError,
+} from "./sqlite-boundary.js"
 import { SQLiteQueryTranslator } from "./sqlite-query-translator.js"
 import { transactionManager } from "./transaction-manager.js"
-
-/** Regex to extract field name from SQLite unique constraint error */
-const UNIQUE_CONSTRAINT_REGEX = /UNIQUE constraint failed: \w+\.(\w+)/
-
-/** Regex to remove underscore prefix from generated column names */
-const UNDERSCORE_PREFIX_REGEX = /^_/
 
 type StoredRow = {
   _id: string
@@ -139,6 +138,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
   /** SQLite database instance */
   private readonly db: SQLiteDatabase
+  private readonly sql: SQLiteBoundary
 
   /** Query translator for converting filters to SQL */
   private readonly translator: SQLiteQueryTranslator<T>
@@ -219,15 +219,25 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
   private runOperation<R>(
     operation: () => Promise<R>,
-    options?: RetryableOptions
+    options?: RetryableOptions,
+    operationName = "collection"
   ): Promise<R> {
     if (isDatabaseClosed(this.db)) {
       return Promise.reject(new ConnectionError("StrataDB database is closed"))
     }
-    return withRetry(() => {
-      assertDatabaseOpen(this.db)
-      return transactionManager(this.db).run(operation)
-    }, options)
+    return sqliteOperation.run(operationName, () =>
+      withRetry(async () => {
+        try {
+          assertDatabaseOpen(this.db)
+          return await transactionManager(this.db).run(operation)
+        } catch (error) {
+          throw wrapSqliteError(error, {
+            collection: this.name,
+            operation: operationName,
+          })
+        }
+      }, options)
+    )
   }
 
   private hydrate(row: StoredRow): T {
@@ -267,7 +277,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     const options = this.translator.translateOptions(
       sort ? { sort, limit: 1 } : { limit: 1 }
     )
-    const row = this.db
+    const row = this.sql
       .prepare<StoredRow, SQLQueryBindings[]>(
         `SELECT _id, json(body) AS body, createdAt, updatedAt FROM ${this.tableSql} WHERE ${translated.sql} ${options.sql}`
       )
@@ -327,28 +337,18 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
   }
 
   private writeMutation(after: T, exists: boolean, now: number): void {
-    try {
-      if (exists) {
-        this.db
-          .prepare(
-            `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
-          )
-          .run(this.serializeDocument(after), now, after._id)
-      } else {
-        this.db
-          .prepare(
-            `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
-          )
-          .run(after._id, this.serializeDocument(after), now, now)
-      }
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes("UNIQUE constraint failed")
-      ) {
-        throw new UniqueConstraintError(error.message)
-      }
-      throw error
+    if (exists) {
+      this.sql
+        .prepare(
+          `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
+        )
+        .run(this.serializeDocument(after), now, after._id)
+    } else {
+      this.sql
+        .prepare(
+          `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
+        )
+        .run(after._id, this.serializeDocument(after), now, now)
     }
   }
 
@@ -365,7 +365,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         const before = this.readOneSync(filter, options?.sort)
         if (kind === "delete") {
           if (before) {
-            this.db
+            this.sql
               .prepare(`DELETE FROM ${this.tableSql} WHERE _id = ?`)
               .run(before._id)
           }
@@ -415,6 +415,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
   ) {
     assertDatabaseOpen(db)
     this.db = db
+    this.sql = new SQLiteBoundary(db, name)
     this.name = name
     this.schema = schema
     this.idGenerator = idGenerator
@@ -490,7 +491,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         ${columns.join(",\n        ")}
       )
     `
-    this.db.run(createTableSQL)
+    this.sql.run(createTableSQL)
 
     // Create indexes
     this.createIndexes()
@@ -518,7 +519,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           CREATE ${uniqueKeyword} INDEX IF NOT EXISTS ${indexName}
           ON ${this.tableSql}(${columnName})
         `
-        this.db.run(createIndexSQL)
+        this.sql.run(createIndexSQL)
       }
     }
   }
@@ -716,7 +717,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       `SELECT ${sortColumn} as sortVal FROM ${this.tableSql} WHERE _id = ${bind(cursorId, fieldParams)}`,
       fieldParams
     )
-    const cursorRow = this.db
+    const cursorRow = this.sql
       .prepare<{ sortVal: SQLQueryBindings }, SQLQueryBindings[]>(
         cursorStatement.sql
       )
@@ -843,7 +844,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
-        const stmt = this.db.prepare<StoredRow, [string]>(
+        const stmt = this.sql.prepare<StoredRow, [string]>(
           `SELECT _id, json(body) as body, createdAt, updatedAt FROM ${this.tableSql} WHERE _id = ?`
         )
         const row = stmt.get(id)
@@ -854,7 +855,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         return Promise.resolve(this.hydrate(row))
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "findById"
     )
   }
 
@@ -960,7 +962,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           allParams.push(...translatedOptions.params)
         }
 
-        const stmt = this.db.prepare<StoredRow, SQLQueryBindings[]>(sql)
+        const stmt = this.sql.prepare<StoredRow, SQLQueryBindings[]>(sql)
         const rows = stmt.all(...allParams)
 
         assertDatabaseOpen(this.db)
@@ -976,7 +978,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         return Promise.resolve(results)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "find"
     )
   }
 
@@ -1057,11 +1060,14 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           sql += ` WHERE ${whereClause}`
         }
 
-        const stmt = this.db.prepare<{ count: number }, SQLQueryBindings[]>(sql)
+        const stmt = this.sql.prepare<{ count: number }, SQLQueryBindings[]>(
+          sql
+        )
         const row = stmt.get(...params)
         return Promise.resolve(row?.count ?? 0)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "count"
     )
   }
 
@@ -1179,7 +1185,6 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<T> {
     return this.runOperation(
-      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex insert logic
       () => {
         assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
@@ -1209,7 +1214,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         const body = this.serializeDocument(fullDoc)
 
         try {
-          const stmt = this.db.prepare(
+          const stmt = this.sql.prepare(
             `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
           )
           stmt.run(docId, body, now, now)
@@ -1219,34 +1224,16 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
           return Promise.resolve(fullDoc)
         } catch (error) {
-          // Handle unique constraint violations
-          if (
-            error instanceof Error &&
-            error.message.includes("UNIQUE constraint failed")
-          ) {
-            // Extract field name from error message
-            const match = error.message.match(UNIQUE_CONSTRAINT_REGEX)
-            const field = match?.[1]?.replace(UNDERSCORE_PREFIX_REGEX, "") // Remove underscore prefix from generated columns
-
-            // Get the value that violated the constraint
-            const value = field
-              ? (fullDoc as Record<string, unknown>)[field]
-              : undefined
-
-            // Use helper to build actionable error message
-            const message = field
-              ? `Duplicate value for unique field '${field}': ${JSON.stringify(value)} in collection '${this.name}'. ` +
-                "A document with this value already exists. " +
-                "Use updateOne() with { upsert: true } to update existing documents, " +
-                "or use findOne() to check for existence before inserting."
-              : "Unique constraint violation occurred"
-
-            throw new UniqueConstraintError(message, field, value)
+          if (error instanceof UniqueConstraintError && error.field) {
+            Object.assign(error, {
+              value: (fullDoc as Record<string, unknown>)[error.field],
+            })
           }
           throw error
         }
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "insertOne"
     )
   }
 
@@ -1300,7 +1287,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         }
         return Promise.resolve(result.after)
       },
-      this.buildRetryOptions(undefined, options?.signal)
+      this.buildRetryOptions(undefined, options?.signal),
+      "updateOne"
     )
   }
 
@@ -1358,7 +1346,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         this.emitEvent("replace", () => ({ filter, document: result.after }))
         return Promise.resolve(result.after)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "replaceOne"
     )
   }
 
@@ -1398,7 +1387,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           "_id" in normalizedFilter &&
           Object.keys(normalizedFilter).length === 1
         ) {
-          const stmt = this.db.prepare(
+          const stmt = this.sql.prepare(
             `DELETE FROM ${this.tableSql} WHERE _id = ?`
           )
           const result = stmt.run(normalizedFilter._id as string)
@@ -1422,14 +1411,14 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         }
         findSql += " LIMIT 1"
 
-        const row = this.db
+        const row = this.sql
           .prepare<{ _id: string }, SQLQueryBindings[]>(findSql)
           .get(...params)
         if (!row) {
           return Promise.resolve(false)
         }
 
-        const stmt = this.db.prepare(
+        const stmt = this.sql.prepare(
           `DELETE FROM ${this.tableSql} WHERE _id = ?`
         )
         const result = stmt.run(row._id)
@@ -1443,7 +1432,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         return Promise.resolve(deleted)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "deleteOne"
     )
   }
 
@@ -1458,19 +1448,6 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     errors: { index: number; error: Error; document: typeof doc }[]
   ): Error {
     const err = error instanceof Error ? error : new Error(String(error))
-
-    if (err.message.includes("UNIQUE constraint failed")) {
-      const match = err.message.match(UNIQUE_CONSTRAINT_REGEX)
-      const field = match?.[1]?.replace(UNDERSCORE_PREFIX_REGEX, "")
-      const uniqueErr = new UniqueConstraintError(
-        `Duplicate value for unique field '${field}'`,
-        field,
-        undefined
-      )
-      errors.push({ index, error: uniqueErr, document: doc })
-      return uniqueErr
-    }
-
     errors.push({ index, error: err, document: doc })
     return err
   }
@@ -1532,7 +1509,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
               }
             }[] = []
 
-            const stmt = this.db.prepare(
+            const stmt = this.sql.prepare(
               `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
             )
 
@@ -1589,7 +1566,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
             }
           })
         ),
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "insertMany"
     )
   }
 
@@ -1645,7 +1623,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
               selectSql += ` WHERE ${whereClause}`
             }
 
-            const stmt = this.db.prepare<StoredRow, SQLQueryBindings[]>(
+            const stmt = this.sql.prepare<StoredRow, SQLQueryBindings[]>(
               selectSql
             )
             const rows = stmt.all(...params)
@@ -1690,7 +1668,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
             }
 
             // Use transaction for atomic update
-            const updateStmt = this.db.prepare(
+            const updateStmt = this.sql.prepare(
               `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
             )
 
@@ -1714,7 +1692,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
             }
           })
         ),
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "updateMany"
     )
   }
 
@@ -1759,7 +1738,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
               sql += ` WHERE ${whereClause}`
             }
 
-            const stmt = this.db.prepare(sql)
+            const stmt = this.sql.prepare(sql)
             const result = stmt.run(...params)
 
             const deletedCount = result.changes
@@ -1775,7 +1754,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
             }
           })
         ),
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "deleteMany"
     )
   }
 
@@ -1824,7 +1804,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         }))
         return Promise.resolve(result.before)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "findOneAndDelete"
     )
   }
 
@@ -1876,7 +1857,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         }))
         return Promise.resolve(document)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "findOneAndUpdate"
     )
   }
 
@@ -1922,7 +1904,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         }))
         return Promise.resolve(document)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "findOneAndReplace"
     )
   }
 
@@ -1967,12 +1950,13 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         sql += " ORDER BY value"
 
-        const stmt = this.db.prepare<{ value: T[K] }, SQLQueryBindings[]>(sql)
+        const stmt = this.sql.prepare<{ value: T[K] }, SQLQueryBindings[]>(sql)
         const rows = stmt.all(...params)
 
         return Promise.resolve(rows.map((row) => row.value))
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "distinct"
     )
   }
 
@@ -1991,13 +1975,14 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         throwIfAborted(options?.signal)
 
         // Use SQLite's internal statistics for fast estimate
-        const stmt = this.db.prepare<{ count: number }, []>(
+        const stmt = this.sql.prepare<{ count: number }, []>(
           `SELECT COUNT(*) as count FROM ${this.tableSql}`
         )
         const result = stmt.get()
         return Promise.resolve(result?.count ?? 0)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "estimatedDocumentCount"
     )
   }
 
@@ -2016,7 +2001,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           transactionManager(this.db).sync(() => {
             assertDatabaseOpen(this.db)
             throwIfAborted(options?.signal)
-            this.db.exec(`DROP TABLE IF EXISTS ${this.tableSql}`)
+            this.sql.exec(`DROP TABLE IF EXISTS ${this.tableSql}`)
 
             // Emit drop event after successful operation
             this.emitEvent("drop", () => ({
@@ -2029,7 +2014,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
             return
           })
         ),
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "drop"
     )
   }
 
@@ -2085,7 +2071,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         throw new ValidationError("Document validation failed", undefined, doc)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "validate"
     )
   }
 

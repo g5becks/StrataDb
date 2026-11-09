@@ -3,6 +3,7 @@ import { AsyncLocalStorage } from "node:async_hooks"
 import { assertDatabaseOpen } from "./database-state.js"
 import { TransactionError } from "./errors.js"
 import { quoteIdent } from "./field-resolver.js"
+import { sqliteCall, wrapSqliteError } from "./sqlite-boundary.js"
 
 class SerialQueue {
   private tail: Promise<void> = Promise.resolve()
@@ -62,6 +63,10 @@ class TransactionManager {
     }
   }
 
+  private exec(sql: string): void {
+    sqliteCall(() => this.database.exec(sql), { sql, operation: "transaction" })
+  }
+
   begin(owned = false): TransactionFrame {
     assertDatabaseOpen(this.database)
     if (!owned) {
@@ -72,9 +77,7 @@ class TransactionManager {
     const savepoint = this.database.inTransaction
       ? quoteIdent(`stratadb_savepoint_${this.sequence}`)
       : null
-    this.database.exec(
-      savepoint ? `SAVEPOINT ${savepoint}` : "BEGIN TRANSACTION"
-    )
+    this.exec(savepoint ? `SAVEPOINT ${savepoint}` : "BEGIN TRANSACTION")
     const frame: TransactionFrame = {
       active: true,
       savepoint,
@@ -97,7 +100,7 @@ class TransactionManager {
       return
     }
     this.assertTop(frame)
-    this.database.exec(
+    this.exec(
       frame.savepoint ? `RELEASE SAVEPOINT ${frame.savepoint}` : "COMMIT"
     )
     this.frames.pop()
@@ -120,10 +123,10 @@ class TransactionManager {
     }
     this.assertTop(frame)
     if (frame.savepoint) {
-      this.database.exec(`ROLLBACK TO SAVEPOINT ${frame.savepoint}`)
-      this.database.exec(`RELEASE SAVEPOINT ${frame.savepoint}`)
+      this.exec(`ROLLBACK TO SAVEPOINT ${frame.savepoint}`)
+      this.exec(`RELEASE SAVEPOINT ${frame.savepoint}`)
     } else {
-      this.database.exec("ROLLBACK")
+      this.exec("ROLLBACK")
     }
     this.frames.pop()
     frame.active = false
@@ -155,7 +158,7 @@ class TransactionManager {
       } catch (error) {
         await frame.queue.drain()
         this.rollback(frame)
-        throw error
+        throw wrapSqliteError(error, { operation: "execute" })
       }
     })
   }

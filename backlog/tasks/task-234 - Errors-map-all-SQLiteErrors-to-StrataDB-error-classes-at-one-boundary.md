@@ -1,9 +1,11 @@
 ---
 id: TASK-234
 title: 'Errors: map all SQLiteErrors to StrataDB error classes at one boundary'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-11-09T04:01:00Z'
+updated_date: '2026-11-09T18:26:00Z'
 labels:
   - api
 milestone: m-1
@@ -39,10 +41,29 @@ type: enhancement
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 No raw bun:sqlite SQLiteError escapes a public API call (tests for syntax error, unique violation, lock, missing table)
-- [ ] #2 Every exported error class is either thrown by a tested code path or marked @deprecated
-- [ ] #3 Wrapped lock errors are still retried (retry integration test passes)
-- [ ] #4 src/errors.ts line coverage >= 90%
+- [x] #1 No raw bun:sqlite SQLiteError escapes a public API call (tests for syntax error, unique violation, lock, missing table)
+- [x] #2 Every exported error class is either thrown by a tested code path or marked @deprecated
+- [x] #3 Wrapped lock errors are still retried (retry integration test passes)
+- [x] #4 src/errors.ts line coverage >= 90%
 - [ ] #5 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
-- [ ] #6 CHANGELOG.md has an entry under ## [Unreleased] describing the change
+- [x] #6 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Add real SQLite tests for syntax/missing-table, unique/constraint, lock retry, constructor failures and typed error context; inspect pre-fix output.
+2. Add one errno-based error mapper and a statement/exec boundary, preserve causes and context, and route public collection/transaction/database paths through it.
+3. Deprecate reserved unused classes without removal, cover error metadata/constructors to >=90% line coverage, update wrapped-lock expectations and docs.
+4. Run all quality gates, coverage and local CI.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+- Central errno mapper and statement/exec boundary now cover library collection SQL, transaction control, database open/version/close, and errors crossing execute callbacks. Native statements retain binding and lifecycle behavior through a proxy; no parameter values are logged or attached to context.
+- Mappings: BUSY/LOCKED/CANTOPEN -> ConnectionError; UNIQUE/PRIMARYKEY -> UniqueConstraintError; other constraints -> ConstraintError; SQLITE_ERROR -> QueryError; remaining SQLite failures -> DatabaseError. Preserve errno, native code name, library code, cause and operation/collection/SQL context. Removed duplicate message-based mappings; insertOne preserves the unique value property. Direct sqliteDb remains the native escape hatch.
+- Reserved TypeMismatchError and TransactionAbortedError are deprecated, retained and exported for compatibility. All other classes have real tested paths; constructor metadata coverage is 100% lines/functions for src/errors.ts.
+- Regression-first mapping suite: 5 failures before, 5 passes after. Real SQLITE_BUSY integration now requires wrapped ConnectionError and native SQLiteError cause, and recovers after real lock release.
+- Breaking change: none; applies the documented typed-error taxonomy. Host gate PASS: typecheck TS 7.0.2; lint 97 files; coverage 860 pass/3 existing skips/0 fail; errors.ts 100% lines/functions; build; type tests; consumer TS 6/7 and CRUD; source TS 5.9.3/6.0.3. Local CI pending committed SHA.
+<!-- SECTION:NOTES:END -->

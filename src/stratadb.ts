@@ -18,6 +18,7 @@ import { quoteIdent } from "./field-resolver.js"
 import { generateId } from "./id-generator.js"
 import type { RetryOptions } from "./retry-types.js"
 import type { SchemaDefinition } from "./schema-types.js"
+import { sqliteCall } from "./sqlite-boundary.js"
 import { SQLiteCollection } from "./sqlite-collection.js"
 import {
   type TransactionFrame,
@@ -76,20 +77,26 @@ export class Strata implements StrataDBInterface {
   constructor(options: DatabaseOptions) {
     // Initialize database connection
     if (typeof options.database === "string") {
-      this.sqliteDb = new SQLiteDatabase(options.database)
+      this.sqliteDb = sqliteCall(
+        () => new SQLiteDatabase(options.database as string),
+        { operation: "open" }
+      )
     } else {
       this.sqliteDb = options.database
     }
 
     assertDatabaseOpen(this.sqliteDb)
-    const version =
-      this.sqliteDb
-        .query<{ version: string }, []>("SELECT sqlite_version() AS version")
-        .get()?.version ?? "unknown"
+    const version = sqliteCall(
+      () =>
+        this.sqliteDb
+          .query<{ version: string }, []>("SELECT sqlite_version() AS version")
+          .get()?.version ?? "unknown",
+      { sql: "SELECT sqlite_version() AS version", operation: "open" }
+    )
     const [major = 0, minor = 0] = version.split(".").map(Number)
     if (!(major > 3 || (major === 3 && minor >= 45))) {
       if (typeof options.database === "string") {
-        this.sqliteDb.close()
+        sqliteCall(() => this.sqliteDb.close(), { operation: "close" })
       }
       throw new ConnectionError(
         `SQLite ${version} is unsupported; StrataDB requires SQLite >= 3.45.0 for JSONB. On macOS, call Database.setCustomSQLite() before opening a database to load a newer SQLite library.`
@@ -217,7 +224,7 @@ export class Strata implements StrataDBInterface {
     }
 
     this.onCloseCallback?.()
-    this.sqliteDb.close()
+    sqliteCall(() => this.sqliteDb.close(), { operation: "close" })
     markDatabaseClosed(this.sqliteDb)
   }
 

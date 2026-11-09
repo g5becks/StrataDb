@@ -79,10 +79,15 @@ export type {
 export {
   AbortedError,
   ConnectionError,
+  ConstraintError,
+  DatabaseError,
   InvalidQueryOperatorError,
   QueryError,
+  SchemaValidationError,
   StrataDBError,
+  TransactionAbortedError,
   TransactionError,
+  TypeMismatchError,
   UniqueConstraintError,
   ValidationError,
 } from "./errors.js"

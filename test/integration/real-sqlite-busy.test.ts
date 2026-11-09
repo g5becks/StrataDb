@@ -3,7 +3,12 @@ import { expect, test } from "bun:test"
 import { mkdtemp, rm } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { createSchema, type Document, Strata } from "../../src/index.js"
+import {
+  ConnectionError,
+  createSchema,
+  type Document,
+  Strata,
+} from "../../src/index.js"
 import { defaultShouldRetry } from "../../src/retry-utils.js"
 
 test("A7: real SQLITE_BUSY retries after another connection releases its lock", async () => {
@@ -21,12 +26,13 @@ test("A7: real SQLITE_BUSY retries after another connection releases its lock", 
     db.sqliteDb.exec("PRAGMA busy_timeout=0")
     owner.exec("BEGIN IMMEDIATE")
     try {
-      // retry:false still has the pre-0.6 synchronous error contract.
+      // Disabling retries returns the typed lock error immediately through rejection.
       await collection.insertOne({ name: "disabled" }, { retry: false })
       expect.unreachable("Expected SQLITE_BUSY with retries disabled")
     } catch (error) {
-      expect(error).toBeInstanceOf(SQLiteError)
-      expect((error as SQLiteError).errno % 256).toBe(5)
+      expect(error).toBeInstanceOf(ConnectionError)
+      expect(error.cause).toBeInstanceOf(SQLiteError)
+      expect(((error as ConnectionError).errno ?? -1) % 256).toBe(5)
     }
     const failures: number[] = []
     release = setTimeout(() => owner.exec("COMMIT"), 20)
@@ -39,8 +45,9 @@ test("A7: real SQLITE_BUSY retries after another connection releases its lock", 
           maxTimeout: 5,
           shouldRetry: defaultShouldRetry,
           onFailedAttempt: ({ error }) => {
-            expect(error).toBeInstanceOf(SQLiteError)
-            failures.push((error as SQLiteError).errno)
+            expect(error).toBeInstanceOf(ConnectionError)
+            expect(error.cause).toBeInstanceOf(SQLiteError)
+            failures.push((error as ConnectionError).errno ?? -1)
           },
         },
       }
