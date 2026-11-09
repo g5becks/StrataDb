@@ -5,8 +5,9 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T17:30:00Z'
-labels: []
+updated_date: '2026-11-09T17:36:00Z'
+labels:
+  - blocked
 milestone: m-0
 dependencies:
   - TASK-214
@@ -111,4 +112,38 @@ The npm invocation is a maintainer-only provenance publication command documente
 - Exact next step: account owner must resolve the GitHub Actions billing lock. Then inspect actual state and rerun Step 0; push any local backlog bookkeeping commit on release/v0.5.1 if needed, rerun required CI for PR #1, and require every job to pass before R step 4. Keep v0.5.1 at 73bf38c while changes remain backlog-only. No merge commit, npm tarball URL, GitHub release URL or release-workflow run exists for 0.5.1 yet. Maintainer publish authorization persists.
 
 - Mission resumed with maintainer-approved local CI replacement: scripts/ci-local.sh is the release CI gate while GitHub Actions jobs carry billing-lock annotations. CI/workflow acceptance criteria use the local runner and actionlint; never claim remote jobs ran. Step 0 passed: GIT_OK, CACHE_OK, WT_DIR_OK, Docker OSType linux via existing Colima socket, npm identity takinprofit, GitHub identity g5becks, dry-run push exit 0 with hooks. Initial clean HEAD 761088d; PR #1 open; npm versions end at 0.5.0; tag v0.5.1 remains 73bf38c. Removed historical blocked label. Existing scratch worktree is clean at the correct tag. Latest Bun resolves to 1.4.4, matching the pinned version.
+
+- STOPPED at R(0.5.1) step 6: local npm publication failed with EOTP and requires interactive one-time-password authentication. No retry, alternate credentials/flags, browser authentication, remote tag push, GitHub release, or Phase B/C work was attempted. TASK-226 remains In Progress, labeled blocked. The maintainer authorization to push, merge, and publish persists; this overrides historical do-not-publish wording but cannot bypass the mission OTP hard stop.
+- R steps 1–5 completed. Fresh tag worktree verification passed on Bun 1.4.4: frozen install; typecheck; lint (84 files); bun test (733 pass, 3 existing skips, 0 fail, 2117 assertions); build; type tests; packed-consumer TS 6.0.3/7.0.2 with skipLibCheck:false and runtime CRUD. Version 0.5.1 and dated changelog confirmed. actionlint passed.
+- Verified with scripts/ci-local.sh (73bf38c0fbc77f8751274ca9bad0c46dcb123032, RESULT: PASS) and scripts/ci-local.sh (562ee24f08281abba25675bcd8e525ed639d76b5, RESULT: PASS); GitHub Actions unavailable (billing lock). Both runs used pinned/latest Bun 1.4.4 and had identical results:
+
+| Local CI job | Tag 73bf38c | Branch 562ee24 |
+| --- | --- | --- |
+| check (macos, bun 1.4.4) | pass | pass |
+| check (linux, bun 1.4.4) | pass | pass |
+| typescript (5.9.3) | pass | pass |
+| typescript (6.0.3) | pass | pass |
+| typescript (7.0.2) | pass | pass |
+| typescript (7.1.0-beta, advisory) | pass | pass |
+| RESULT | PASS | PASS |
+
+- Local CI logs: /Users/takinprofit/Dev/StrataDb-release/ci-local/73bf38c/logs/ and /Users/takinprofit/Dev/StrataDb-release/ci-local/562ee24/logs/. Results posted at https://github.com/g5becks/StrataDb/pull/1#issuecomment-6746932198. Remote branch was pushed with hooks. At merge verification, all 14 completed GitHub failures at head 562ee24 had the billing annotation; 2 macOS checks were pending. No executed-job failure was reported. GitHub Actions did not provide validation; local CI is the explicitly authorized replacement.
+- PR https://github.com/g5becks/StrataDb/pull/1 merged normally (--merge, no squash/admin) as 7ceab80d0b566bfcc19f3fc1eea860d14d29385d. main was fast-forwarded and git merge-base --is-ancestor v0.5.1 main succeeded. No change to local annotated tags: v0.5.1 -> 73bf38c; v0.5.0 -> c105ba5.
+- Rebuilt and packed from tag in /Users/takinprofit/Dev/StrataDb-release/v0.5.1. Tarball stratadb-0.5.1.tgz has 35 files restricted to dist/, src/, README.md, LICENSE, package.json; SHA1 ddda58c089873d6e7f522fc41601966a6f161a3a. Pack review passed. npm publish ./stratadb-0.5.1.tgz --access public exited 1; no provenance flag was supplied.
+
+Full npm error output returned by the tool (authentication URLs were redacted):
+```text
+npm error code EOTP
+npm error This operation requires a one-time password.
+npm error Open this URL in your browser to authenticate:
+npm error   https://www.npmjs.com/auth/cli/***
+npm error
+npm error After authenticating, your token can be retrieved from:
+npm error   https://registry.npmjs.org/-/v1/done?authId=***
+npm error A complete log of this run can be found in: /Users/takinprofit/.npm/_logs/2026-11-09T17_35_27_012Z-debug-0.log
+```
+
+- Post-failure read-only registry verification: npm view stratadb@0.5.1 version returned E404 / No match found for version 0.5.1; npm view stratadb dist-tags.latest returned 0.5.0. No npm tarball URL, GitHub release URL, or release-workflow result exists for this version. Remote tag list remains empty. Published-package consumer test is not run because publication failed.
+- No tasks were completed and no follow-up tasks were created this session. Regression suite: 733 existing passing tests, 3 existing skips, no test.failing in test/; TASK-227 Appendix A suite not started. Milestones: m-0 12/13 done, m-1 0/17, m-2 0/18. Scratch worktree and merged local branches are retained because the release is incomplete.
+- Exact next step for the maintainer: satisfy npm interactive authentication personally or provide an explicitly authorized noninteractive publication path; never expose credentials. Before another publish attempt, inspect actual registry state to avoid duplicate publication and rerun Step 0/release gates. PR #1 is already merged, so skip merge steps. Resume R(0.5.1) step 6 only after the OTP blocker is resolved; then push only v0.5.0/v0.5.1, verify registry and isolated runtime CRUD, create the GitHub release, and close TASK-226 on main. This blocker evidence is committed on release/v0.5.1 rather than pushed directly to main because the mission permits direct main pushes only for backlog-closing commits; TASK-226 cannot be closed yet.
 <!-- SECTION:NOTES:END -->
