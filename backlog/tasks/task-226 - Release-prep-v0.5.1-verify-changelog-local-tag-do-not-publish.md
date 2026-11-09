@@ -49,7 +49,7 @@ Package the non-breaking guardrail work as v0.5.1. Publishing is done by the mai
 <!-- AC:BEGIN -->
 - [x] #1 CHANGELOG.md has a [0.5.1] section covering every task in this milestone
 - [x] #2 package.json version is 0.5.1 and all verification commands pass
-- [ ] #3 Local tags v0.5.0 (retroactive) and v0.5.1 exist; nothing is pushed or published
+- [x] #3 Local tags v0.5.0 (retroactive) and v0.5.1 exist; nothing is pushed or published
 - [x] #4 Task notes contain the exact publish commands for the maintainer
 <!-- AC:END -->
 
@@ -88,4 +88,7 @@ npm publish ./stratadb-0.5.1.tgz --provenance --access public
 ```
 
 The npm invocation is a maintainer-only provenance publication command documented as requested; all engineering/install/test/build commands in this session used Bun. No push, publication or GitHub release creation was performed.
+
+- Tag verification complete: annotated v0.5.0 -> c105ba5c0100b2e7bf6e59cdf1ae64d3b7a1fada; annotated v0.5.1 -> 73bf38c (release preparation). git cat-file reports tag for both references, and the v0.5.1 package manifest is version 0.5.1. No remote actions occurred. This final bookkeeping commit changes only task metadata; the release tag remains on the verified release content.
+- Gate state: all four acceptance criteria verified; status deliberately remains In Progress pending maintainer publication. Stop here as instructed.
 <!-- SECTION:NOTES:END -->
