@@ -38,7 +38,7 @@
     "typedoc": "^0.28.15",
     "typedoc-plugin-markdown": "^4.9.0",
     "typedoc-vitepress-theme": "^1.1.2",
-    "typescript": "^5.9.3",
+    "typescript": "~7.0.2",
     "ultracite": "6.3.4",
     "valibot": "^1.1.0",
     "vitepress": "1.6.3",

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Develop on TypeScript 7.0, with blocking TypeScript 5.9/6.0/7.0 compatibility checks and an advisory 7.1 beta CI check.
 - Build with tsdown 0.23 and oxc isolated declarations, preserving `dist/index.mjs` and `dist/index.d.mts`. Public declarations inline type-fest so consumers do not need that development dependency.
 
 ### Fixed
