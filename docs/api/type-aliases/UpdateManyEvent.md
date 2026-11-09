@@ -6,7 +6,7 @@
 type UpdateManyEvent<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:114](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L114)
+Defined in: [src/collection-events.ts:114](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L114)
 
 Event payload for batch update operations.
 
@@ -41,7 +41,7 @@ The document type extending Document
 readonly filter: QueryFilter<T>;
 ```
 
-Defined in: [src/collection-events.ts:116](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L116)
+Defined in: [src/collection-events.ts:116](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L116)
 
 The filter used to find documents
 
@@ -53,7 +53,7 @@ The filter used to find documents
 readonly matchedCount: number;
 ```
 
-Defined in: [src/collection-events.ts:120](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L120)
+Defined in: [src/collection-events.ts:120](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L120)
 
 Number of documents that matched the filter
 
@@ -65,7 +65,7 @@ Number of documents that matched the filter
 readonly modifiedCount: number;
 ```
 
-Defined in: [src/collection-events.ts:122](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L122)
+Defined in: [src/collection-events.ts:122](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L122)
 
 Number of documents that were modified
 
@@ -77,6 +77,6 @@ Number of documents that were modified
 readonly update: Partial<T>;
 ```
 
-Defined in: [src/collection-events.ts:118](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L118)
+Defined in: [src/collection-events.ts:118](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L118)
 
 The update that was applied

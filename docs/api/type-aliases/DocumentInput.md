@@ -6,7 +6,7 @@
 type DocumentInput<T> = Simplify<SetOptional<Except<T, "_id">, never> & object>;
 ```
 
-Defined in: [src/core-types.ts:93](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/core-types.ts#L93)
+Defined in: [src/core-types.ts:93](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/core-types.ts#L93)
 
 Document input type for insertion operations.
 

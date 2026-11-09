@@ -6,7 +6,7 @@
 type InsertManyEvent<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:56](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L56)
+Defined in: [src/collection-events.ts:56](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L56)
 
 Event payload for batch insert operations.
 
@@ -39,7 +39,7 @@ The document type extending Document
 readonly documents: readonly T[];
 ```
 
-Defined in: [src/collection-events.ts:58](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L58)
+Defined in: [src/collection-events.ts:58](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L58)
 
 Array of inserted documents
 
@@ -51,6 +51,6 @@ Array of inserted documents
 readonly insertedCount: number;
 ```
 
-Defined in: [src/collection-events.ts:60](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L60)
+Defined in: [src/collection-events.ts:60](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L60)
 
 Number of documents successfully inserted

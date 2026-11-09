@@ -6,7 +6,7 @@
 type DeleteEvent<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:169](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L169)
+Defined in: [src/collection-events.ts:169](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L169)
 
 Event payload for single document delete operations.
 
@@ -41,7 +41,7 @@ The document type extending Document
 readonly deleted: boolean;
 ```
 
-Defined in: [src/collection-events.ts:173](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L173)
+Defined in: [src/collection-events.ts:173](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L173)
 
 Whether a document was deleted
 
@@ -53,6 +53,6 @@ Whether a document was deleted
 readonly filter: string | QueryFilter<T>;
 ```
 
-Defined in: [src/collection-events.ts:171](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L171)
+Defined in: [src/collection-events.ts:171](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L171)
 
 The filter used to find the document

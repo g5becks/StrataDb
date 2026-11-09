@@ -6,7 +6,7 @@
 type DocumentUpdate<T> = Simplify<PartialDeep<Except<T, "_id">>>;
 ```
 
-Defined in: [src/core-types.ts:127](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/core-types.ts#L127)
+Defined in: [src/core-types.ts:127](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/core-types.ts#L127)
 
 Document update type for update operations.
 

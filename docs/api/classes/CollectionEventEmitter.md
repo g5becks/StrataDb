@@ -2,7 +2,7 @@
 
 # Class: CollectionEventEmitter&lt;T&gt;
 
-Defined in: [src/collection-events.ts:424](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L424)
+Defined in: [src/collection-events.ts:424](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L424)
 
 Typed EventEmitter for collection events.
 
@@ -194,7 +194,7 @@ v0.1.26
 dispatch<E>(event, payload): void;
 ```
 
-Defined in: [src/collection-events.ts:428](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/collection-events.ts#L428)
+Defined in: [src/collection-events.ts:428](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L428)
 
 Invoke a registration snapshot in order, retaining once-wrapper behavior.
 

@@ -6,7 +6,7 @@
 type ExistenceOperator = object;
 ```
 
-Defined in: [src/query-types.ts:319](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-types.ts#L319)
+Defined in: [src/query-types.ts:319](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-types.ts#L319)
 
 Existence operators for checking field presence.
 
@@ -39,6 +39,6 @@ const activeUsersWithEmail = {
 readonly $exists?: boolean;
 ```
 
-Defined in: [src/query-types.ts:321](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/query-types.ts#L321)
+Defined in: [src/query-types.ts:321](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-types.ts#L321)
 
 Field exists in document (true) or doesn't exist (false)

@@ -2,7 +2,7 @@
 
 # Class: ValidationError
 
-Defined in: [src/errors.ts:86](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L86)
+Defined in: [src/errors.ts:86](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L86)
 
 Base class for validation-related errors.
 
@@ -40,7 +40,7 @@ new ValidationError(
 ): ValidationError;
 ```
 
-Defined in: [src/errors.ts:96](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L96)
+Defined in: [src/errors.ts:96](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L96)
 
 #### Parameters
 
@@ -72,7 +72,7 @@ Defined in: [src/errors.ts:96](https://github.com/g5becks/StrataDb/blob/e11f0016
 readonly category: "validation";
 ```
 
-Defined in: [src/errors.ts:87](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L87)
+Defined in: [src/errors.ts:87](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L87)
 
 Error category for grouping related error types
 
@@ -88,7 +88,7 @@ Error category for grouping related error types
 readonly cause?: unknown;
 ```
 
-Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L45)
+Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L45)
 
 The cause of the error.
 
@@ -104,7 +104,7 @@ The cause of the error.
 readonly code: "VALIDATION_ERROR" = "VALIDATION_ERROR";
 ```
 
-Defined in: [src/errors.ts:88](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L88)
+Defined in: [src/errors.ts:88](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L88)
 
 Unique error code for programmatic identification
 
@@ -120,7 +120,7 @@ Unique error code for programmatic identification
 readonly context?: SQLiteErrorContext;
 ```
 
-Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L44)
+Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L44)
 
 #### Inherited from
 
@@ -134,7 +134,7 @@ Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/e11f0016
 readonly errno?: number;
 ```
 
-Defined in: [src/errors.ts:42](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L42)
+Defined in: [src/errors.ts:42](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L42)
 
 #### Inherited from
 
@@ -148,7 +148,7 @@ Defined in: [src/errors.ts:42](https://github.com/g5becks/StrataDb/blob/e11f0016
 readonly field?: string;
 ```
 
-Defined in: [src/errors.ts:91](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L91)
+Defined in: [src/errors.ts:91](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L91)
 
 Optional field name that failed validation
 
@@ -188,7 +188,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 readonly sqliteCodeName?: string;
 ```
 
-Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L43)
+Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L43)
 
 #### Inherited from
 
@@ -216,7 +216,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1076
 readonly value?: unknown;
 ```
 
-Defined in: [src/errors.ts:94](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L94)
+Defined in: [src/errors.ts:94](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L94)
 
 The value that failed validation
 

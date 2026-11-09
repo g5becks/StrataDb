@@ -2,7 +2,7 @@
 
 # Class: ConstraintError
 
-Defined in: [src/errors.ts:336](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L336)
+Defined in: [src/errors.ts:336](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L336)
 
 Error thrown when database constraints are violated.
 
@@ -38,7 +38,7 @@ new ConstraintError(
 ): ConstraintError;
 ```
 
-Defined in: [src/errors.ts:346](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L346)
+Defined in: [src/errors.ts:346](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L346)
 
 #### Parameters
 
@@ -70,7 +70,7 @@ Defined in: [src/errors.ts:346](https://github.com/g5becks/StrataDb/blob/e11f001
 readonly category: "database";
 ```
 
-Defined in: [src/errors.ts:337](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L337)
+Defined in: [src/errors.ts:337](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L337)
 
 Error category for grouping related error types
 
@@ -86,7 +86,7 @@ Error category for grouping related error types
 readonly cause?: unknown;
 ```
 
-Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L45)
+Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L45)
 
 The cause of the error.
 
@@ -102,7 +102,7 @@ The cause of the error.
 readonly code: "CONSTRAINT_ERROR" = "CONSTRAINT_ERROR";
 ```
 
-Defined in: [src/errors.ts:338](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L338)
+Defined in: [src/errors.ts:338](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L338)
 
 Unique error code for programmatic identification
 
@@ -118,7 +118,7 @@ Unique error code for programmatic identification
 readonly constraint?: string;
 ```
 
-Defined in: [src/errors.ts:344](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L344)
+Defined in: [src/errors.ts:344](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L344)
 
 The constraint that was violated
 
@@ -130,7 +130,7 @@ The constraint that was violated
 readonly context?: SQLiteErrorContext;
 ```
 
-Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L44)
+Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L44)
 
 #### Inherited from
 
@@ -144,7 +144,7 @@ Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/e11f0016
 readonly errno?: number;
 ```
 
-Defined in: [src/errors.ts:42](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L42)
+Defined in: [src/errors.ts:42](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L42)
 
 #### Inherited from
 
@@ -186,7 +186,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 readonly sqliteCode?: number;
 ```
 
-Defined in: [src/errors.ts:341](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L341)
+Defined in: [src/errors.ts:341](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L341)
 
 SQLite error code (if available)
 
@@ -198,7 +198,7 @@ SQLite error code (if available)
 readonly sqliteCodeName?: string;
 ```
 
-Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/e11f00160f1967891c5654fdf8f093c18f8b8230/src/errors.ts#L43)
+Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L43)
 
 #### Inherited from
 

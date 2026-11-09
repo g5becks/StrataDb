@@ -1,6 +1,6 @@
 {
   "name": "stratadb",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Type-safe embedded document database for Bun with MongoDB-like queries",
   "type": "module",
   "main": "./dist/index.mjs",

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-09
+
 ### Breaking changes
 
 - Enabled retries now use `defaultShouldRetry` when no predicate is supplied. Validation, constraint, query and unknown errors stop after the first attempt; real transient SQLite lock failures still retry. Supply a custom `shouldRetry` for application-specific transient errors. Retries remain disabled until configured.
@@ -28,6 +30,11 @@ See [Migrating to 0.6](docs/guide/migrating-to-0.6.md) for before/after examples
 - Unknown `$operators` now raise `InvalidQueryOperatorError` at every query nesting level. Malformed operator values and empty operator objects raise `QueryError` before SQL or cache lookup. Correct misspelled operators and supply arrays for `$in`/`$nin`/`$all`, strings for LIKE operators, a boolean for `$exists`, and a nonnegative integer for `$size`. Explicit empty-filter bulk operations (`deleteMany({})`, `updateMany({})`) remain supported.
 
 - Query field paths now require identifier segments (`A-Z`, `a-z`, `_`, then letters, digits or `_`). Invalid filter, sort, search, distinct and schema paths raise `QueryError`; rename keys containing punctuation and use dotted paths for nested fields. Numeric `limit`, `skip` and `$index.index` must be nonnegative safe integers. JSON paths and numeric options are bound, and collection/index/column identifiers are quoted, preventing SQL injection. Collection names such as `order` and `user-data` now work; empty/NUL names are rejected. Dotted indexed fields use distinct generated-column names; reopen existing databases after migrating any manually created generated columns.
+
+### Added
+
+- Tag-triggered release workflow with SHA-pinned actions, full verification, version/registry guards, npm OIDC trusted publishing and provenance. CONTRIBUTING.md documents the one-time setup and local/manual release fallback while Actions is unavailable.
+- Audit regression and identifier-injection suites cover the v0.6.0 safety and correctness fixes.
 
 ### Fixed
 
