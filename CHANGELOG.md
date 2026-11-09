@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking changes
+
+- Successful `update` event documents are now typed as non-null, and delete events discriminate `_id: string` on success from `_id: null` on a miss. Batch update/delete payloads require `ids`. Update manually constructed event fixtures accordingly. `deleteOne` now emits a miss event consistently for both ID and object filters.
+
 ### Added
+
+- Delete events identify the resolved row, with optional deleted-document snapshots through `deleteOne(filter, { includeDocument: true })`. Batch events include IDs from actual SQLite RETURNING rows; updates ignored by a trigger are excluded from IDs and modified counts. ID order follows SQLite RETURNING and is not guaranteed. Commit buffering and rollback suppression are preserved.
 
 - Reopening a collection adds newly declared indexed fields as virtual generated columns and creates their indexes atomically. Existing rows become queryable through the new fields; affected indexes left by earlier failed evolution attempts are rebuilt. Bun's query cache is cleared after DDL. Removed or type-changed stored generated columns are retained and reported through `onSchemaDrift` (default console warning); set it to `"error"` to require an explicit migration.
 

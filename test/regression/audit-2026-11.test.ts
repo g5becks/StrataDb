@@ -309,7 +309,7 @@ for (const name of ["order", "user-data"]) {
   })
 }
 
-test.failing("A17 [TASK-244] delete event carries resolved id", async () => {
+test("A17 [TASK-244] delete event carries resolved id", async () => {
   const document = await users.findOne({ name: "alice" })
   const events: unknown[] = []
   users.on("delete", (event) => events.push(event))
@@ -317,7 +317,7 @@ test.failing("A17 [TASK-244] delete event carries resolved id", async () => {
   expect(events).toMatchObject([{ _id: document?._id, deleted: true }])
 })
 
-test.failing("A17 [TASK-244] deleteMany event carries exact ids", async () => {
+test("A17 [TASK-244] deleteMany event carries exact ids", async () => {
   const documents = await users.find({ role: "user" })
   const events: unknown[] = []
   users.on("deleteMany", (event) => events.push(event))

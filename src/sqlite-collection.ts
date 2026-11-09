@@ -1331,10 +1331,11 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           this.emitEvent("insert", () => ({ document: result.after as T }))
         }
         if (result.after) {
+          const document = result.after
           this.emitEvent("update", () => ({
             filter,
             update: update as Partial<T>,
-            document: result.after,
+            document,
             upserted: result.upserted,
           }))
         }
@@ -1426,7 +1427,11 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    */
   deleteOne(
     filter: string | QueryFilter<T>,
-    options?: { signal?: AbortSignal; retry?: RetryOptions | false }
+    options?: {
+      signal?: AbortSignal
+      retry?: RetryOptions | false
+      includeDocument?: boolean
+    }
   ): Promise<boolean> {
     return this.runOperation(
       () => {
@@ -1435,55 +1440,34 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         const normalizedFilter = this.normalizeFilter(filter)
 
-        // Optimization: If filter is just { _id: 'xxx' }, use direct delete
-        if (
-          "_id" in normalizedFilter &&
-          Object.keys(normalizedFilter).length === 1
-        ) {
-          const stmt = this.sql.prepare(
-            `DELETE FROM ${this.tableSql} WHERE _id = ?`
-          )
-          const result = stmt.run(normalizedFilter._id as string)
-          const deleted = result.changes > 0
-
-          // Emit delete event after successful operation
-          this.emitEvent("delete", () => ({
-            filter,
-            deleted,
-          }))
-
-          return Promise.resolve(deleted)
-        }
-
-        // For complex filters: find first match, then delete by ID
         const { sql: whereClause, params } =
           this.translator.translate(normalizedFilter)
-        let findSql = `SELECT _id FROM ${this.tableSql}`
-        if (whereClause && whereClause !== "1=1") {
-          findSql += ` WHERE ${whereClause}`
-        }
-        findSql += " LIMIT 1"
-
+        const returning = options?.includeDocument
+          ? "_id, json(body) as body, createdAt, updatedAt"
+          : "_id"
         const row = this.sql
-          .prepare<{ _id: string }, SQLQueryBindings[]>(findSql)
+          .prepare<StoredRow, SQLQueryBindings[]>(
+            `DELETE FROM ${this.tableSql} WHERE _id = (SELECT _id FROM ${this.tableSql} WHERE ${whereClause} LIMIT 1) RETURNING ${returning}`
+          )
           .get(...params)
-        if (!row) {
-          return Promise.resolve(false)
+        if (row) {
+          const document = options?.includeDocument
+            ? this.hydrate(row)
+            : undefined
+          this.emitEvent("delete", () => ({
+            filter,
+            deleted: true,
+            _id: row._id,
+            ...(document ? { document } : {}),
+          }))
+        } else {
+          this.emitEvent("delete", () => ({
+            filter,
+            deleted: false,
+            _id: null,
+          }))
         }
-
-        const stmt = this.sql.prepare(
-          `DELETE FROM ${this.tableSql} WHERE _id = ?`
-        )
-        const result = stmt.run(row._id)
-        const deleted = result.changes > 0
-
-        // Emit delete event after successful operation
-        this.emitEvent("delete", () => ({
-          filter,
-          deleted,
-        }))
-
-        return Promise.resolve(deleted)
+        return Promise.resolve(row !== null)
       },
       this.buildRetryOptions(options?.retry, options?.signal),
       "deleteOne"
@@ -1685,6 +1669,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
             if (matchedCount === 0) {
               // Emit updateMany event even when no matches
               this.emitEvent("updateMany", () => ({
+                ids: [],
                 filter,
                 update: update as Partial<T>,
                 matchedCount: 0,
@@ -1721,27 +1706,31 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
             }
 
             // Use transaction for atomic update
-            const updateStmt = this.sql.prepare(
-              `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
+            const updateStmt = this.sql.prepare<
+              { _id: string },
+              SQLQueryBindings[]
+            >(
+              `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ? RETURNING _id`
             )
-
-            for (const doc of updatedDocs) {
+            const ids = updatedDocs.flatMap((doc) => {
               const _id = doc._id
               const body = this.serializeDocument(doc)
-              updateStmt.run(body, now, _id)
-            }
+              const changed = updateStmt.get(body, now, _id)
+              return changed ? [changed._id] : []
+            })
 
             // Emit updateMany event after successful operation
             this.emitEvent("updateMany", () => ({
+              ids,
               filter,
               update: update as Partial<T>,
               matchedCount,
-              modifiedCount: updatedDocs.length,
+              modifiedCount: ids.length,
             }))
 
             return {
               matchedCount,
-              modifiedCount: updatedDocs.length,
+              modifiedCount: ids.length,
             }
           })
         ),
@@ -1791,13 +1780,17 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
               sql += ` WHERE ${whereClause}`
             }
 
-            const stmt = this.sql.prepare(sql)
-            const result = stmt.run(...params)
-
-            const deletedCount = result.changes
+            const rows = this.sql
+              .prepare<{ _id: string }, SQLQueryBindings[]>(
+                `${sql} RETURNING _id`
+              )
+              .all(...params)
+            const ids = rows.map((row) => row._id)
+            const deletedCount = ids.length
 
             // Emit deleteMany event after successful operation
             this.emitEvent("deleteMany", () => ({
+              ids,
               filter,
               deletedCount,
             }))
@@ -1892,12 +1885,13 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         if (result.upserted && result.after) {
           this.emitEvent("insert", () => ({ document: result.after as T }))
         }
-        if (result.before) {
+        if (result.before && result.after) {
+          const after = result.after
           this.emitEvent("update", () => ({
             filter,
             update: update as Partial<T>,
             upserted: false,
-            document: result.after,
+            document: after,
           }))
         }
         const document =

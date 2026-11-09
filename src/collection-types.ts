@@ -675,7 +675,11 @@ export type Collection<T extends Document> = {
    */
   deleteOne(
     filter: string | QueryFilter<T>,
-    options?: { signal?: AbortSignal; retry?: RetryOptions | false }
+    options?: {
+      signal?: AbortSignal
+      retry?: RetryOptions | false
+      includeDocument?: boolean
+    }
   ): Promise<boolean>
 
   // ===== Atomic Find-and-Modify Operations =====

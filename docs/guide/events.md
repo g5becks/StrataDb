@@ -48,11 +48,11 @@ await users.deleteOne('user-id')
 |------------|---------|---------|
 | `insert` | After `insertOne` succeeds | `{ document: T }` |
 | `insertMany` | After `insertMany` succeeds | `{ documents: readonly T[], insertedCount: number }` |
-| `update` | After `updateOne` succeeds | `{ filter: string \| QueryFilter<T>, update: Partial<T>, document: T \| null, upserted: boolean }` |
-| `updateMany` | After `updateMany` succeeds | `{ filter: QueryFilter<T>, update: Partial<T>, matchedCount: number, modifiedCount: number }` |
+| `update` | After a successful update or upsert | `{ filter: string \| QueryFilter<T>, update: Partial<T>, document: T, upserted: boolean }` |
+| `updateMany` | After `updateMany` succeeds | `{ filter: QueryFilter<T>, update: Partial<T>, matchedCount: number, modifiedCount: number, ids: readonly string[] }` |
 | `replace` | After `replaceOne` succeeds | `{ filter: string \| QueryFilter<T>, document: T \| null }` |
-| `delete` | After `deleteOne` succeeds | `{ filter: string \| QueryFilter<T>, deleted: boolean }` |
-| `deleteMany` | After `deleteMany` succeeds | `{ filter: QueryFilter<T>, deletedCount: number }` |
+| `delete` | After `deleteOne` attempts deletion | `{ filter, deleted: true, _id: string, document?: T }` or `{ filter, deleted: false, _id: null }` |
+| `deleteMany` | After `deleteMany` succeeds | `{ filter: QueryFilter<T>, deletedCount: number, ids: readonly string[] }` |
 | `findOneAndDelete` | After `findOneAndDelete` succeeds | `{ filter: string \| QueryFilter<T>, document: T \| null }` |
 | `findOneAndUpdate` | After `findOneAndUpdate` succeeds | `{ filter: string \| QueryFilter<T>, update: Partial<T>, document: T \| null, upserted: boolean }` |
 | `findOneAndReplace` | After `findOneAndReplace` succeeds | `{ filter: string \| QueryFilter<T>, document: T \| null, upserted: boolean }` |
@@ -60,6 +60,14 @@ await users.deleteOne('user-id')
 | `error` | When an event listener fails | `{ operation: string, error: Error, context?: unknown }` |
 
 ## Event Timing
+
+`deleteOne(filter, { includeDocument: true })` includes a snapshot of the deleted
+document, respecting `timestamps(false)`. Without that option the payload carries
+only the resolved ID. A miss emits `deleted: false` and `_id: null` for either
+filter form. `update` is emitted only for a successful update or upsert, so its
+document is non-null. Batch `ids` contain actual affected rows, including an empty
+array for no changes; their SQLite RETURNING order is unspecified. Trigger-ignored
+updates count as matched but are excluded from `modifiedCount` and `ids`.
 
 Events are delivered synchronously after commit, in listener registration order, at most once per listener registration and emitted event. Inside `execute()` or a manual transaction, delivery waits for the outermost commit; rollback discards its events. Nested savepoint commits defer delivery to their parent.
 
