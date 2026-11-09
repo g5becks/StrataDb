@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T13:52:00Z'
+updated_date: '2026-11-09T13:53:00Z'
 labels:
   - build-release
   - blocked
@@ -98,4 +98,6 @@ The npm invocation is a maintainer-only provenance publication command documente
 - Resume snapshot: branch release/v0.5.1 initially clean at 8db6003; origin/main c105ba5; local annotated tags v0.5.0 and v0.5.1 unchanged. gh pr list --state all returned []; remote tag list empty. No PR, CI run, npm publication or GitHub release was created. npm versions/latest were not queried after the npm preflight failure; registry state is unverified this session. Full tag verification, TS 5.9/6.0 checks, build, type tests, consumer smoke and actionlint were not rerun. No test.failing matches currently exist in test/; Appendix A suite TASK-227 has not started.
 - Milestones at stop: m-0 v0.5.1 Guardrails 12/13 done; m-1 v0.6.0 Safety and Correctness 0/17 done; m-2 v0.7.0 DX and Performance 0/18 done. No tasks completed or follow-up tasks created this session. Release-workflow task creation is deferred to Phase B after v0.5.1 release.
 - Exact next step: maintainer must restore normal access to the existing npm cache (and ensure the execution environment permits that access), then rerun all Step 0 checks; npm whoami must succeed as takinprofit. Once all pass, remove blocked label via Backlog CLI and resume R(0.5.1) step 1 at the unchanged v0.5.1 tag. Do not bypass npm preflight or use an alternative cache or credentials.
+
+- Maintainer authorization (2026-11-09 mission): pushing, merging and publishing stratadb 0.5.1, 0.6.0 and 0.7.0 are explicitly authorized. This overrides earlier do-not-publish/local-tag-only wording in TASK-226, TASK-242 and TASK-260. Follow mission release procedure R, including local npm publish without --provenance before pushing tags, passing PR CI and merge without squash/rebase. Plan approval is pre-granted. All mission hard rules remain in force.
 <!-- SECTION:NOTES:END -->

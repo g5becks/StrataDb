@@ -4,6 +4,7 @@ title: 'Release prep: v0.7.0 (verify, changelog, local tag; do not publish)'
 status: To Do
 assignee: []
 created_date: '2026-11-09T04:01:00Z'
+updated_date: '2026-11-09T13:53:00Z'
 labels:
   - build-release
 milestone: m-2
@@ -53,3 +54,9 @@ Package the DX and performance release. Publishing is done by the maintainer.
 - [ ] #2 CHANGELOG has a [0.7.0] section; package.json version is 0.7.0; all verification commands pass
 - [ ] #3 Local tag v0.7.0 exists; nothing pushed or published; publish commands are in task notes
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+- Maintainer authorization (2026-11-09 mission): pushing, merging and publishing stratadb 0.5.1, 0.6.0 and 0.7.0 are explicitly authorized. This overrides earlier do-not-publish/local-tag-only wording in TASK-226, TASK-242 and TASK-260. Follow mission release procedure R, including local npm publish without --provenance before pushing tags, passing PR CI and merge without squash/rebase. Plan approval is pre-granted. All mission hard rules remain in force.
+<!-- SECTION:NOTES:END -->
