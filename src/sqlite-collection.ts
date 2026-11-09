@@ -2203,6 +2203,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     if (!this._emitter) {
       return []
     }
-    return this._emitter.listeners(event)
+    // Every public event name belongs to CollectionEventMap; Node 26 also
+    // permits built-in emitter events in its conditional listener type.
+    return this._emitter.listeners(event) as ((
+      ...args: CollectionEventMap<T>[E]
+    ) => void)[]
   }
 }
