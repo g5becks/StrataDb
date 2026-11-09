@@ -1,11 +1,11 @@
 ---
 id: TASK-241
 title: 'Docs: README corrections, semantics page and 0.6 migration guide'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T20:22:00Z'
+updated_date: '2026-11-09T20:26:00Z'
 labels:
   - build-release
 milestone: m-1
@@ -66,4 +66,6 @@ README and docs claim behavior that is fixed or changed in 0.6.0 (retries, compo
 - Breaking change: none in this documentation task; it documents preceding behavior changes. Retry default wiring remains TASK-261; current README uses an explicit classifier, so its example matches current tests.
 - Verification PASS: frozen docs install; docs:build (TypeDoc on TS 6 and VitePress, 3.62s); typecheck TS 7.0.2; lint 103 files; 874 pass/2 existing skips/0 fail; build; type tests; consumer TS 6/7 and CRUD; source TS 5.9.3/6.0.3.
 - Docs build has seven TypeDoc warnings (public named types/duplicate tags) tracked in new m-2 TASK-264; TASK-260 retains its dependencies and additionally depends on TASK-264. VitePress chunk-size advisory remains unsuppressed. Local CI pending committed SHA because docs configuration/finalizer changed.
+
+Verified with scripts/ci-local.sh (1c193a4221ca90662fb8bccd4c9a263ed4d8a229, PASS); GitHub Actions unavailable (billing lock). macOS/Linux pinned/latest Bun 1.4.4 PASS; TS 5.9.3/6.0.3/7.0.2 source/type tests PASS; TS 7.1.0-beta advisory PASS. Logs: /Users/takinprofit/Dev/StrataDb-release/ci-local/1c193a4/logs. Self-review complete.
 <!-- SECTION:NOTES:END -->
