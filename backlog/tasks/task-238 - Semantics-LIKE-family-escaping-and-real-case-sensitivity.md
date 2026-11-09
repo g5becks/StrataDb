@@ -1,11 +1,11 @@
 ---
 id: TASK-238
 title: 'Semantics: LIKE-family escaping and real case sensitivity'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T20:02:00Z'
+updated_date: '2026-11-09T20:04:00Z'
 labels:
   - api
 milestone: m-1
@@ -38,7 +38,7 @@ SQLite LIKE is ASCII case-insensitive, so `$like` equals `$ilike`. `search({ cas
 <!-- AC:BEGIN -->
 - [x] #1 Regression case A13 passes: $like is case-sensitive, $ilike is not, search caseSensitive:true is honored
 - [x] #2 Literal % _ and backslash in $contains/$startsWith/$endsWith/search are matched literally (tests)
-- [ ] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #4 CHANGELOG.md has an entry under ## [Unreleased] describing the change (Breaking changes section)
 <!-- AC:END -->
 
@@ -59,4 +59,6 @@ SQLite LIKE is ASCII case-insensitive, so `$like` equals `$ilike`. `search({ cas
 - All A13 cases now pass as normal tests. Regression-first indexed/unindexed suite failed before; now covers repeat calls, wildcard literals, backslashes, glob syntax, empty strings, ASCII/Unicode and pragma independence. Exact SQL/bind assertions remain exact; changed the prior case-insensitive contains test to require exact matching names.
 - Breaking change: case-sensitive operators and literal search/substrings now honor their intended semantics. Query guide and CHANGELOG document migration and SQLite limits with primary references.
 - Host gate PASS: typecheck TS 7.0.2; lint 102 files; 873 pass/2 existing skips/0 fail; build; type tests; consumer TS 6/7 and CRUD; source TS 5.9.3/6.0.3. Local CI pending committed SHA. Follow-ups: none.
+
+Verified with scripts/ci-local.sh (f1a7363defa0a9c7abd0ce86c7e289ebf9976dba, PASS); GitHub Actions unavailable (billing lock). macOS/Linux pinned/latest Bun 1.4.4 PASS; TS 5.9.3/6.0.3/7.0.2 source/type tests PASS; TS 7.1.0-beta advisory PASS. Logs: /Users/takinprofit/Dev/StrataDb-release/ci-local/f1a7363/logs. Self-review complete.
 <!-- SECTION:NOTES:END -->
