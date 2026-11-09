@@ -5,9 +5,10 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T13:30:00Z'
+updated_date: '2026-11-09T13:52:00Z'
 labels:
   - build-release
+  - blocked
 milestone: m-0
 dependencies:
   - TASK-214
@@ -91,4 +92,10 @@ The npm invocation is a maintainer-only provenance publication command documente
 
 - Tag verification complete: annotated v0.5.0 -> c105ba5c0100b2e7bf6e59cdf1ae64d3b7a1fada; annotated v0.5.1 -> 73bf38c (release preparation). git cat-file reports tag for both references, and the v0.5.1 package manifest is version 0.5.1. No remote actions occurred. This final bookkeeping commit changes only task metadata; the release tag remains on the verified release content.
 - Gate state: all four acceptance criteria verified; status deliberately remains In Progress pending maintainer publication. Stop here as instructed.
+
+- STOPPED at mission Step 0 on 2026-11-09: npm whoami exited 1; expected identity takinprofit could not be verified. Error: npm error code EPERM; syscall open; path /Users/takinprofit/.npm/_cacache/tmp/***; errno EPERM. npm reported root-owned cache files and could not write /Users/takinprofit/.npm/_logs. No cache relocation, permission workaround, credential change or retry was attempted. Environment failure stops all release and milestone work per mission. TASK-226 remains In Progress with label blocked; previously checked criteria are historical verification, not fresh release verification.
+- Other Step 0 checks: GIT_OK; CACHE_OK; gh auth status confirmed active account g5becks; git push --dry-run origin HEAD exited 0 (dry run only). The dry-run hook passed typecheck, lint (84 files) and tests (733 pass, 3 existing skips, 0 fail, 2117 assertions across 33 files, Bun 1.4.4). The environment checks were executed in one invocation, so the GitHub check and dry-run also completed after npm failed; no actual push occurred.
+- Resume snapshot: branch release/v0.5.1 initially clean at 8db6003; origin/main c105ba5; local annotated tags v0.5.0 and v0.5.1 unchanged. gh pr list --state all returned []; remote tag list empty. No PR, CI run, npm publication or GitHub release was created. npm versions/latest were not queried after the npm preflight failure; registry state is unverified this session. Full tag verification, TS 5.9/6.0 checks, build, type tests, consumer smoke and actionlint were not rerun. No test.failing matches currently exist in test/; Appendix A suite TASK-227 has not started.
+- Milestones at stop: m-0 v0.5.1 Guardrails 12/13 done; m-1 v0.6.0 Safety and Correctness 0/17 done; m-2 v0.7.0 DX and Performance 0/18 done. No tasks completed or follow-up tasks created this session. Release-workflow task creation is deferred to Phase B after v0.5.1 release.
+- Exact next step: maintainer must restore normal access to the existing npm cache (and ensure the execution environment permits that access), then rerun all Step 0 checks; npm whoami must succeed as takinprofit. Once all pass, remove blocked label via Backlog CLI and resume R(0.5.1) step 1 at the unchanged v0.5.1 tag. Do not bypass npm preflight or use an alternative cache or credentials.
 <!-- SECTION:NOTES:END -->
