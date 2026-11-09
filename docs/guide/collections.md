@@ -274,3 +274,16 @@ try {
 // Synchronous validation
 const validUser = users.validateSync(unknownData)
 ```
+
+## Connection lifecycle and row counts
+
+After `db.close()`, asynchronous collection database operations and `validate()`
+reject with `ConnectionError` saying the database is closed. `validateSync()` and
+attempts to create a collection or transaction throw the same error. This applies
+to both schema-created and fluent-builder collections. Repeated `close()` calls
+are safe. Event listener registration and inspection keep their synchronous API.
+
+On Bun 1.4.4 and newer, SQLite's `changes` count includes only rows changed by the
+statement itself. Rows changed by user-added triggers or foreign-key cascades do
+not inflate `deleteOne()`/`deleteMany()` results. Older Bun versions can include
+those indirect changes; StrataDB does not create triggers or foreign-key cascades.

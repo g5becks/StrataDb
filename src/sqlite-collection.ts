@@ -13,9 +13,14 @@ import type {
   UpdateResult,
 } from "./collection-types.js"
 import type { Document } from "./core-types.js"
+import { assertDatabaseOpen, isDatabaseClosed } from "./database-state.js"
 import { mergeDocumentUpdate } from "./deep-merge.js"
 import { buildCompleteDocument } from "./document-builder.js"
-import { UniqueConstraintError, ValidationError } from "./errors.js"
+import {
+  ConnectionError,
+  UniqueConstraintError,
+  ValidationError,
+} from "./errors.js"
 import type {
   CursorSpec,
   ProjectionSpec,
@@ -184,6 +189,19 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     return merged
   }
 
+  private runOperation<R>(
+    operation: () => Promise<R>,
+    options?: RetryableOptions
+  ): Promise<R> {
+    if (isDatabaseClosed(this.db)) {
+      return Promise.reject(new ConnectionError("StrataDB database is closed"))
+    }
+    return withRetry(() => {
+      assertDatabaseOpen(this.db)
+      return operation()
+    }, options)
+  }
+
   /**
    * Creates a new SQLite collection.
    *
@@ -208,6 +226,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     databaseRetryOptions?: RetryOptions,
     collectionRetryOptions?: RetryOptions | false
   ) {
+    assertDatabaseOpen(db)
     this.db = db
     this.name = name
     this.schema = schema
@@ -668,8 +687,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     id: string,
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<T | null> {
-    return withRetry(
+    return this.runOperation(
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const stmt = this.db.prepare<{ _id: string; body: string }, [string]>(
@@ -739,9 +759,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     filter: QueryFilter<T>,
     options?: QueryOptions<T>
   ): Promise<readonly T[]> {
-    return withRetry(
+    return this.runOperation(
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex query logic
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const { sql: whereClause, params } = this.translator.translate(filter)
@@ -800,6 +821,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         >(sql)
         const rows = stmt.all(...allParams)
 
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         let results = rows.map((row) => {
@@ -884,8 +906,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     filter: QueryFilter<T>,
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<number> {
-    return withRetry(
+    return this.runOperation(
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const { sql: whereClause, params } = this.translator.translate(filter)
@@ -1016,9 +1039,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     doc: Omit<T, "_id" | "createdAt" | "updatedAt"> & { _id?: string },
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<T> {
-    return withRetry(
+    return this.runOperation(
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex insert logic
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const now = Date.now()
@@ -1116,6 +1140,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     update: Omit<Partial<T>, "_id" | "createdAt" | "updatedAt">,
     options?: { upsert?: boolean; signal?: AbortSignal }
   ): Promise<T | null> {
+    assertDatabaseOpen(this.db)
     throwIfAborted(options?.signal)
 
     const normalizedFilter = this.normalizeFilter(filter)
@@ -1124,6 +1149,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       options?.signal ? { signal: options.signal } : undefined
     )
 
+    assertDatabaseOpen(this.db)
     throwIfAborted(options?.signal)
 
     if (!existing) {
@@ -1235,8 +1261,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     doc: Omit<T, "_id" | "createdAt" | "updatedAt">,
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<T | null> {
-    return withRetry(
+    return this.runOperation(
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const normalizedFilter = this.normalizeFilter(filter)
@@ -1256,6 +1283,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           )
           .get(...params)
 
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         if (!row) {
@@ -1330,8 +1358,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     filter: string | QueryFilter<T>,
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<boolean> {
-    return withRetry(
+    return this.runOperation(
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const normalizedFilter = this.normalizeFilter(filter)
@@ -1451,9 +1480,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       retry?: RetryOptions | false
     }
   ): Promise<InsertManyResult<T>> {
-    return withRetry(
+    return this.runOperation(
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex batch insert logic
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const ordered = options?.ordered ?? true
@@ -1473,6 +1503,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         )
 
         for (let i = 0; i < docs.length; i++) {
+          assertDatabaseOpen(this.db)
           throwIfAborted(options?.signal)
 
           const doc = docs[i]
@@ -1563,8 +1594,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     update: Omit<Partial<T>, "_id" | "createdAt" | "updatedAt">,
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<UpdateResult> {
-    return withRetry(
+    return this.runOperation(
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const { sql: whereClause, params } = this.translator.translate(filter)
@@ -1602,6 +1634,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         // Prepare all updated documents and validate before committing
         for (const row of rows) {
+          assertDatabaseOpen(this.db)
           throwIfAborted(options?.signal)
 
           const existingDoc = JSON.parse(row.body) as Omit<T, "_id">
@@ -1687,8 +1720,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     filter: QueryFilter<T>,
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<DeleteResult> {
-    return withRetry(
+    return this.runOperation(
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const { sql: whereClause, params } = this.translator.translate(filter)
@@ -1761,14 +1795,16 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       retry?: RetryOptions | false
     }
   ): Promise<T | null> {
-    return withRetry(
+    return this.runOperation(
       async () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         // Normalize and find the document first
         const normalizedFilter = this.normalizeFilter(filter)
         const doc = await this.findOne(normalizedFilter, options)
 
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         if (!doc) {
@@ -1817,8 +1853,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       retry?: RetryOptions | false
     }
   ): Promise<T | null> {
-    return withRetry(
+    return this.runOperation(
       async () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const returnDoc = options?.returnDocument ?? "after"
@@ -1828,6 +1865,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         const findOptions = options?.sort ? { sort: options.sort } : undefined
         const existing = await this.findOne(normalizedFilter, findOptions)
 
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         if (!existing) {
@@ -1899,8 +1937,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       retry?: RetryOptions | false
     }
   ): Promise<T | null> {
-    return withRetry(
+    return this.runOperation(
       async () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const returnDoc = options?.returnDocument ?? "after"
@@ -1910,6 +1949,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         const findOptions = options?.sort ? { sort: options.sort } : undefined
         const existing = await this.findOne(normalizedFilter, findOptions)
 
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         if (!existing) {
@@ -1970,8 +2010,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     filter?: QueryFilter<T>,
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<T[K][]> {
-    return withRetry(
+    return this.runOperation(
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         const fieldStr = String(field)
@@ -2017,8 +2058,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     signal?: AbortSignal
     retry?: RetryOptions | false
   }): Promise<number> {
-    return withRetry(
+    return this.runOperation(
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         // Use SQLite's internal statistics for fast estimate
@@ -2041,8 +2083,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     signal?: AbortSignal
     retry?: RetryOptions | false
   }): Promise<void> {
-    return withRetry(
+    return this.runOperation(
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
         this.db.exec(`DROP TABLE IF EXISTS ${this.name}`)
 
@@ -2096,8 +2139,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     doc: unknown,
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<T> {
-    return withRetry(
+    return this.runOperation(
       () => {
+        assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
         if (!this.schema.validate) {
@@ -2136,6 +2180,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    * ```
    */
   validateSync(doc: unknown): T {
+    assertDatabaseOpen(this.db)
     if (!this.schema.validate) {
       // No validator configured, trust the document
       return doc as T

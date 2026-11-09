@@ -6,6 +6,7 @@ import {
 } from "./collection-builder.js"
 import type { Collection } from "./collection-types.js"
 import type { Document } from "./core-types.js"
+import { assertDatabaseOpen, markDatabaseClosed } from "./database-state.js"
 import type {
   CollectionOptions,
   DatabaseOptions,
@@ -75,6 +76,7 @@ export class Strata implements StrataDBInterface {
       this.sqliteDb = options.database
     }
 
+    assertDatabaseOpen(this.sqliteDb)
     const version =
       this.sqliteDb
         .query<{ version: string }, []>("SELECT sqlite_version() AS version")
@@ -127,6 +129,7 @@ export class Strata implements StrataDBInterface {
     options?: CollectionOptions
   ): Collection<T> | CollectionBuilder<T> {
     if (!schema) {
+      assertDatabaseOpen(this.sqliteDb)
       // Return builder for fluent schema definition
       return new CollectionBuilderImpl<T>(
         this.sqliteDb,
@@ -140,6 +143,7 @@ export class Strata implements StrataDBInterface {
     if (existing) {
       return existing as Collection<T>
     }
+    assertDatabaseOpen(this.sqliteDb)
 
     // Determine cache setting: collection option > database default
     const enableCache = options?.enableCache ?? this.enableCacheDefault
@@ -164,6 +168,7 @@ export class Strata implements StrataDBInterface {
    * @returns Transaction instance
    */
   transaction(): Transaction {
+    assertDatabaseOpen(this.sqliteDb)
     this.sqliteDb.exec("BEGIN TRANSACTION")
 
     let committed = false
@@ -229,6 +234,7 @@ export class Strata implements StrataDBInterface {
 
     this.onCloseCallback?.()
     this.sqliteDb.close()
+    markDatabaseClosed(this.sqliteDb)
   }
 
   /**
