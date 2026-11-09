@@ -1,11 +1,11 @@
 ---
 id: TASK-226
 title: 'Release prep: v0.5.1 (verify, changelog, local tag; do not publish)'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T17:30:00Z'
+updated_date: '2026-11-09T17:46:00Z'
 labels: []
 milestone: m-0
 dependencies:
@@ -111,4 +111,12 @@ The npm invocation is a maintainer-only provenance publication command documente
 - Exact next step: account owner must resolve the GitHub Actions billing lock. Then inspect actual state and rerun Step 0; push any local backlog bookkeeping commit on release/v0.5.1 if needed, rerun required CI for PR #1, and require every job to pass before R step 4. Keep v0.5.1 at 73bf38c while changes remain backlog-only. No merge commit, npm tarball URL, GitHub release URL or release-workflow run exists for 0.5.1 yet. Maintainer publish authorization persists.
 
 - Mission resumed with maintainer-approved local CI replacement: scripts/ci-local.sh is the release CI gate while GitHub Actions jobs carry billing-lock annotations. CI/workflow acceptance criteria use the local runner and actionlint; never claim remote jobs ran. Step 0 passed: GIT_OK, CACHE_OK, WT_DIR_OK, Docker OSType linux via existing Colima socket, npm identity takinprofit, GitHub identity g5becks, dry-run push exit 0 with hooks. Initial clean HEAD 761088d; PR #1 open; npm versions end at 0.5.0; tag v0.5.1 remains 73bf38c. Removed historical blocked label. Existing scratch worktree is clean at the correct tag. Latest Bun resolves to 1.4.4, matching the pinned version.
+
+- Current mission authorization supersedes historical publication instructions: npm publication is maintainer-only; listed tag pushes and release merges are authorized.
+- PR #1 merged as 7ceab80d0b566bfcc19f3fc1eea860d14d29385d; main contains v0.5.1. Pushed annotated tags v0.5.0 and v0.5.1 on 2026-11-09.
+- Registry status: published 0.5.1 (npm view stratadb@0.5.1 version). Published-package CRUD verification pending below.
+
+- Published-package verification PASS: isolated bun init, bun add stratadb@0.5.1; package version asserted, :memory: insert/find/update/delete/close exited 0.
+- Retained tarball: /Users/takinprofit/Dev/StrataDb-release/v0.5.1/stratadb-0.5.1.tgz; SHA-512 425d3e51098455ef9592ebd8d4e80e4618271f3bddcc69b14daf44e72b7a456f32b890924172c9854475c1399b5eeed70f7bc3a42ac0c4aa4191650dc743e219. Release notes saved alongside tarball as RELEASE_NOTES.md.
+- No npm publication or authentication command was run this session.
 <!-- SECTION:NOTES:END -->
