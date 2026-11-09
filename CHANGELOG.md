@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- `$like`, `$contains`, `$startsWith` and `$endsWith` are case-sensitive. Substring/prefix/suffix and search text treat `%`, `_` and backslash literally. `$like`/`$ilike` retain `%`/`_` pattern wildcards with backslash escaping; `$ilike` and default search fold ASCII case only. Use `$ilike` or default search when ASCII-insensitive matching is required. `search({ caseSensitive: true })` now performs exact matching.
+
 - Null equality now matches explicit null and missing fields. `$ne: null` requires a non-null value; `$ne: value` and non-null `$nin` lists include missing/null fields. A `null` entry in `$nin` excludes both null and missing values; an empty list matches all documents. Review bulk-write filters that previously relied on SQL NULL comparisons dropping rows. See the [scalar semantics table](docs/guide/mongodb-differences.md#semantics-vs-mongodb-null-and-missing-scalar-fields).
 
 - Unique compound indexes are now enforced. Remove duplicate tuples before reopening an existing database with a unique compound index declaration that earlier versions ignored.

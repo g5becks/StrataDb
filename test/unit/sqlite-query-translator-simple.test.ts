@@ -200,24 +200,24 @@ describe("SQLiteQueryTranslator - String Operators", () => {
     const filter: QueryFilter<User> = { name: { $like: "%admin%" } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe('("_name" LIKE ?)')
-    expect(result.params).toEqual(["%admin%"])
+    expect(result.sql).toBe('("_name" GLOB ?)')
+    expect(result.params).toEqual(["*admin*"])
   })
 
   it("should translate $startsWith operator", () => {
     const filter: QueryFilter<User> = { name: { $startsWith: "Admin" } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe('("_name" LIKE ?)')
-    expect(result.params).toEqual(["Admin%"])
+    expect(result.sql).toBe('(substr("_name", 1, length(?)) = ?)')
+    expect(result.params).toEqual(["Admin", "Admin"])
   })
 
   it("should translate $endsWith operator", () => {
     const filter: QueryFilter<User> = { email: { $endsWith: "@company.com" } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe('("_email" LIKE ?)')
-    expect(result.params).toEqual(["%@company.com"])
+    expect(result.sql).toBe('(substr("_email", -length(?)) = ?)')
+    expect(result.params).toEqual(["@company.com", "@company.com"])
   })
 })
 

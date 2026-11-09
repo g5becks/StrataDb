@@ -257,15 +257,15 @@ test.failing("A12 [TASK-245] $elemMatch resolves nested operators", async () => 
   ).toMatchObject([{ name: "alice" }])
 })
 
-test.failing("A13 [TASK-238] $like is case sensitive", async () => {
+test("A13 [TASK-238] $like is case sensitive", async () => {
   expect(await users.find({ name: { $like: "ALICE" } })).toEqual([])
 })
 
-test.failing("A13 [TASK-238] startsWith treats underscore literally", async () => {
+test("A13 [TASK-238] startsWith treats underscore literally", async () => {
   expect(await users.find({ name: { $startsWith: "_" } })).toEqual([])
 })
 
-test.failing("A13 [TASK-238] search honors caseSensitive", async () => {
+test("A13 [TASK-238] search honors caseSensitive", async () => {
   expect(
     await users.find(
       {},

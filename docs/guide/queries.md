@@ -39,11 +39,13 @@ await users.find({ name: { $ilike: 'john' } })    // John, JOHN, john
 await users.find({ bio: { $contains: 'engineer' } })  // simpler than $like
 ```
 
-The `$like` operator uses SQL LIKE syntax: `%` matches any sequence, `_` matches one character.
+The `$like` operator is case-sensitive and uses SQL pattern syntax: `%` matches any sequence, `_` matches one character, and backslash escapes a pattern character. Literal Unix glob characters (`*`, `?`, `[` and `]`) retain their literal meaning.
 
-The `$ilike` operator is identical to `$like` but case-insensitive.
+The `$ilike` operator uses the same pattern syntax and folds ASCII case. Non-ASCII characters retain their case, following [SQLite's default case-folding behavior](https://www.sqlite.org/lang_expr.html#like).
 
-The `$contains` operator is a convenient shorthand for `$like: '%value%'`.
+`$contains`, `$startsWith` and `$endsWith` match literal text with exact case. `%`, `_` and backslash are ordinary characters in these operators. Empty text matches any present, non-null value. Use `$ilike` patterns for ASCII-insensitive matching.
+
+Search text is also literal. Default search folds ASCII case; `caseSensitive: true` uses exact case. Search text containing `%`, `_` or backslash never becomes a pattern wildcard.
 
 ## Array Operators
 

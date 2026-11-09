@@ -18,6 +18,7 @@ import {
 import type { QueryFilter } from "./query-types.js"
 import { validateQuery } from "./query-validation.js"
 import type { SchemaDefinition, SchemaField } from "./schema-types.js"
+import { likeToGlob } from "./string-patterns.js"
 
 /**
  * SQLite-specific query translator for converting StrataDB queries to SQL.
@@ -283,7 +284,8 @@ export class SQLiteQueryTranslator<T extends Document>
           "$all" in ops ||
           "$contains" in ops ||
           "$startsWith" in ops ||
-          "$endsWith" in ops
+          "$endsWith" in ops ||
+          "$like" in ops
         ) {
           return true
         }
@@ -689,27 +691,18 @@ export class SQLiteQueryTranslator<T extends Document>
         return this.translateNotInOperator(fieldSql, value, params)
 
       case "$like":
-        return `${fieldSql} LIKE ${bind(this.toBindValue(value), params)}`
-
-      // Case-insensitive LIKE pattern matching using SQLite's COLLATE NOCASE
+        return `${fieldSql} GLOB ${bind(likeToGlob(value as string), params)}`
       case "$ilike":
-        return `${fieldSql} LIKE ${bind(this.toBindValue(value), params)} COLLATE NOCASE`
-
-      // Substring containment: sugar for $like: '%value%'
-      case "$contains": {
-        const pattern = `%${this.toBindValue(value)}%`
-        return `${fieldSql} LIKE ${bind(pattern, params)}`
-      }
-
-      case "$startsWith": {
-        const pattern = `${this.toBindValue(value)}%`
-        return `${fieldSql} LIKE ${bind(pattern, params)}`
-      }
-
-      case "$endsWith": {
-        const pattern = `%${this.toBindValue(value)}`
-        return `${fieldSql} LIKE ${bind(pattern, params)}`
-      }
+        return `lower(${fieldSql}) LIKE lower(${bind(this.toBindValue(value), params)}) ESCAPE '\\'`
+      case "$contains":
+      case "$startsWith":
+      case "$endsWith":
+        return this.translateLiteralString(
+          fieldSql,
+          op,
+          value as string,
+          params
+        )
 
       case "$all":
         return this.translateAllOperator(fieldSql, value, params)
@@ -735,6 +728,24 @@ export class SQLiteQueryTranslator<T extends Document>
         // Object-element field translation is handled by TASK-245.
         return null
     }
+  }
+
+  private translateLiteralString(
+    fieldSql: string,
+    operator: "$contains" | "$startsWith" | "$endsWith",
+    value: string,
+    params: SQLiteBindValue[]
+  ): string {
+    if (operator === "$contains") {
+      return `instr(${fieldSql}, ${bind(value, params)}) > 0`
+    }
+    if (operator === "$startsWith") {
+      return `substr(${fieldSql}, 1, length(${bind(value, params)})) = ${bind(value, params)}`
+    }
+    if (value.length === 0) {
+      return `${fieldSql} IS NOT NULL`
+    }
+    return `substr(${fieldSql}, -length(${bind(value, params)})) = ${bind(value, params)}`
   }
 
   /**

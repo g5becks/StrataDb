@@ -56,6 +56,7 @@ import {
   wrapSqliteError,
 } from "./sqlite-boundary.js"
 import { SQLiteQueryTranslator } from "./sqlite-query-translator.js"
+import { escapeLikeLiteral } from "./string-patterns.js"
 import { transactionManager } from "./transaction-manager.js"
 
 type StoredRow = {
@@ -689,14 +690,17 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       return
     }
 
-    const pattern = `%${search.text}%`
-    const collate = search.caseSensitive ? "" : " COLLATE NOCASE"
+    const pattern = `%${escapeLikeLiteral(search.text)}%`
     const clauses: string[] = []
     const params: SQLQueryBindings[] = []
 
     for (const field of search.fields) {
       const column = resolveField(String(field), this.schema.fields, params)
-      clauses.push(`${column} LIKE ${bind(pattern, params)}${collate}`)
+      clauses.push(
+        search.caseSensitive
+          ? `instr(${column}, ${bind(search.text, params)}) > 0`
+          : `lower(${column}) LIKE lower(${bind(pattern, params)}) ESCAPE '\\'`
+      )
     }
 
     return {
