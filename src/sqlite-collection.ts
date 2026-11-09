@@ -196,8 +196,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     const payload = createPayload()
     const emitter = this._emitter
     transactionManager(this.db).event(() => {
-      // @ts-expect-error - EventEmitter's emit typing is complex with tuple types
-      emitter.emit(event, payload)
+      emitter.dispatch(event, payload)
     })
   }
 

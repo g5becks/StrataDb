@@ -423,4 +423,44 @@ export type CollectionEventName = keyof CollectionEventMap<Document>
  */
 export class CollectionEventEmitter<T extends Document> extends EventEmitter<
   CollectionEventMap<T>
-> {}
+> {
+  /** Invoke a registration snapshot in order, retaining once-wrapper behavior. */
+  dispatch<E extends CollectionEventName>(
+    event: E,
+    payload: CollectionEventMap<T>[E][0]
+  ): void {
+    for (const listener of this.rawListeners(event)) {
+      try {
+        const result: unknown = Reflect.apply(listener, this, [payload])
+        if (
+          result !== null &&
+          (typeof result === "object" || typeof result === "function")
+        ) {
+          Promise.resolve(result).catch((error: unknown) =>
+            this.listenerError(event, error)
+          )
+        }
+      } catch (error) {
+        this.listenerError(event, error)
+      }
+    }
+  }
+
+  private listenerError(event: CollectionEventName, failure: unknown): void {
+    const error =
+      failure instanceof Error ? failure : new Error(String(failure))
+    if (event !== "error" && this.listenerCount("error") > 0) {
+      this.dispatch("error", {
+        operation: event,
+        error,
+        context: { source: "listener", event },
+      })
+      return
+    }
+    try {
+      console.error(`[StrataDB] Listener for "${event}" failed`, error)
+    } catch {
+      /* Logging must not fail a committed write. */
+    }
+  }
+}

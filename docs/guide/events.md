@@ -57,13 +57,19 @@ await users.deleteOne('user-id')
 | `findOneAndUpdate` | After `findOneAndUpdate` succeeds | `{ filter: string \| QueryFilter<T>, update: Partial<T>, document: T \| null, upserted: boolean }` |
 | `findOneAndReplace` | After `findOneAndReplace` succeeds | `{ filter: string \| QueryFilter<T>, document: T \| null, upserted: boolean }` |
 | `drop` | After collection is dropped | `{ name: string }` |
-| `error` | When an operation fails | `{ operation: string, error: Error, context?: unknown }` |
+| `error` | When an event listener fails | `{ operation: string, error: Error, context?: unknown }` |
 
 ## Event Timing
 
-**Events fire AFTER operations succeed**, not before. This means:
+Events are delivered synchronously after commit, in listener registration order, at most once per listener registration and emitted event. Inside `execute()` or a manual transaction, delivery waits for the outermost commit; rollback discards its events. Nested savepoint commits defer delivery to their parent.
 
-- The document is already persisted to disk when the event fires
+Listener exceptions never reject a committed write or trigger a database retry. Each listener runs independently, so later listeners still receive the event. `once()` listeners are removed before invocation, even if they throw. A failing listener is reported through the collection's `error` listeners with `operation` set to its event name and `context.source` set to `listener`. Without an error observer, StrataDB logs the failure with `console.error`. Failures in error observers are logged without recursively emitting another error event.
+
+Async listeners start in registration order, but their completion is not awaited by the write. Their promise rejections follow the same error-reporting path. Await database operations explicitly and use their returned promise to handle operation failures.
+
+These guarantees mean:
+
+- The document is committed when the event fires
 - You can safely query for the document in the event handler
 - If the operation fails, no event is emitted
 - Event listeners cannot prevent the operation from completing
@@ -486,7 +492,7 @@ useEffect(() => {
 }, [])
 ```
 
-3. **Handle errors gracefully** - If a listener throws, it won't affect the database operation, but it may not execute subsequent listeners.
+3. **Handle errors gracefully** - A failing listener is reported to `error` observers (or logged), and subsequent listeners still execute. Register an `error` listener to observe failures centrally.
 
 ```typescript
 users.on('insert', (event) => {

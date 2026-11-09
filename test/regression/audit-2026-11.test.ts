@@ -163,7 +163,7 @@ test("A5 [TASK-230] insertOne returns a rejected promise on invalid insert", asy
   await expect(result).rejects.toBeInstanceOf(UniqueConstraintError)
 })
 
-test.failing("A6 [TASK-233] throwing listener does not fail committed insert", async () => {
+test("A6 [TASK-233] throwing listener does not fail committed insert", async () => {
   users.on("insert", () => {
     throw new Error("listener boom")
   })

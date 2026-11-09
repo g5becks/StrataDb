@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Listener failures are isolated per registration and reported through collection `error` observers, with console logging as the fallback. Later listeners still run, throwing `once()` listeners run once, async rejections are handled, and committed writes never fail or retry because of a listener. Events are synchronous after commit, in registration order, at most once per registration.
+
 - Single-document updates, replacements, `findOneAnd*` operations and upserts now select and write inside a synchronous SQLite immediate transaction. Conditional transitions have one winner, independent concurrent updates persist, and concurrent matching upserts insert once. Deep merges still replace arrays and preserve explicit null values. Document metadata is stored in its dedicated columns and hydrated on reads; writes remove duplicate metadata from JSON bodies.
 
 ## [0.5.1] - 2026-11-09
