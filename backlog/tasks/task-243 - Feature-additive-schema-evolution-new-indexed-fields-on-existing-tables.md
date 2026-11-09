@@ -1,11 +1,11 @@
 ---
 id: TASK-243
 title: 'Feature: additive schema evolution (new indexed fields on existing tables)'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T20:47:00Z'
+updated_date: '2026-11-09T20:48:00Z'
 labels:
   - api
 milestone: m-2
@@ -34,7 +34,7 @@ type: feature
 <!-- AC:BEGIN -->
 - [x] #1 Regression case A10 passes: reopening a collection with a new indexed field adds the column and index and queries on it work
 - [x] #2 Removed or changed fields trigger onSchemaDrift (or a configurable error) instead of silent misbehavior (tests)
-- [ ] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #4 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
 
@@ -53,4 +53,6 @@ type: feature
 - Database onSchemaDrift accepts a callback or "error"; the default is console.warn. Removed and stored-type-changed generated columns are retained, never rewritten; strict mode aborts before any migration. BOOLEAN/INTEGER share the stored SQLite representation. Unindexed properties have no stored declaration to compare. Both collection creation paths use this database-level policy.
 - Regression-first tests: the original A10 and three new cases exposed missing-column query results/absent drift callbacks/absent strict rejection. Additional investigation reproduced an existing SQLite DQS constant-index hazard (integrity_check reported a row missing from the index after ALTER TABLE). A new regression failed before repairing affected single/compound indexes during migration and now verifies exact results and integrity_check=ok. Unique-index failure rollback and real two-connection DDL-lock typed errors are covered. A10 is now an ordinary passing test.
 - Breaking change: none. Documented additive evolution, drift policy and rollback behavior in the schema guide and CHANGELOG. Host gate PASS: 897 pass, 2 existing skips, 0 fail; lint; TS 7.0.2 typecheck; build; type tests; consumer TS 6/7 CRUD; source TS 5.9.3/6.0.3. Local CI pending committed SHA.
+
+- Verified with scripts/ci-local.sh (58e23ea7e277fb2c927adc2e43586fbba5616c1f, PASS); GitHub Actions unavailable (billing lock). All macOS/Linux Bun and required/advisory TypeScript jobs passed.
 <!-- SECTION:NOTES:END -->
