@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+# Local stand-in for .github/workflows/ci.yml while GitHub Actions is unavailable.
+#
+# Runs the same matrix against a clean clone of a git ref (default: HEAD):
+#   check:      {linux (Docker oven/bun), macOS (host)} x {Bun 1.4.4, Bun latest}
+#               frozen install, typecheck, lint, test --coverage, build, test:types, test:consumer
+#   typescript: linux, Bun 1.4.4, tsc on source + type tests for TS 5.9.3, 6.0.3, 7.0.2
+#               (7.1.0-beta is advisory and never fails the run)
+#
+# Usage:   bash scripts/ci-local.sh [git-ref]
+# Env:     CI_LOCAL_DIR  work dir; must be inside $HOME so Colima can mount it
+#                        (default: ../StrataDb-release/ci-local next to the repo)
+#          DOCKER_HOST   auto-detected for Colima when unset or unreachable
+# Exit:    0 if every required job passed, 1 otherwise. Logs: $CI_LOCAL_DIR/<sha>/logs/
+set -euo pipefail
+
+REPO="$(git rev-parse --show-toplevel)"
+REF="${1:-HEAD}"
+SHA="$(git -C "$REPO" rev-parse --verify "$REF^{commit}")"
+SHORT="${SHA:0:7}"
+BASE="${CI_LOCAL_DIR:-$(cd "$REPO/.." && pwd)/StrataDb-release/ci-local}"
+WORK="$BASE/$SHORT"
+LOGS="$WORK/logs"
+BUN_PINNED="1.4.4"
+TS_REQUIRED=("5.9.3" "6.0.3" "7.0.2")
+TS_ADVISORY=("7.1.0-beta")
+
+rm -rf "$WORK"
+mkdir -p "$LOGS"
+
+# Docker (Colima) for the Linux jobs
+if ! docker info >/dev/null 2>&1; then
+  for sock in "$HOME/.config/colima/default/docker.sock" "$HOME/.colima/default/docker.sock"; do
+    if [[ -S "$sock" ]]; then export DOCKER_HOST="unix://$sock"; break; fi
+  done
+fi
+docker info >/dev/null 2>&1 || { echo "Docker is not reachable (start it with: colima start)"; exit 1; }
+
+BUN_LATEST="$(npm view bun dist-tags.latest 2>/dev/null || true)"
+[[ -n "$BUN_LATEST" ]] || { echo "Could not resolve the latest Bun version from npm"; exit 1; }
+BUN_VERSIONS=("$BUN_PINNED")
+[[ "$BUN_LATEST" != "$BUN_PINNED" ]] && BUN_VERSIONS+=("$BUN_LATEST")
+
+RESULTS=()
+FAILED=0
+
+clone() { # fresh checkout of $SHA, like actions/checkout
+  local dir="$1"
+  git clone --quiet --no-hardlinks "$REPO" "$dir"
+  git -C "$dir" checkout --quiet --detach "$SHA"
+}
+
+record() { # name status required
+  RESULTS+=("$(printf '%-34s %s' "$1" "$2")")
+  if [[ "$2" != "pass" && "$3" == "required" ]]; then FAILED=1; fi
+}
+
+# GitHub ubuntu runners ship Node/npx; oven/bun images do not, and ultracite shells out to npx.
+LINUX_SHIMS='printf "#!/bin/sh\nexec bunx \"\$@\"\n" > /usr/local/bin/npx && chmod +x /usr/local/bin/npx'
+
+CHECK_STEPS='set -e
+bun install --frozen-lockfile
+bun run typecheck
+bun run lint
+bun test --coverage
+bun run build
+bun run test:types
+bun run test:consumer'
+
+mac_bun_dir() { # echo a directory containing a darwin bun binary of the given version
+  local v="$1"
+  if [[ "$(bun --version)" == "$v" ]]; then dirname "$(command -v bun)"; return; fi
+  local d="$BASE/bun-darwin-$v"
+  if [[ ! -x "$d/package/bin/bun" ]]; then
+    mkdir -p "$d"
+    (cd "$d" && npm pack --silent "@oven/bun-darwin-$(uname -m | sed 's/arm64/aarch64/')@$v" >/dev/null && tar -xzf ./*.tgz)
+  fi
+  echo "$d/package/bin"
+}
+
+for v in "${BUN_VERSIONS[@]}"; do
+  # macOS (host)
+  name="check (macos, bun $v)"
+  dir="$WORK/macos-$v"; clone "$dir"
+  bindir="$(mac_bun_dir "$v")"
+  echo "▶ $name"
+  if (cd "$dir" && PATH="$bindir:$PATH" CI=true bash -c "$CHECK_STEPS") >"$LOGS/macos-$v.log" 2>&1; then
+    record "$name" pass required
+  else
+    record "$name" FAIL required
+  fi
+
+  # Linux (Docker)
+  name="check (linux, bun $v)"
+  dir="$WORK/linux-$v"; clone "$dir"
+  echo "▶ $name"
+  if docker run --rm -e CI=true -v "$dir:/w" -w /w "oven/bun:$v" bash -c \
+       "apt-get update -qq >/dev/null && apt-get install -y -qq git >/dev/null && git config --global --add safe.directory /w && $LINUX_SHIMS && $CHECK_STEPS" \
+       >"$LOGS/linux-$v.log" 2>&1; then
+    record "$name" pass required
+  else
+    record "$name" FAIL required
+  fi
+done
+
+# TypeScript compatibility (Linux, pinned Bun)
+dir="$WORK/linux-typescript"; clone "$dir"
+echo "▶ typescript matrix"
+TS_SCRIPT='set -e
+apt-get update -qq >/dev/null && apt-get install -y -qq git >/dev/null && git config --global --add safe.directory /w
+bun install --frozen-lockfile >/dev/null
+for ts in "$@"; do
+  if bunx -p "typescript@$ts" tsc --noEmit > "/logs/ts-$ts.log" 2>&1 \
+     && bunx -p "typescript@$ts" tsc --noEmit -p test/type/tsconfig.json >> "/logs/ts-$ts.log" 2>&1; then
+    echo "$ts pass"; else echo "$ts FAIL"; fi
+done'
+if ts_out="$(docker run --rm -e CI=true -v "$dir:/w" -v "$LOGS:/logs" -w /w "oven/bun:$BUN_PINNED" \
+      bash -c "$TS_SCRIPT" _ "${TS_REQUIRED[@]}" "${TS_ADVISORY[@]}" 2>"$LOGS/typescript-setup.log")"; then
+  for ts in "${TS_REQUIRED[@]}"; do
+    record "typescript ($ts)" "$(awk -v t="$ts" '$1==t{print $2}' <<<"$ts_out")" required
+  done
+  for ts in "${TS_ADVISORY[@]}"; do
+    record "typescript ($ts, advisory)" "$(awk -v t="$ts" '$1==t{print $2}' <<<"$ts_out")" advisory
+  done
+else
+  record "typescript (setup)" FAIL required
+fi
+
+echo
+echo "ci-local results for $SHORT ($(git -C "$REPO" log -1 --format=%s "$SHA"))"
+echo "bun pinned=$BUN_PINNED latest=$BUN_LATEST; logs: $LOGS"
+printf '  %s\n' "${RESULTS[@]}"
+if [[ "$FAILED" -eq 0 ]]; then
+  echo "RESULT: PASS"
+  rm -rf "$WORK"/macos-* "$WORK"/linux-*   # keep logs, drop clones
+else
+  echo "RESULT: FAIL"
+fi
+exit "$FAILED"
