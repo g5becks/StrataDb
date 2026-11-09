@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Publish complete MIT/repository metadata, a `stratadb/package.json` export, and source files for working source-map navigation. The v0.5.1 package declares Bun `>=1.3.14`.
 - API documentation regenerates in a private TypeScript 6 package. Remove this workaround when TypeDoc supports the TypeScript 7 compiler API.
 - Type assertions now run directly against source with expect-type under every supported compiler, without a build or tsd's bundled compiler.
 - Develop on TypeScript 7.0, with blocking TypeScript 5.9/6.0/7.0 compatibility checks and an advisory 7.1 beta CI check.
