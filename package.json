@@ -33,7 +33,7 @@
     "lefthook": "^2.0.4",
     "mitata": "^1.0.34",
     "tsd": "^0.33.0",
-    "tsdown": "^0.16.6",
+    "tsdown": "^0.23.7",
     "type-fest": "^5.2.0",
     "typedoc": "^0.28.15",
     "typedoc-plugin-markdown": "^4.9.0",
