@@ -76,7 +76,7 @@ test("A1 [TASK-228] limit injection rejects before SQL parsing", async () => {
   expect(await users.count({})).toBe(4)
 })
 
-test.failing("A2 [TASK-229] unknown operator cannot delete documents", async () => {
+test("A2 [TASK-229] unknown operator cannot delete documents", async () => {
   await expect(
     Promise.resolve().then(() =>
       users.deleteMany({ role: { $eqq: "admin" } } as never)

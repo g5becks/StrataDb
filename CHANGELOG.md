@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- Unknown `$operators` now raise `InvalidQueryOperatorError` at every query nesting level. Malformed operator values and empty operator objects raise `QueryError` before SQL or cache lookup. Correct misspelled operators and supply arrays for `$in`/`$nin`/`$all`, strings for LIKE operators, a boolean for `$exists`, and a nonnegative integer for `$size`. Explicit empty-filter bulk operations (`deleteMany({})`, `updateMany({})`) remain supported.
+
 - Query field paths now require identifier segments (`A-Z`, `a-z`, `_`, then letters, digits or `_`). Invalid filter, sort, search, distinct and schema paths raise `QueryError`; rename keys containing punctuation and use dotted paths for nested fields. Numeric `limit`, `skip` and `$index.index` must be nonnegative safe integers. JSON paths and numeric options are bound, and collection/index/column identifiers are quoted, preventing SQL injection. Collection names such as `order` and `user-data` now work; empty/NUL names are rejected. Dotted indexed fields use distinct generated-column names; reopen existing databases after migrating any manually created generated columns.
 
 ## [0.5.1] - 2026-11-09

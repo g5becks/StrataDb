@@ -1,5 +1,5 @@
 import type { Document } from "./core-types.js"
-import { QueryError } from "./errors.js"
+import { InvalidQueryOperatorError, QueryError } from "./errors.js"
 import {
   arrayElement,
   assertNonNegativeInt,
@@ -16,6 +16,7 @@ import {
   type SQLiteBindValue,
 } from "./query-translator-types.js"
 import type { QueryFilter } from "./query-types.js"
+import { validateQuery } from "./query-validation.js"
 import type { SchemaDefinition, SchemaField } from "./schema-types.js"
 
 /**
@@ -184,6 +185,7 @@ export class SQLiteQueryTranslator<T extends Document>
    * due to their complex value extraction requirements.
    */
   translate(filter: QueryFilter<T>): QueryTranslatorResult {
+    validateQuery(filter)
     // Empty filter matches all documents
     if (!filter || Object.keys(filter).length === 0) {
       return createQueryResult("1=1", [])
@@ -716,7 +718,10 @@ export class SQLiteQueryTranslator<T extends Document>
       // Additional operators will be added in subsequent tasks
 
       default:
-        // Unknown operator - ignore
+        if (op.startsWith("$")) {
+          throw new InvalidQueryOperatorError(`Unknown query operator ${op}`)
+        }
+        // Object-element field translation is handled by TASK-245.
         return null
     }
   }

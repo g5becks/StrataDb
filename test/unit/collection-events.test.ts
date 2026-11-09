@@ -1734,7 +1734,7 @@ describe("Collection Events - Registration Methods", () => {
       }
 
       // Document should still be inserted
-      const count = await collection.count()
+      const count = await collection.count({})
       expect(count).toBe(1)
     })
 

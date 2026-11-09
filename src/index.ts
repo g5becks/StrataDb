@@ -79,6 +79,7 @@ export type {
 export {
   AbortedError,
   ConnectionError,
+  InvalidQueryOperatorError,
   QueryError,
   StrataDBError,
   TransactionError,
