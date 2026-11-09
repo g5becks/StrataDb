@@ -6,10 +6,11 @@
 function mergeRetryOptions(
    database?, 
    collection?, 
-   operation?): RetryOptions | undefined;
+   operation?
+): RetryOptions | undefined;
 ```
 
-Defined in: [src/retry-utils.ts:155](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/retry-utils.ts#L155)
+Defined in: [src/retry-utils.ts:155](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/retry-utils.ts#L155)
 
 Merges retry options from database, collection, and operation levels.
 Operation-level options take precedence over collection-level, which take precedence over database-level.
@@ -18,21 +19,21 @@ Operation-level options take precedence over collection-level, which take preced
 
 ### database?
 
-Database-level retry options
+`false` \| [`RetryOptions`](../type-aliases/RetryOptions.md)
 
-`false` | [`RetryOptions`](../type-aliases/RetryOptions.md)
+Database-level retry options
 
 ### collection?
 
-Collection-level retry options
+`false` \| [`RetryOptions`](../type-aliases/RetryOptions.md)
 
-`false` | [`RetryOptions`](../type-aliases/RetryOptions.md)
+Collection-level retry options
 
 ### operation?
 
-Operation-level retry options
+`false` \| [`RetryOptions`](../type-aliases/RetryOptions.md)
 
-`false` | [`RetryOptions`](../type-aliases/RetryOptions.md)
+Operation-level retry options
 
 ## Returns
 

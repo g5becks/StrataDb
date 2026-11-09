@@ -6,7 +6,7 @@
 function createSchema<T>(): SchemaBuilder<Document<T>>;
 ```
 
-Defined in: [src/schema-builder.ts:274](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/schema-builder.ts#L274)
+Defined in: [src/schema-builder.ts:274](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/schema-builder.ts#L274)
 
 Creates a new schema builder for defining collection schemas.
 

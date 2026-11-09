@@ -34,14 +34,9 @@
     "mitata": "^1.0.34",
     "tsdown": "^0.23.7",
     "type-fest": "^5.2.0",
-    "typedoc": "^0.28.15",
-    "typedoc-plugin-markdown": "^4.9.0",
-    "typedoc-vitepress-theme": "^1.1.2",
     "typescript": "~7.0.2",
     "ultracite": "6.3.4",
     "valibot": "^1.1.0",
-    "vitepress": "1.6.3",
-    "vitepress-carbon": "^1.5.0",
     "zod": "^4.1.12",
     "@types/node": "^26",
     "expect-type": "^1.3.0"
@@ -64,8 +59,8 @@
     "bench:crud": "bun run bench/crud-operations.bench.ts",
     "bench:batch": "bun run bench/batch-throughput.bench.ts",
     "bench:all": "bun run bench && bun run bench:crud && bun run bench:batch",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:dev": "bun run --cwd docs dev",
+    "docs:build": "bun run --cwd docs build",
+    "docs:preview": "bun run --cwd docs preview"
   }
 }

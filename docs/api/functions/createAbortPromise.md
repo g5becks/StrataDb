@@ -6,7 +6,7 @@
 function createAbortPromise(signal?): object;
 ```
 
-Defined in: [src/abort-utils.ts:58](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/abort-utils.ts#L58)
+Defined in: [src/abort-utils.ts:58](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/abort-utils.ts#L58)
 
 Creates a promise that rejects when the signal is aborted.
 
@@ -24,7 +24,7 @@ Optional AbortSignal to monitor
 
 Object with promise that rejects on abort and cleanup function
 
-### cleanup()
+### cleanup
 
 ```ts
 cleanup: () => void;

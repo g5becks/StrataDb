@@ -6,31 +6,9 @@
 type QueryOptionsWithSelect<T, K> = QueryOptionsBase<T> & object;
 ```
 
-Defined in: [src/query-options-types.ts:598](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L598)
+Defined in: [src/query-options-types.ts:598](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/query-options-types.ts#L598)
 
 Query options with `select` for type-safe field inclusion.
-
-## Type Declaration
-
-### omit?
-
-```ts
-readonly optional omit: never;
-```
-
-### projection?
-
-```ts
-readonly optional projection: never;
-```
-
-### select
-
-```ts
-readonly select: readonly K[];
-```
-
-Array of fields to include in results (plus _id).
 
 ## Type Parameters
 
@@ -45,6 +23,28 @@ The document type being queried
 `K` *extends* keyof `T`
 
 The keys to select (inferred from the select array)
+
+## Type Declaration
+
+### omit?
+
+```ts
+readonly omit?: never;
+```
+
+### projection?
+
+```ts
+readonly projection?: never;
+```
+
+### select
+
+```ts
+readonly select: readonly K[];
+```
+
+Array of fields to include in results (plus _id).
 
 ## Remarks
 

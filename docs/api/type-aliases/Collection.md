@@ -6,7 +6,7 @@
 type Collection<T> = object;
 ```
 
-Defined in: [src/collection-types.ts:187](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L187)
+Defined in: [src/collection-types.ts:191](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L191)
 
 MongoDB-like collection interface for type-safe document operations.
 
@@ -108,7 +108,7 @@ The document type, must extend Document
 readonly name: string;
 ```
 
-Defined in: [src/collection-types.ts:191](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L191)
+Defined in: [src/collection-types.ts:195](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L195)
 
 Collection name (table name in SQLite).
 
@@ -120,7 +120,7 @@ Collection name (table name in SQLite).
 readonly schema: SchemaDefinition<T>;
 ```
 
-Defined in: [src/collection-types.ts:196](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L196)
+Defined in: [src/collection-types.ts:200](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L200)
 
 Schema definition for this collection.
 
@@ -132,7 +132,7 @@ Schema definition for this collection.
 count(filter, options?): Promise<number>;
 ```
 
-Defined in: [src/collection-types.ts:374](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L374)
+Defined in: [src/collection-types.ts:378](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L378)
 
 Count documents matching the query filter.
 
@@ -195,7 +195,7 @@ const count = await users.count({}, { signal: controller.signal });
 deleteMany(filter, options?): Promise<DeleteResult>;
 ```
 
-Defined in: [src/collection-types.ts:964](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L964)
+Defined in: [src/collection-types.ts:968](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L968)
 
 Delete multiple documents matching the query filter.
 
@@ -255,7 +255,7 @@ const result = await users.deleteMany(filter, { signal: controller.signal });
 deleteOne(filter, options?): Promise<boolean>;
 ```
 
-Defined in: [src/collection-types.ts:672](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L672)
+Defined in: [src/collection-types.ts:676](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L676)
 
 Delete a single document by ID or filter.
 
@@ -263,9 +263,9 @@ Delete a single document by ID or filter.
 
 ##### filter
 
-Document ID (string) or query filter
+`string` \| [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
 
-`string` | [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
+Document ID (string) or query filter
 
 ##### options?
 
@@ -323,10 +323,11 @@ const deleted = await users.deleteOne(filter, { signal: controller.signal });
 distinct<K>(
    field, 
    filter?, 
-   options?): Promise<T[K][]>;
+   options?
+): Promise<T[K][]>;
 ```
 
-Defined in: [src/collection-types.ts:1003](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L1003)
+Defined in: [src/collection-types.ts:1007](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L1007)
 
 Find distinct values for a specified field across the collection.
 
@@ -402,7 +403,7 @@ const ages = await users.distinct('age', {}, { signal: controller.signal });
 drop(options?): Promise<void>;
 ```
 
-Defined in: [src/collection-types.ts:1068](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L1068)
+Defined in: [src/collection-types.ts:1072](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L1072)
 
 Drop the collection (delete the table).
 
@@ -456,7 +457,7 @@ await collection.drop({ signal: controller.signal });
 estimatedDocumentCount(options?): Promise<number>;
 ```
 
-Defined in: [src/collection-types.ts:1036](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L1036)
+Defined in: [src/collection-types.ts:1040](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L1040)
 
 Get an estimated count of documents in the collection.
 
@@ -513,7 +514,7 @@ const estimate = await users.estimatedDocumentCount({ signal: controller.signal 
 find<K>(filter, options): Promise<readonly Pick<T, K | keyof T & "_id">[]>;
 ```
 
-Defined in: [src/collection-types.ts:273](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L273)
+Defined in: [src/collection-types.ts:277](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L277)
 
 Find all documents matching the query filter.
 
@@ -588,7 +589,7 @@ const results = await users.find({
 find<K>(filter, options): Promise<readonly Omit<T, K>[]>;
 ```
 
-Defined in: [src/collection-types.ts:279](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L279)
+Defined in: [src/collection-types.ts:283](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L283)
 
 ##### Type Parameters
 
@@ -616,7 +617,7 @@ Defined in: [src/collection-types.ts:279](https://github.com/g5becks/StrataDb/bl
 find(filter, options?): Promise<readonly T[]>;
 ```
 
-Defined in: [src/collection-types.ts:285](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L285)
+Defined in: [src/collection-types.ts:289](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L289)
 
 ##### Parameters
 
@@ -640,7 +641,7 @@ Defined in: [src/collection-types.ts:285](https://github.com/g5becks/StrataDb/bl
 findById(id, options?): Promise<T | null>;
 ```
 
-Defined in: [src/collection-types.ts:223](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L223)
+Defined in: [src/collection-types.ts:227](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L227)
 
 Find a single document by its ID.
 
@@ -698,7 +699,7 @@ const user = await users.findById(id, { signal: controller.signal });
 findOne<K>(filter, options): Promise<Pick<T, keyof T & "_id" | K> | null>;
 ```
 
-Defined in: [src/collection-types.ts:327](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L327)
+Defined in: [src/collection-types.ts:331](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L331)
 
 Find the first document matching the query filter or ID.
 
@@ -712,9 +713,9 @@ Find the first document matching the query filter or ID.
 
 ###### filter
 
-Document ID or query filter to match documents
+`string` \| [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
 
-`string` | [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
+Document ID or query filter to match documents
 
 ###### options
 
@@ -768,7 +769,7 @@ if (exists) {
 findOne<K>(filter, options): Promise<Omit<T, K> | null>;
 ```
 
-Defined in: [src/collection-types.ts:333](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L333)
+Defined in: [src/collection-types.ts:337](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L337)
 
 ##### Type Parameters
 
@@ -780,7 +781,7 @@ Defined in: [src/collection-types.ts:333](https://github.com/g5becks/StrataDb/bl
 
 ###### filter
 
-`string` | [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
+`string` \| [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
 
 ###### options
 
@@ -796,13 +797,13 @@ Defined in: [src/collection-types.ts:333](https://github.com/g5becks/StrataDb/bl
 findOne(filter, options?): Promise<T | null>;
 ```
 
-Defined in: [src/collection-types.ts:339](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L339)
+Defined in: [src/collection-types.ts:343](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L343)
 
 ##### Parameters
 
 ###### filter
 
-`string` | [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
+`string` \| [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
 
 ###### options?
 
@@ -820,7 +821,7 @@ Defined in: [src/collection-types.ts:339](https://github.com/g5becks/StrataDb/bl
 findOneAndDelete(filter, options?): Promise<T | null>;
 ```
 
-Defined in: [src/collection-types.ts:719](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L719)
+Defined in: [src/collection-types.ts:723](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L723)
 
 Find and delete a single document atomically.
 
@@ -828,9 +829,9 @@ Find and delete a single document atomically.
 
 ##### filter
 
-Document ID (string) or query filter
+`string` \| [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
 
-`string` | [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
+Document ID (string) or query filter
 
 ##### options?
 
@@ -897,10 +898,11 @@ const deleted = await users.findOneAndDelete(filter, { signal: controller.signal
 findOneAndReplace(
    filter, 
    replacement, 
-   options?): Promise<T | null>;
+   options?
+): Promise<T | null>;
 ```
 
-Defined in: [src/collection-types.ts:844](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L844)
+Defined in: [src/collection-types.ts:848](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L848)
 
 Find and replace a single document atomically.
 
@@ -908,9 +910,9 @@ Find and replace a single document atomically.
 
 ##### filter
 
-Document ID (string) or query filter
+`string` \| [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
 
-`string` | [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
+Document ID (string) or query filter
 
 ##### replacement
 
@@ -1000,10 +1002,11 @@ const replaced = await users.findOneAndReplace(filter, replacement, { signal: co
 findOneAndUpdate(
    filter, 
    update, 
-   options?): Promise<T | null>;
+   options?
+): Promise<T | null>;
 ```
 
-Defined in: [src/collection-types.ts:782](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L782)
+Defined in: [src/collection-types.ts:786](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L786)
 
 Find and update a single document atomically.
 
@@ -1011,9 +1014,9 @@ Find and update a single document atomically.
 
 ##### filter
 
-Document ID (string) or query filter
+`string` \| [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
 
-`string` | [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
+Document ID (string) or query filter
 
 ##### update
 
@@ -1107,7 +1110,7 @@ const updated = await users.findOneAndUpdate(filter, update, { signal: controlle
 insertMany(docs, options?): Promise<InsertManyResult<T>>;
 ```
 
-Defined in: [src/collection-types.ts:889](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L889)
+Defined in: [src/collection-types.ts:893](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L893)
 
 Insert multiple documents into the collection.
 
@@ -1179,7 +1182,7 @@ const result = await users.insertMany(docs, { signal: controller.signal });
 insertOne(doc, options?): Promise<T>;
 ```
 
-Defined in: [src/collection-types.ts:521](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L521)
+Defined in: [src/collection-types.ts:525](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L525)
 
 Insert a single document into the collection.
 
@@ -1254,16 +1257,389 @@ const user = await users.insertOne(doc, { signal: controller.signal });
 
 ***
 
+### listenerCount()
+
+```ts
+listenerCount(event): number;
+```
+
+Defined in: [src/collection-types.ts:1329](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L1329)
+
+Get the number of listeners for an event.
+
+#### Parameters
+
+##### event
+
+keyof [`CollectionEventMap`](CollectionEventMap.md)&lt;[`Document`](Document.md)&gt;
+
+The event name
+
+#### Returns
+
+`number`
+
+Number of registered listeners for the event
+
+#### Remarks
+
+Returns the count of listeners currently registered for the specified event.
+Useful for debugging or monitoring event listener usage.
+
+Returns 0 if no listeners are registered or if the event emitter
+has not been initialized yet.
+
+#### Example
+
+```typescript
+// Check if anyone is listening
+if (users.listenerCount('insert') === 0) {
+  console.log('No insert listeners registered')
+}
+
+// Monitor listener count
+users.on('insert', listener1)
+users.on('insert', listener2)
+console.log(users.listenerCount('insert')) // 2
+
+users.off('insert', listener1)
+console.log(users.listenerCount('insert')) // 1
+```
+
+***
+
+### listeners()
+
+```ts
+listeners<E>(event): ((...args) => void)[];
+```
+
+Defined in: [src/collection-types.ts:1361](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L1361)
+
+Get all listeners for an event.
+
+#### Type Parameters
+
+##### E
+
+`E` *extends* keyof [`CollectionEventMap`](CollectionEventMap.md)&lt;[`Document`](Document.md)&gt;
+
+The event name type
+
+#### Parameters
+
+##### event
+
+`E`
+
+The event name
+
+#### Returns
+
+((...`args`) => `void`)[]
+
+Array of listener functions registered for the event
+
+#### Remarks
+
+Returns an array of all listener functions currently registered for
+the specified event. The array is a copy, so modifying it won't affect
+the actual listeners.
+
+Returns an empty array if no listeners are registered or if the event
+emitter has not been initialized yet.
+
+#### Example
+
+```typescript
+// Get all insert listeners
+const insertListeners = users.listeners('insert')
+console.log(`${insertListeners.length} listeners registered`)
+
+// Iterate over listeners
+for (const listener of users.listeners('update')) {
+  console.log('Listener:', listener.name)
+}
+
+// Check if specific listener is registered
+const hasListener = users.listeners('delete').includes(myListener)
+```
+
+***
+
+### off()
+
+```ts
+off<E>(event, listener): Collection<T>;
+```
+
+Defined in: [src/collection-types.ts:1265](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L1265)
+
+Remove an event listener.
+
+#### Type Parameters
+
+##### E
+
+`E` *extends* keyof [`CollectionEventMap`](CollectionEventMap.md)&lt;[`Document`](Document.md)&gt;
+
+The event name type
+
+#### Parameters
+
+##### event
+
+`E`
+
+The event name
+
+##### listener
+
+(...`args`) => `void`
+
+The callback function to remove
+
+#### Returns
+
+`Collection`&lt;`T`&gt;
+
+The collection instance for method chaining
+
+#### Remarks
+
+Removes a previously registered listener. The listener reference must
+be the same function reference that was passed to `on()` or `once()`.
+
+If the listener was not registered, this method has no effect.
+
+#### Example
+
+```typescript
+// Define listener function
+const logInsert = (event: InsertEvent<User>) => {
+  console.log('User inserted:', event.document._id)
+}
+
+// Register listener
+users.on('insert', logInsert)
+
+// Later, remove it
+users.off('insert', logInsert)
+
+// Note: Arrow functions must use the same reference
+const listener = (event) => console.log(event)
+users.on('insert', listener)
+users.off('insert', listener) // Works
+
+// This won't work (different function reference):
+users.on('insert', (event) => console.log(event))
+users.off('insert', (event) => console.log(event)) // Does nothing
+```
+
+***
+
+### on()
+
+```ts
+on<E>(event, listener): Collection<T>;
+```
+
+Defined in: [src/collection-types.ts:1193](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L1193)
+
+Register an event listener for collection events.
+
+#### Type Parameters
+
+##### E
+
+`E` *extends* keyof [`CollectionEventMap`](CollectionEventMap.md)&lt;[`Document`](Document.md)&gt;
+
+The event name type
+
+#### Parameters
+
+##### event
+
+`E`
+
+The event name to listen for
+
+##### listener
+
+(...`args`) => `void`
+
+The callback function to invoke when the event is emitted
+
+#### Returns
+
+`Collection`&lt;`T`&gt;
+
+The collection instance for method chaining
+
+#### Remarks
+
+Registers a listener function that will be called whenever the specified
+event is emitted. The listener receives the event payload as its argument.
+
+The event emitter is lazily initialized on the first call to `on()`,
+ensuring zero overhead when events are not used.
+
+All events are emitted **after** the operation completes successfully.
+Events do not fire if the operation throws an error (except for 'error' events).
+
+#### Example
+
+```typescript
+// Audit logging
+users.on('insert', (event) => {
+  console.log(`New user created: ${event.document._id}`)
+  auditLog.record('user.created', event.document)
+})
+
+// Cache invalidation
+users.on('update', (event) => {
+  if (event.document) {
+    cache.invalidate(`user:${event.document._id}`)
+  }
+})
+
+// Error monitoring
+users.on('error', (event) => {
+  errorTracker.capture(event.error, {
+    operation: event.operation,
+    context: event.context
+  })
+})
+
+// Method chaining
+users
+  .on('insert', logInsert)
+  .on('update', logUpdate)
+  .on('delete', logDelete)
+```
+
+***
+
+### once()
+
+```ts
+once<E>(event, listener): Collection<T>;
+```
+
+Defined in: [src/collection-types.ts:1223](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L1223)
+
+Register a one-time event listener.
+
+#### Type Parameters
+
+##### E
+
+`E` *extends* keyof [`CollectionEventMap`](CollectionEventMap.md)&lt;[`Document`](Document.md)&gt;
+
+The event name type
+
+#### Parameters
+
+##### event
+
+`E`
+
+The event name to listen for
+
+##### listener
+
+(...`args`) => `void`
+
+The callback function to invoke once
+
+#### Returns
+
+`Collection`&lt;`T`&gt;
+
+The collection instance for method chaining
+
+#### Remarks
+
+Registers a listener that will be automatically removed after it is
+invoked once. Useful for setup tasks or one-time notifications.
+
+#### Example
+
+```typescript
+// Log only the first user creation
+users.once('insert', (event) => {
+  console.log('First user created:', event.document._id)
+})
+
+// One-time initialization
+users.once('insert', async (event) => {
+  await initializeUserMetrics()
+})
+```
+
+***
+
+### removeAllListeners()
+
+```ts
+removeAllListeners(event?): Collection<T>;
+```
+
+Defined in: [src/collection-types.ts:1298](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L1298)
+
+Remove all listeners for an event, or all events if no event specified.
+
+#### Parameters
+
+##### event?
+
+keyof CollectionEventMap\<Document\>
+
+Optional event name to clear listeners for
+
+#### Returns
+
+`Collection`&lt;`T`&gt;
+
+The collection instance for method chaining
+
+#### Remarks
+
+If an event name is provided, removes all listeners for that event.
+If no event name is provided, removes all listeners for all events.
+
+Use with caution in shared codebases where multiple parts of the
+application might be listening to the same events.
+
+#### Example
+
+```typescript
+// Remove all 'insert' listeners
+users.removeAllListeners('insert')
+
+// Remove all listeners for all events
+users.removeAllListeners()
+
+// Cleanup before disposal
+function cleanup() {
+  users.removeAllListeners()
+  db.close()
+}
+```
+
+***
+
 ### replaceOne()
 
 ```ts
 replaceOne(
    filter, 
    doc, 
-   options?): Promise<T | null>;
+   options?
+): Promise<T | null>;
 ```
 
-Defined in: [src/collection-types.ts:630](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L630)
+Defined in: [src/collection-types.ts:634](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L634)
 
 Replace a single document by ID or filter.
 
@@ -1271,9 +1647,9 @@ Replace a single document by ID or filter.
 
 ##### filter
 
-Document ID (string) or query filter
+`string` \| [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
 
-`string` | [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
+Document ID (string) or query filter
 
 ##### doc
 
@@ -1355,10 +1731,11 @@ const replaced = await users.replaceOne(filter, doc, { signal: controller.signal
 search<K>(
    text, 
    fields, 
-   options): Promise<readonly Pick<T, keyof T & "_id" | K>[]>;
+   options
+): Promise<readonly Pick<T, keyof T & "_id" | K>[]>;
 ```
 
-Defined in: [src/collection-types.ts:433](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L433)
+Defined in: [src/collection-types.ts:437](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L437)
 
 Search for documents across multiple fields.
 
@@ -1447,10 +1824,11 @@ const exact = await posts.search('TypeScript', ['title'], {
 search<K>(
    text, 
    fields, 
-   options): Promise<readonly Omit<T, K>[]>;
+   options
+): Promise<readonly Omit<T, K>[]>;
 ```
 
-Defined in: [src/collection-types.ts:443](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L443)
+Defined in: [src/collection-types.ts:447](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L447)
 
 ##### Type Parameters
 
@@ -1482,10 +1860,11 @@ readonly (`string` \| keyof `T`)[]
 search(
    text, 
    fields, 
-   options?): Promise<readonly T[]>;
+   options?
+): Promise<readonly T[]>;
 ```
 
-Defined in: [src/collection-types.ts:453](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L453)
+Defined in: [src/collection-types.ts:457](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L457)
 
 ##### Parameters
 
@@ -1513,10 +1892,11 @@ readonly (`string` \| keyof `T`)[]
 updateMany(
    filter, 
    update, 
-   options?): Promise<UpdateResult>;
+   options?
+): Promise<UpdateResult>;
 ```
 
-Defined in: [src/collection-types.ts:930](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L930)
+Defined in: [src/collection-types.ts:934](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L934)
 
 Update multiple documents matching the query filter.
 
@@ -1585,10 +1965,11 @@ const result = await users.updateMany(filter, update, { signal: controller.signa
 updateOne(
    filter, 
    update, 
-   options?): Promise<T | null>;
+   options?
+): Promise<T | null>;
 ```
 
-Defined in: [src/collection-types.ts:569](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L569)
+Defined in: [src/collection-types.ts:573](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L573)
 
 Update a single document matching the query filter or ID.
 
@@ -1596,9 +1977,9 @@ Update a single document matching the query filter or ID.
 
 ##### filter
 
-Document ID or query filter to find the document to update
+`string` \| [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
 
-`string` | [`QueryFilter`](QueryFilter.md)&lt;`T`&gt;
+Document ID or query filter to find the document to update
 
 ##### update
 
@@ -1673,7 +2054,7 @@ await users.updateOne(filter, update, { signal: controller.signal });
 validate(doc, options?): Promise<T>;
 ```
 
-Defined in: [src/collection-types.ts:1109](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L1109)
+Defined in: [src/collection-types.ts:1113](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L1113)
 
 Validate a document against the schema (async).
 
@@ -1741,7 +2122,7 @@ await users.validate(doc, { signal: controller.signal });
 validateSync(doc): T;
 ```
 
-Defined in: [src/collection-types.ts:1137](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L1137)
+Defined in: [src/collection-types.ts:1141](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L1141)
 
 Validate a document against the schema (sync).
 

@@ -6,7 +6,7 @@
 type DatabaseOptions = object;
 ```
 
-Defined in: [src/database-types.ts:21](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/database-types.ts#L21)
+Defined in: [src/database-types.ts:21](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/database-types.ts#L21)
 
 Options for creating a StrataDB instance.
 
@@ -29,7 +29,7 @@ const db = new StrataDB(options);
 readonly database: string | SQLiteDatabase;
 ```
 
-Defined in: [src/database-types.ts:26](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/database-types.ts#L26)
+Defined in: [src/database-types.ts:26](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/database-types.ts#L26)
 
 SQLite database path or ':memory:' for in-memory database.
 Can also be an existing bun:sqlite Database instance.
@@ -39,10 +39,10 @@ Can also be an existing bun:sqlite Database instance.
 ### enableCache?
 
 ```ts
-readonly optional enableCache: boolean;
+readonly enableCache?: boolean;
 ```
 
-Defined in: [src/database-types.ts:76](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/database-types.ts#L76)
+Defined in: [src/database-types.ts:76](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/database-types.ts#L76)
 
 Enable query caching for all collections.
 
@@ -91,13 +91,13 @@ const db = new StrataDB({ database: ':memory:' });
 
 ***
 
-### idGenerator()?
+### idGenerator?
 
 ```ts
-readonly optional idGenerator: () => string;
+readonly idGenerator?: () => string;
 ```
 
-Defined in: [src/database-types.ts:31](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/database-types.ts#L31)
+Defined in: [src/database-types.ts:31](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/database-types.ts#L31)
 
 Custom ID generator function. Defaults to crypto.randomUUID().
 
@@ -107,13 +107,13 @@ Custom ID generator function. Defaults to crypto.randomUUID().
 
 ***
 
-### onClose()?
+### onClose?
 
 ```ts
-readonly optional onClose: () => void;
+readonly onClose?: () => void;
 ```
 
-Defined in: [src/database-types.ts:36](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/database-types.ts#L36)
+Defined in: [src/database-types.ts:36](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/database-types.ts#L36)
 
 Callback invoked when database is closed.
 
@@ -126,10 +126,10 @@ Callback invoked when database is closed.
 ### retry?
 
 ```ts
-readonly optional retry: RetryOptions;
+readonly retry?: RetryOptions;
 ```
 
-Defined in: [src/database-types.ts:97](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/database-types.ts#L97)
+Defined in: [src/database-types.ts:97](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/database-types.ts#L97)
 
 Default retry configuration for all database operations.
 

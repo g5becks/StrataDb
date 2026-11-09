@@ -3,10 +3,10 @@
 # Type Alias: OmitSpec&lt;T&gt;
 
 ```ts
-type OmitSpec<T> = readonly keyof T[];
+type OmitSpec<T> = readonly (keyof T)[];
 ```
 
-Defined in: [src/query-options-types.ts:238](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/query-options-types.ts#L238)
+Defined in: [src/query-options-types.ts:238](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/query-options-types.ts#L238)
 
 Array-based field exclusion for query results.
 

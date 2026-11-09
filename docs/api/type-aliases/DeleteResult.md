@@ -6,7 +6,7 @@
 type DeleteResult = object;
 ```
 
-Defined in: [src/collection-types.ts:97](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L97)
+Defined in: [src/collection-types.ts:101](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L101)
 
 Result of a delete operation.
 
@@ -31,6 +31,6 @@ console.log(`Deleted ${result.deletedCount} users`);
 readonly deletedCount: number;
 ```
 
-Defined in: [src/collection-types.ts:99](https://github.com/g5becks/StrataDb/blob/56b93c15dc2c602cd539356668e05ed574e9a8c7/src/collection-types.ts#L99)
+Defined in: [src/collection-types.ts:103](https://github.com/g5becks/StrataDb/blob/bfe87286e3588c98a6bed6b51cdd05a009cd9cf9/src/collection-types.ts#L103)
 
 Number of documents deleted
