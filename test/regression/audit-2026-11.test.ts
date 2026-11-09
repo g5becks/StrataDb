@@ -177,7 +177,7 @@ const compoundSchema = () =>
     .compoundIndex("name_role", ["name", "role"], { unique: true })
     .build()
 
-test.failing("A8 [TASK-235] compound index exists in SQLite", () => {
+test("A8 [TASK-235] compound index exists in SQLite", () => {
   db.collection("compound", compoundSchema())
   const indexes = db.sqliteDb
     .query<{ name: string }, []>("PRAGMA index_list('compound')")
@@ -185,7 +185,7 @@ test.failing("A8 [TASK-235] compound index exists in SQLite", () => {
   expect(indexes.some((index) => index.name.includes("name_role"))).toBe(true)
 })
 
-test.failing("A8 [TASK-235] unique compound index rejects duplicate tuple", async () => {
+test("A8 [TASK-235] unique compound index rejects duplicate tuple", async () => {
   const collection = db.collection("compound", compoundSchema())
   await collection.insertOne({ name: "same", role: "same" })
   await expect(

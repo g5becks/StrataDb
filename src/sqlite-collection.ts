@@ -18,16 +18,19 @@ import { mergeDocumentUpdate } from "./deep-merge.js"
 import { buildCompleteDocument } from "./document-builder.js"
 import {
   ConnectionError,
+  SchemaValidationError,
   UniqueConstraintError,
   ValidationError,
 } from "./errors.js"
 import {
   bind,
+  compoundIndexName,
   ddlField,
   fieldPath,
   generatedColumn,
   positional,
   quoteIdent,
+  resolveDDLField,
   resolveField,
 } from "./field-resolver.js"
 import type {
@@ -521,6 +524,21 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         `
         this.sql.run(createIndexSQL)
       }
+    }
+    for (const index of this.schema.compoundIndexes ?? []) {
+      if (!Array.isArray(index.fields) || index.fields.length === 0) {
+        throw new SchemaValidationError(
+          "A compound index requires at least one field"
+        )
+      }
+      const name = compoundIndexName(this.name, index.name)
+      const columns = index.fields.map((field) =>
+        resolveDDLField(String(field), this.schema.fields)
+      )
+      const unique = index.unique ? "UNIQUE" : ""
+      this.sql.run(
+        `CREATE ${unique} INDEX IF NOT EXISTS ${name} ON ${this.tableSql} (${columns.join(", ")})`
+      )
     }
   }
 

@@ -63,6 +63,27 @@ export function ddlField(name: string): string {
   return `jsonb_extract(body, '${fieldPath(name)}')`
 }
 
+export function resolveDDLField(
+  name: string,
+  fields: readonly { readonly name: PropertyKey; readonly indexed?: boolean }[]
+): string {
+  fieldPath(name)
+  if (name === "_id" || name === "createdAt" || name === "updatedAt") {
+    return quoteIdent(name)
+  }
+  return fields.some((field) => field.name === name && field.indexed)
+    ? generatedColumn(name)
+    : ddlField(name)
+}
+
+export function compoundIndexName(table: string, name: string): string {
+  quoteIdent(table)
+  quoteIdent(name)
+  return quoteIdent(
+    `stratadb_ci_${table.length}_${table}_${name.length}_${name}`
+  )
+}
+
 export function assertNonNegativeInt(
   value: unknown,
   name: string

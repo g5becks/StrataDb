@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- Unique compound indexes are now enforced. Remove duplicate tuples before reopening an existing database with a unique compound index declaration that earlier versions ignored.
+
 - `execute()` calls and operations issued outside an active `execute()` now queue in call order. Await every transaction operation; outside writes survive a transaction rollback. Nested calls use savepoints, and events fire only after the outer commit (rolled-back events are discarded). Synchronous transaction/collection creation cannot join another caller's pending `execute()`; create collections beforehand or inside its callback. Transaction collection access now forwards collection options.
 
 - Promise-returning collection operations always reject on failure, including when retries are disabled. Replace synchronous `try/catch` around calls with `await` inside `try/catch` or a `.catch()` handler. Synchronous APIs such as `validateSync()`, `collection()`, and `transaction()` retain synchronous errors.
@@ -18,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Query field paths now require identifier segments (`A-Z`, `a-z`, `_`, then letters, digits or `_`). Invalid filter, sort, search, distinct and schema paths raise `QueryError`; rename keys containing punctuation and use dotted paths for nested fields. Numeric `limit`, `skip` and `$index.index` must be nonnegative safe integers. JSON paths and numeric options are bound, and collection/index/column identifiers are quoted, preventing SQL injection. Collection names such as `order` and `user-data` now work; empty/NUL names are rejected. Dotted indexed fields use distinct generated-column names; reopen existing databases after migrating any manually created generated columns.
 
 ### Fixed
+
+- Declared compound indexes are now created, including unique and nested-field indexes. Index names encode the collection/name pair to prevent collisions. Existing duplicate tuples must be cleaned before opening a schema that declares a unique compound index. Generated columns are used for indexed fields, validated JSON expressions otherwise; declare constituent fields indexed when query-plan use of the full compound key is required. SQLite's standard NULL uniqueness behavior is retained.
 
 - Library SQLite failures now map by numeric `errno` to query, connection, unique/constraint or database errors. Wrapped errors preserve the native `cause`, `errno`, `sqliteCodeName`, and operation/collection/SQL context; the library `code` remains stable. Lock errors remain retryable. Reserved `TypeMismatchError` and `TransactionAbortedError` classes are deprecated and retained for compatibility. Direct access through `sqliteDb` remains Bun's native API.
 
