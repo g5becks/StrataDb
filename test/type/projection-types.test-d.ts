@@ -1,11 +1,6 @@
 // biome-ignore-all lint/nursery/noUnusedExpressions: Type tests intentionally use expressions to verify TypeScript errors on projected types
 // biome-ignore-all lint/complexity/noVoid: Using void to suppress unused function warnings in type tests
-import {
-  expectAssignable,
-  expectError,
-  expectNotAssignable,
-  expectType,
-} from "tsd"
+import { expectTypeOf } from "expect-type"
 import type {
   Collection,
   Document,
@@ -17,7 +12,7 @@ import type {
   QueryOptionsWithoutProjection,
   QueryOptionsWithSelect,
   SelectSpec,
-} from "../../dist/index.js"
+} from "../../src/index.js"
 
 // ============================================================================
 // TEST TYPES
@@ -52,14 +47,25 @@ type User = Document<{
  */
 
 // ✅ Valid SelectSpec with known fields
-expectAssignable<SelectSpec<User>>(["name", "email"])
-expectAssignable<SelectSpec<User>>(["name", "email", "age", "active"])
-expectAssignable<SelectSpec<User>>(["_id", "name"])
-expectAssignable<SelectSpec<User>>([])
+expectTypeOf(["name", "email"] satisfies SelectSpec<User>).toMatchTypeOf<
+  SelectSpec<User>
+>()
+expectTypeOf([
+  "name",
+  "email",
+  "age",
+  "active",
+] satisfies SelectSpec<User>).toMatchTypeOf<SelectSpec<User>>()
+expectTypeOf(["_id", "name"] satisfies SelectSpec<User>).toMatchTypeOf<
+  SelectSpec<User>
+>()
+expectTypeOf([] satisfies SelectSpec<User>).toMatchTypeOf<SelectSpec<User>>()
 
 // ❌ Invalid SelectSpec with unknown fields
-expectError<SelectSpec<User>>(["name", "nonexistent"])
-expectError<SelectSpec<User>>(["unknownField"])
+// @ts-expect-error - invalid value must be rejected
+expectTypeOf(["name", "nonexistent"] satisfies SelectSpec<User>)
+// @ts-expect-error - invalid value must be rejected
+expectTypeOf(["unknownField"] satisfies SelectSpec<User>)
 
 // ============================================================================
 // OMIT SPEC TYPE TESTS
@@ -70,13 +76,19 @@ expectError<SelectSpec<User>>(["unknownField"])
  */
 
 // ✅ Valid OmitSpec with known fields
-expectAssignable<OmitSpec<User>>(["password"])
-expectAssignable<OmitSpec<User>>(["password", "email"])
-expectAssignable<OmitSpec<User>>([])
+expectTypeOf(["password"] satisfies OmitSpec<User>).toMatchTypeOf<
+  OmitSpec<User>
+>()
+expectTypeOf(["password", "email"] satisfies OmitSpec<User>).toMatchTypeOf<
+  OmitSpec<User>
+>()
+expectTypeOf([] satisfies OmitSpec<User>).toMatchTypeOf<OmitSpec<User>>()
 
 // ❌ Invalid OmitSpec with unknown fields
-expectError<OmitSpec<User>>(["password", "nonexistent"])
-expectError<OmitSpec<User>>(["unknownField"])
+// @ts-expect-error - invalid value must be rejected
+expectTypeOf(["password", "nonexistent"] satisfies OmitSpec<User>)
+// @ts-expect-error - invalid value must be rejected
+expectTypeOf(["unknownField"] satisfies OmitSpec<User>)
 
 // ============================================================================
 // QUERY OPTIONS WITH SELECT TYPE TESTS
@@ -88,23 +100,28 @@ expectError<OmitSpec<User>>(["unknownField"])
 
 // ✅ Valid QueryOptionsWithSelect
 declare const selectOptions1: QueryOptionsWithSelect<User, "name" | "email">
-expectType<readonly ("name" | "email")[]>(selectOptions1.select)
-expectType<undefined>(selectOptions1.omit)
-expectType<undefined>(selectOptions1.projection)
+expectTypeOf(selectOptions1.select).toEqualTypeOf<
+  readonly ("name" | "email")[]
+>()
+expectTypeOf(selectOptions1.omit).toEqualTypeOf<undefined>()
+expectTypeOf(selectOptions1.projection).toEqualTypeOf<undefined>()
 
 // ✅ Can include sort, limit, skip with select
-expectAssignable<QueryOptionsWithSelect<User, "name" | "age">>({
+expectTypeOf({
   select: ["name", "age"] as const,
   sort: { name: 1 },
   limit: 10,
   skip: 0,
-})
+} satisfies QueryOptionsWithSelect<User, "name" | "age">).toMatchTypeOf<
+  QueryOptionsWithSelect<User, "name" | "age">
+>()
 
 // ❌ Cannot mix select with omit
-expectNotAssignable<QueryOptionsWithSelect<User, "name">>({
+expectTypeOf({
   select: ["name"] as const,
+  // @ts-expect-error - invalid value must be rejected
   omit: ["password"],
-})
+} satisfies QueryOptionsWithSelect<User, "name">)
 
 // ============================================================================
 // QUERY OPTIONS WITH OMIT TYPE TESTS
@@ -116,22 +133,25 @@ expectNotAssignable<QueryOptionsWithSelect<User, "name">>({
 
 // ✅ Valid QueryOptionsWithOmit
 declare const omitOptions1: QueryOptionsWithOmit<User, "password">
-expectType<readonly "password"[]>(omitOptions1.omit)
-expectType<undefined>(omitOptions1.select)
-expectType<undefined>(omitOptions1.projection)
+expectTypeOf(omitOptions1.omit).toEqualTypeOf<readonly "password"[]>()
+expectTypeOf(omitOptions1.select).toEqualTypeOf<undefined>()
+expectTypeOf(omitOptions1.projection).toEqualTypeOf<undefined>()
 
 // ✅ Can include sort, limit, skip with omit
-expectAssignable<QueryOptionsWithOmit<User, "password" | "email">>({
+expectTypeOf({
   omit: ["password", "email"] as const,
   sort: { name: 1 },
   limit: 10,
-})
+} satisfies QueryOptionsWithOmit<User, "password" | "email">).toMatchTypeOf<
+  QueryOptionsWithOmit<User, "password" | "email">
+>()
 
 // ❌ Cannot mix omit with select
-expectNotAssignable<QueryOptionsWithOmit<User, "password">>({
+expectTypeOf({
   omit: ["password"] as const,
+  // @ts-expect-error - invalid value must be rejected
   select: ["name"],
-})
+} satisfies QueryOptionsWithOmit<User, "password">)
 
 // ============================================================================
 // QUERY OPTIONS WITHOUT PROJECTION TYPE TESTS
@@ -143,16 +163,18 @@ expectNotAssignable<QueryOptionsWithOmit<User, "password">>({
 
 // ✅ Valid QueryOptionsWithoutProjection
 declare const noProjection: QueryOptionsWithoutProjection<User>
-expectType<undefined>(noProjection.select)
-expectType<undefined>(noProjection.omit)
-expectType<undefined>(noProjection.projection)
+expectTypeOf(noProjection.select).toEqualTypeOf<undefined>()
+expectTypeOf(noProjection.omit).toEqualTypeOf<undefined>()
+expectTypeOf(noProjection.projection).toEqualTypeOf<undefined>()
 
 // ✅ Can include sort, limit, skip
-expectAssignable<QueryOptionsWithoutProjection<User>>({
+expectTypeOf({
   sort: { createdAt: -1 },
   limit: 20,
   skip: 10,
-})
+} satisfies QueryOptionsWithoutProjection<User>).toMatchTypeOf<
+  QueryOptionsWithoutProjection<User>
+>()
 
 // ============================================================================
 // PROJECTED DOCUMENT TYPE TESTS
@@ -163,15 +185,15 @@ expectAssignable<QueryOptionsWithoutProjection<User>>({
  */
 
 // ✅ ProjectedDocument with no keys returns full type
-expectType<User>({} as ProjectedDocument<User>)
-expectType<User>({} as ProjectedDocument<User, never>)
+expectTypeOf({} as ProjectedDocument<User>).toEqualTypeOf<User>()
+expectTypeOf({} as ProjectedDocument<User, never>).toEqualTypeOf<User>()
 
 // ✅ ProjectedDocument with keys returns Pick including _id
 type NameEmailProjection = ProjectedDocument<User, "name" | "email">
 declare const projected1: NameEmailProjection
-expectType<string>(projected1._id)
-expectType<string>(projected1.name)
-expectType<string>(projected1.email)
+expectTypeOf(projected1._id).toEqualTypeOf<string>()
+expectTypeOf(projected1.name).toEqualTypeOf<string>()
+expectTypeOf(projected1.email).toEqualTypeOf<string>()
 
 // ============================================================================
 // COLLECTION FIND METHOD OVERLOAD TESTS
@@ -186,15 +208,18 @@ declare const users: Collection<User>
 // ✅ find() without projection returns full User[]
 async function testFindNoProjection() {
   const results = await users.find({ active: true })
-  expectType<readonly User[]>(results)
+  expectTypeOf(results).toEqualTypeOf<readonly User[]>()
 
   // All fields should be accessible
   const user = results[0]
-  expectType<string>(user._id)
-  expectType<string>(user.name)
-  expectType<string>(user.email)
-  expectType<string>(user.password)
-  expectType<number>(user.age)
+  if (!user) {
+    return
+  }
+  expectTypeOf(user._id).toEqualTypeOf<string>()
+  expectTypeOf(user.name).toEqualTypeOf<string>()
+  expectTypeOf(user.email).toEqualTypeOf<string>()
+  expectTypeOf(user.password).toEqualTypeOf<string>()
+  expectTypeOf(user.age).toEqualTypeOf<number>()
 }
 
 // ✅ find() with select returns Pick<User, K | '_id'>[]
@@ -206,9 +231,12 @@ async function testFindWithSelect() {
 
   // Should return Pick<User, '_id' | 'name' | 'email'>[]
   const user = results[0]
-  expectType<string>(user._id)
-  expectType<string>(user.name)
-  expectType<string>(user.email)
+  if (!user) {
+    return
+  }
+  expectTypeOf(user._id).toEqualTypeOf<string>()
+  expectTypeOf(user.name).toEqualTypeOf<string>()
+  expectTypeOf(user.email).toEqualTypeOf<string>()
 
   // These fields should NOT exist on the projected type
   // @ts-expect-error - password not in projection
@@ -228,10 +256,13 @@ async function testFindWithOmit() {
 
   // Should return Omit<User, 'password' | 'email'>[]
   const user = results[0]
-  expectType<string>(user._id)
-  expectType<string>(user.name)
-  expectType<number>(user.age)
-  expectType<boolean>(user.active)
+  if (!user) {
+    return
+  }
+  expectTypeOf(user._id).toEqualTypeOf<string>()
+  expectTypeOf(user.name).toEqualTypeOf<string>()
+  expectTypeOf(user.age).toEqualTypeOf<number>()
+  expectTypeOf(user.active).toEqualTypeOf<boolean>()
 
   // These fields should NOT exist on the projected type
   // @ts-expect-error - password was omitted
@@ -251,12 +282,12 @@ async function testFindWithOmit() {
 // ✅ findOne() without projection returns User | null
 async function testFindOneNoProjection() {
   const result = await users.findOne({ active: true })
-  expectType<User | null>(result)
+  expectTypeOf(result).toEqualTypeOf<User | null>()
 
   if (result) {
-    expectType<string>(result._id)
-    expectType<string>(result.name)
-    expectType<string>(result.password)
+    expectTypeOf(result._id).toEqualTypeOf<string>()
+    expectTypeOf(result.name).toEqualTypeOf<string>()
+    expectTypeOf(result.password).toEqualTypeOf<string>()
   }
 }
 
@@ -268,9 +299,9 @@ async function testFindOneWithSelect() {
   )
 
   if (result) {
-    expectType<string>(result._id)
-    expectType<string>(result.name)
-    expectType<number>(result.age)
+    expectTypeOf(result._id).toEqualTypeOf<string>()
+    expectTypeOf(result.name).toEqualTypeOf<string>()
+    expectTypeOf(result.age).toEqualTypeOf<number>()
 
     // These fields should NOT exist on the projected type
     // @ts-expect-error - password not in projection
@@ -288,10 +319,10 @@ async function testFindOneWithOmit() {
   )
 
   if (result) {
-    expectType<string>(result._id)
-    expectType<string>(result.name)
-    expectType<string>(result.email)
-    expectType<number>(result.age)
+    expectTypeOf(result._id).toEqualTypeOf<string>()
+    expectTypeOf(result.name).toEqualTypeOf<string>()
+    expectTypeOf(result.email).toEqualTypeOf<string>()
+    expectTypeOf(result.age).toEqualTypeOf<number>()
 
     // password should NOT exist on the projected type
     // @ts-expect-error - password was omitted
@@ -306,9 +337,9 @@ async function testFindOneByIdWithSelect() {
   })
 
   if (result) {
-    expectType<string>(result._id)
-    expectType<string>(result.name)
-    expectType<string>(result.email)
+    expectTypeOf(result._id).toEqualTypeOf<string>()
+    expectTypeOf(result.name).toEqualTypeOf<string>()
+    expectTypeOf(result.email).toEqualTypeOf<string>()
 
     // @ts-expect-error - password not in projection
     result.password
@@ -326,12 +357,15 @@ async function testFindOneByIdWithSelect() {
 // ✅ search() without projection returns User[]
 async function testSearchNoProjection() {
   const results = await users.search("alice", ["name", "email"])
-  expectType<readonly User[]>(results)
+  expectTypeOf(results).toEqualTypeOf<readonly User[]>()
 
   const user = results[0]
-  expectType<string>(user._id)
-  expectType<string>(user.name)
-  expectType<string>(user.password)
+  if (!user) {
+    return
+  }
+  expectTypeOf(user._id).toEqualTypeOf<string>()
+  expectTypeOf(user.name).toEqualTypeOf<string>()
+  expectTypeOf(user.password).toEqualTypeOf<string>()
 }
 
 // ✅ search() with select returns Pick<User, K | '_id'>[]
@@ -341,9 +375,12 @@ async function testSearchWithSelect() {
   })
 
   const user = results[0]
-  expectType<string>(user._id)
-  expectType<string>(user.name)
-  expectType<number>(user.age)
+  if (!user) {
+    return
+  }
+  expectTypeOf(user._id).toEqualTypeOf<string>()
+  expectTypeOf(user.name).toEqualTypeOf<string>()
+  expectTypeOf(user.age).toEqualTypeOf<number>()
 
   // @ts-expect-error - password not in projection
   user.password
@@ -358,9 +395,12 @@ async function testSearchWithOmit() {
   })
 
   const user = results[0]
-  expectType<string>(user._id)
-  expectType<string>(user.name)
-  expectType<string>(user.email)
+  if (!user) {
+    return
+  }
+  expectTypeOf(user._id).toEqualTypeOf<string>()
+  expectTypeOf(user.name).toEqualTypeOf<string>()
+  expectTypeOf(user.email).toEqualTypeOf<string>()
 
   // @ts-expect-error - password was omitted
   user.password
@@ -378,9 +418,12 @@ async function testSearchWithSelectAndFilter() {
   })
 
   const user = results[0]
-  expectType<string>(user._id)
-  expectType<string>(user.name)
-  expectType<"admin" | "user" | "guest">(user.role)
+  if (!user) {
+    return
+  }
+  expectTypeOf(user._id).toEqualTypeOf<string>()
+  expectTypeOf(user.name).toEqualTypeOf<string>()
+  expectTypeOf(user.role).toEqualTypeOf<"admin" | "user" | "guest">()
 
   // @ts-expect-error - email not in select
   user.email
@@ -402,12 +445,15 @@ async function testSelectManyFields() {
   )
 
   const user = results[0]
-  expectType<string>(user._id)
-  expectType<string>(user.name)
-  expectType<string>(user.email)
-  expectType<number>(user.age)
-  expectType<boolean>(user.active)
-  expectType<"admin" | "user" | "guest">(user.role)
+  if (!user) {
+    return
+  }
+  expectTypeOf(user._id).toEqualTypeOf<string>()
+  expectTypeOf(user.name).toEqualTypeOf<string>()
+  expectTypeOf(user.email).toEqualTypeOf<string>()
+  expectTypeOf(user.age).toEqualTypeOf<number>()
+  expectTypeOf(user.active).toEqualTypeOf<boolean>()
+  expectTypeOf(user.role).toEqualTypeOf<"admin" | "user" | "guest">()
 
   // @ts-expect-error - password not selected
   user.password
@@ -425,11 +471,14 @@ async function testOmitManyFields() {
   )
 
   const user = results[0]
-  expectType<string>(user._id)
-  expectType<string>(user.name)
-  expectType<string>(user.email)
-  expectType<number>(user.age)
-  expectType<boolean>(user.active)
+  if (!user) {
+    return
+  }
+  expectTypeOf(user._id).toEqualTypeOf<string>()
+  expectTypeOf(user.name).toEqualTypeOf<string>()
+  expectTypeOf(user.email).toEqualTypeOf<string>()
+  expectTypeOf(user.age).toEqualTypeOf<number>()
+  expectTypeOf(user.active).toEqualTypeOf<boolean>()
 
   // @ts-expect-error - password omitted
   user.password
@@ -446,9 +495,12 @@ async function testSelectArrayField() {
   const results = await users.find({}, { select: ["name", "tags"] as const })
 
   const user = results[0]
-  expectType<string>(user._id)
-  expectType<string>(user.name)
-  expectType<string[]>(user.tags)
+  if (!user) {
+    return
+  }
+  expectTypeOf(user._id).toEqualTypeOf<string>()
+  expectTypeOf(user.name).toEqualTypeOf<string>()
+  expectTypeOf(user.tags).toEqualTypeOf<readonly string[]>()
 
   // @ts-expect-error - email not selected
   user.email
@@ -459,9 +511,15 @@ async function testSelectNestedField() {
   const results = await users.find({}, { select: ["name", "profile"] as const })
 
   const user = results[0]
-  expectType<string>(user._id)
-  expectType<string>(user.name)
-  expectType<{ bio: string; avatar: string }>(user.profile)
+  if (!user) {
+    return
+  }
+  expectTypeOf(user._id).toEqualTypeOf<string>()
+  expectTypeOf(user.name).toEqualTypeOf<string>()
+  expectTypeOf(user.profile).toEqualTypeOf<{
+    readonly bio: string
+    readonly avatar: string
+  }>()
 
   // @ts-expect-error - email not selected
   user.email
@@ -477,11 +535,11 @@ async function testSelectNestedField() {
 
 // ✅ QueryOptionsBase has sort, limit, skip, search, cursor
 declare const baseOptions: QueryOptionsBase<User>
-expectType<{ readonly [K in keyof User]?: 1 | -1 } | undefined>(
-  baseOptions.sort
-)
-expectType<number | undefined>(baseOptions.limit)
-expectType<number | undefined>(baseOptions.skip)
+expectTypeOf(baseOptions.sort).toEqualTypeOf<
+  { readonly [K in keyof User]?: 1 | -1 } | undefined
+>()
+expectTypeOf(baseOptions.limit).toEqualTypeOf<number | undefined>()
+expectTypeOf(baseOptions.skip).toEqualTypeOf<number | undefined>()
 
 // ============================================================================
 // INTEGRATION WITH QUERY OPTIONS TYPE
@@ -492,21 +550,21 @@ expectType<number | undefined>(baseOptions.skip)
  */
 
 // ✅ QueryOptions accepts select as SelectSpec
-expectAssignable<QueryOptions<User>>({
+expectTypeOf({
   select: ["name", "email"],
   sort: { name: 1 },
-})
+} satisfies QueryOptions<User>).toMatchTypeOf<QueryOptions<User>>()
 
 // ✅ QueryOptions accepts omit as OmitSpec
-expectAssignable<QueryOptions<User>>({
+expectTypeOf({
   omit: ["password"],
   limit: 10,
-})
+} satisfies QueryOptions<User>).toMatchTypeOf<QueryOptions<User>>()
 
 // ✅ QueryOptions accepts projection
-expectAssignable<QueryOptions<User>>({
+expectTypeOf({
   projection: { name: 1, email: 1 },
-})
+} satisfies QueryOptions<User>).toMatchTypeOf<QueryOptions<User>>()
 
 // ============================================================================
 // ENSURE TYPE SAFETY IS ENFORCED

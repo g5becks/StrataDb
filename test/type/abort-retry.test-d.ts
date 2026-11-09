@@ -1,4 +1,4 @@
-import { expectAssignable, expectError, expectType } from "tsd"
+import { expectTypeOf } from "expect-type"
 import type {
   AbortedError,
   Collection,
@@ -6,7 +6,7 @@ import type {
   RetryContext,
   RetryOptions,
   StrataDBError,
-} from "../../dist/index.js"
+} from "../../src/index.js"
 
 // ============================================================================
 // TEST TYPES
@@ -25,46 +25,47 @@ declare const collection: Collection<TestDoc>
 // ============================================================================
 
 // RetryOptions should accept all valid properties
-expectAssignable<RetryOptions>({
+expectTypeOf({
   retries: 3,
-})
+} satisfies RetryOptions).toMatchTypeOf<RetryOptions>()
 
-expectAssignable<RetryOptions>({
+expectTypeOf({
   retries: 3,
   minTimeout: 100,
-})
+} satisfies RetryOptions).toMatchTypeOf<RetryOptions>()
 
-expectAssignable<RetryOptions>({
+expectTypeOf({
   retries: 3,
   minTimeout: 100,
   maxRetryTime: 5000,
-})
+} satisfies RetryOptions).toMatchTypeOf<RetryOptions>()
 
-expectAssignable<RetryOptions>({
+expectTypeOf({
   retries: 3,
   onFailedAttempt: (context: RetryContext) => {
-    expectType<number>(context.attemptNumber)
-    expectType<number>(context.retriesLeft)
-    expectType<Error>(context.error)
+    expectTypeOf(context.attemptNumber).toEqualTypeOf<number>()
+    expectTypeOf(context.retriesLeft).toEqualTypeOf<number>()
+    expectTypeOf(context.error).toEqualTypeOf<Error>()
   },
-})
+} satisfies RetryOptions).toMatchTypeOf<RetryOptions>()
 
-expectAssignable<RetryOptions>({
+expectTypeOf({
   retries: 3,
-  shouldRetry: (_error: Error) => true,
-})
+  shouldRetry: (_context: RetryContext) => true,
+} satisfies RetryOptions).toMatchTypeOf<RetryOptions>()
 
-expectAssignable<RetryOptions>({
+expectTypeOf({
   retries: 3,
-  shouldConsumeRetry: (_error: Error) => true,
-})
+  shouldConsumeRetry: (_context: RetryContext) => true,
+} satisfies RetryOptions).toMatchTypeOf<RetryOptions>()
 
 // RetryContext should have correct structure
-expectAssignable<RetryContext>({
+expectTypeOf({
   attemptNumber: 1,
   retriesLeft: 2,
+  retriesConsumed: 0,
   error: new Error("test"),
-})
+} satisfies RetryContext).toMatchTypeOf<RetryContext>()
 
 // ============================================================================
 // AbortedError Type
@@ -72,217 +73,286 @@ expectAssignable<RetryContext>({
 
 // AbortedError should extend StrataDBError
 declare const abortedError: AbortedError
-expectAssignable<StrataDBError>(abortedError)
+expectTypeOf(
+  abortedError satisfies StrataDBError
+).toMatchTypeOf<StrataDBError>()
 
 // AbortedError should have correct properties
-expectType<string>(abortedError.message)
-expectType<string>(abortedError.code)
-expectType<string>(abortedError.category)
-expectType<unknown>(abortedError.reason)
+expectTypeOf(abortedError.message).toEqualTypeOf<string>()
+expectTypeOf(abortedError.code).toEqualTypeOf<string>()
+expectTypeOf(abortedError.category).toEqualTypeOf<"database">()
+expectTypeOf(abortedError.reason).toEqualTypeOf<unknown>()
 
 // ============================================================================
 // Signal Option on Collection Methods
 // ============================================================================
 
 // Read operations
-expectAssignable<Promise<TestDoc[]>>(
-  collection.find({}, { signal: new AbortController().signal })
-)
+expectTypeOf(
+  collection.find(
+    {},
+    { signal: new AbortController().signal }
+  ) satisfies Promise<readonly TestDoc[]>
+).toMatchTypeOf<Promise<readonly TestDoc[]>>()
 
-expectAssignable<Promise<TestDoc | null>>(
-  collection.findOne({}, { signal: new AbortController().signal })
-)
+expectTypeOf(
+  collection.findOne(
+    {},
+    { signal: new AbortController().signal }
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
-expectAssignable<Promise<TestDoc | null>>(
-  collection.findById("id", { signal: new AbortController().signal })
-)
+expectTypeOf(
+  collection.findById("id", {
+    signal: new AbortController().signal,
+  }) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
-expectAssignable<Promise<number>>(
-  collection.count({}, { signal: new AbortController().signal })
-)
+expectTypeOf(
+  collection.count(
+    {},
+    { signal: new AbortController().signal }
+  ) satisfies Promise<number>
+).toMatchTypeOf<Promise<number>>()
 
-expectAssignable<Promise<TestDoc[]>>(
-  collection.search("query", ["name"], { signal: new AbortController().signal })
-)
+expectTypeOf(
+  collection.search("query", ["name"], {
+    signal: new AbortController().signal,
+  }) satisfies Promise<readonly TestDoc[]>
+).toMatchTypeOf<Promise<readonly TestDoc[]>>()
 
-expectAssignable<Promise<unknown[]>>(
-  collection.distinct("name", {}, { signal: new AbortController().signal })
-)
+expectTypeOf(
+  collection.distinct(
+    "name",
+    {},
+    { signal: new AbortController().signal }
+  ) satisfies Promise<unknown[]>
+).toMatchTypeOf<Promise<unknown[]>>()
 
-expectAssignable<Promise<number>>(
-  collection.estimatedDocumentCount({ signal: new AbortController().signal })
-)
+expectTypeOf(
+  collection.estimatedDocumentCount({
+    signal: new AbortController().signal,
+  }) satisfies Promise<number>
+).toMatchTypeOf<Promise<number>>()
 
 // Write operations
-expectAssignable<Promise<TestDoc>>(
+expectTypeOf(
   collection.insertOne(
     { name: "test", value: 1 },
     { signal: new AbortController().signal }
-  )
-)
+  ) satisfies Promise<TestDoc>
+).toMatchTypeOf<Promise<TestDoc>>()
 
-expectAssignable<Promise<TestDoc | null>>(
+expectTypeOf(
   collection.replaceOne(
     "id",
     { name: "test", value: 1 },
     { signal: new AbortController().signal }
-  )
-)
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
-expectAssignable<Promise<boolean>>(
-  collection.deleteOne("id", { signal: new AbortController().signal })
-)
+expectTypeOf(
+  collection.deleteOne("id", {
+    signal: new AbortController().signal,
+  }) satisfies Promise<boolean>
+).toMatchTypeOf<Promise<boolean>>()
 
 // Atomic operations
-expectAssignable<Promise<TestDoc | null>>(
-  collection.findOneAndDelete({}, { signal: new AbortController().signal })
-)
+expectTypeOf(
+  collection.findOneAndDelete(
+    {},
+    { signal: new AbortController().signal }
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
-expectAssignable<Promise<TestDoc | null>>(
+expectTypeOf(
   collection.findOneAndUpdate(
     {},
     { value: 2 },
     { signal: new AbortController().signal }
-  )
-)
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
-expectAssignable<Promise<TestDoc | null>>(
+expectTypeOf(
   collection.findOneAndReplace(
     {},
     { name: "test", value: 2 },
     { signal: new AbortController().signal }
-  )
-)
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
 // Utility operations
-expectAssignable<Promise<void>>(
-  collection.drop({ signal: new AbortController().signal })
-)
+expectTypeOf(
+  collection.drop({
+    signal: new AbortController().signal,
+  }) satisfies Promise<void>
+).toMatchTypeOf<Promise<void>>()
 
-expectAssignable<Promise<TestDoc>>(
+expectTypeOf(
   collection.validate(
     { name: "test", value: 1 },
     { signal: new AbortController().signal }
-  )
-)
+  ) satisfies Promise<TestDoc>
+).toMatchTypeOf<Promise<TestDoc>>()
 
 // ============================================================================
 // Retry Option on Collection Methods
 // ============================================================================
 
 // Read operations with retry
-expectAssignable<Promise<TestDoc[]>>(
-  collection.find({}, { retry: { retries: 3 } })
-)
+expectTypeOf(
+  collection.find({}, { retry: { retries: 3 } }) satisfies Promise<
+    readonly TestDoc[]
+  >
+).toMatchTypeOf<Promise<readonly TestDoc[]>>()
 
-expectAssignable<Promise<TestDoc | null>>(
-  collection.findOne({}, { retry: { retries: 3, minTimeout: 100 } })
-)
+expectTypeOf(
+  collection.findOne(
+    {},
+    { retry: { retries: 3, minTimeout: 100 } }
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
-expectAssignable<Promise<TestDoc | null>>(
-  collection.findById("id", { retry: { retries: 3 } })
-)
+expectTypeOf(
+  collection.findById("id", {
+    retry: { retries: 3 },
+  }) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
-expectAssignable<Promise<number>>(
-  collection.count({}, { retry: { retries: 3 } })
-)
+expectTypeOf(
+  collection.count({}, { retry: { retries: 3 } }) satisfies Promise<number>
+).toMatchTypeOf<Promise<number>>()
 
-expectAssignable<Promise<TestDoc[]>>(
-  collection.search("query", ["name"], { retry: { retries: 3 } })
-)
+expectTypeOf(
+  collection.search("query", ["name"], {
+    retry: { retries: 3 },
+  }) satisfies Promise<readonly TestDoc[]>
+).toMatchTypeOf<Promise<readonly TestDoc[]>>()
 
-expectAssignable<Promise<unknown[]>>(
-  collection.distinct("name", {}, { retry: { retries: 3 } })
-)
+expectTypeOf(
+  collection.distinct("name", {}, { retry: { retries: 3 } }) satisfies Promise<
+    unknown[]
+  >
+).toMatchTypeOf<Promise<unknown[]>>()
 
-expectAssignable<Promise<number>>(
-  collection.estimatedDocumentCount({ retry: { retries: 3 } })
-)
+expectTypeOf(
+  collection.estimatedDocumentCount({
+    retry: { retries: 3 },
+  }) satisfies Promise<number>
+).toMatchTypeOf<Promise<number>>()
 
 // Write operations with retry
-expectAssignable<Promise<TestDoc>>(
-  collection.insertOne({ name: "test", value: 1 }, { retry: { retries: 3 } })
-)
+expectTypeOf(
+  collection.insertOne(
+    { name: "test", value: 1 },
+    { retry: { retries: 3 } }
+  ) satisfies Promise<TestDoc>
+).toMatchTypeOf<Promise<TestDoc>>()
 
-expectAssignable<Promise<TestDoc | null>>(
+expectTypeOf(
   collection.replaceOne(
     "id",
     { name: "test", value: 1 },
     { retry: { retries: 3 } }
-  )
-)
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
-expectAssignable<Promise<boolean>>(
-  collection.deleteOne("id", { retry: { retries: 3 } })
-)
+expectTypeOf(
+  collection.deleteOne("id", {
+    retry: { retries: 3 },
+  }) satisfies Promise<boolean>
+).toMatchTypeOf<Promise<boolean>>()
 
 // Atomic operations with retry
-expectAssignable<Promise<TestDoc | null>>(
-  collection.findOneAndDelete({}, { retry: { retries: 3 } })
-)
+expectTypeOf(
+  collection.findOneAndDelete(
+    {},
+    { retry: { retries: 3 } }
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
-expectAssignable<Promise<TestDoc | null>>(
-  collection.findOneAndUpdate({}, { value: 2 }, { retry: { retries: 3 } })
-)
+expectTypeOf(
+  collection.findOneAndUpdate(
+    {},
+    { value: 2 },
+    { retry: { retries: 3 } }
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
-expectAssignable<Promise<TestDoc | null>>(
+expectTypeOf(
   collection.findOneAndReplace(
     {},
     { name: "test", value: 2 },
     { retry: { retries: 3 } }
-  )
-)
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
 // Utility operations with retry
-expectAssignable<Promise<void>>(collection.drop({ retry: { retries: 3 } }))
+expectTypeOf(
+  collection.drop({ retry: { retries: 3 } }) satisfies Promise<void>
+).toMatchTypeOf<Promise<void>>()
 
-expectAssignable<Promise<TestDoc>>(
-  collection.validate({ name: "test", value: 1 }, { retry: { retries: 3 } })
-)
+expectTypeOf(
+  collection.validate(
+    { name: "test", value: 1 },
+    { retry: { retries: 3 } }
+  ) satisfies Promise<TestDoc>
+).toMatchTypeOf<Promise<TestDoc>>()
 
 // ============================================================================
 // Retry: false Option
 // ============================================================================
 
 // retry: false should be accepted
-expectAssignable<Promise<TestDoc[]>>(collection.find({}, { retry: false }))
+expectTypeOf(
+  collection.find({}, { retry: false }) satisfies Promise<readonly TestDoc[]>
+).toMatchTypeOf<Promise<readonly TestDoc[]>>()
 
-expectAssignable<Promise<TestDoc>>(
-  collection.insertOne({ name: "test", value: 1 }, { retry: false })
-)
+expectTypeOf(
+  collection.insertOne(
+    { name: "test", value: 1 },
+    { retry: false }
+  ) satisfies Promise<TestDoc>
+).toMatchTypeOf<Promise<TestDoc>>()
 
-expectAssignable<Promise<TestDoc | null>>(
-  collection.findOneAndUpdate({}, { value: 2 }, { retry: false })
-)
+expectTypeOf(
+  collection.findOneAndUpdate(
+    {},
+    { value: 2 },
+    { retry: false }
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
-expectAssignable<Promise<void>>(collection.drop({ retry: false }))
+expectTypeOf(
+  collection.drop({ retry: false }) satisfies Promise<void>
+).toMatchTypeOf<Promise<void>>()
 
 // ============================================================================
 // Combined Signal and Retry Options
 // ============================================================================
 
 // Both signal and retry should work together
-expectAssignable<Promise<TestDoc[]>>(
+expectTypeOf(
   collection.find(
     {},
     {
       signal: new AbortController().signal,
       retry: { retries: 3, minTimeout: 100 },
     }
-  )
-)
+  ) satisfies Promise<readonly TestDoc[]>
+).toMatchTypeOf<Promise<readonly TestDoc[]>>()
 
-expectAssignable<Promise<TestDoc>>(
+expectTypeOf(
   collection.insertOne(
     { name: "test", value: 1 },
     {
       signal: new AbortController().signal,
       retry: { retries: 3 },
     }
-  )
-)
+  ) satisfies Promise<TestDoc>
+).toMatchTypeOf<Promise<TestDoc>>()
 
-expectAssignable<Promise<TestDoc | null>>(
+expectTypeOf(
   collection.findOneAndUpdate(
     {},
     { value: 2 },
@@ -290,24 +360,19 @@ expectAssignable<Promise<TestDoc | null>>(
       signal: new AbortController().signal,
       retry: false,
     }
-  )
-)
+  ) satisfies Promise<TestDoc | null>
+).toMatchTypeOf<Promise<TestDoc | null>>()
 
 // ============================================================================
 // Invalid Retry Options Should Error
 // ============================================================================
 
 // Invalid retry properties should error
-expectError<RetryOptions>({
-  retries: "3", // Should be number
-})
+// @ts-expect-error - invalid value must be rejected
+expectTypeOf({ retries: "3" } satisfies RetryOptions)
 
-expectError<RetryOptions>({
-  retries: 3,
-  minTimeout: "100", // Should be number
-})
+// @ts-expect-error - invalid value must be rejected
+expectTypeOf({ retries: 3, minTimeout: "100" } satisfies RetryOptions)
 
-expectError<RetryOptions>({
-  retries: 3,
-  invalidProperty: true, // Unknown property
-})
+// @ts-expect-error - invalid value must be rejected
+expectTypeOf({ retries: 3, invalidProperty: true } satisfies RetryOptions)

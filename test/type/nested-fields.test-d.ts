@@ -2,7 +2,7 @@
  * Type tests for nested field support
  */
 
-import { expectType } from "tsd"
+import { expectTypeOf } from "expect-type"
 import { createSchema, type Document } from "../../src/index.js"
 
 // Test: Nested field names are accepted
@@ -21,7 +21,7 @@ import { createSchema, type Document } from "../../src/index.js"
     .field("profile.avatar", { type: "TEXT", indexed: false })
     .build()
 
-  expectType<typeof schema>(schema)
+  expectTypeOf(schema).toEqualTypeOf<typeof schema>()
 }
 
 // Test: Multi-level nested fields work
@@ -42,7 +42,7 @@ import { createSchema, type Document } from "../../src/index.js"
     .field("settings.display.fontSize", { type: "INTEGER", indexed: false })
     .build()
 
-  expectType<typeof schema>(schema)
+  expectTypeOf(schema).toEqualTypeOf<typeof schema>()
 }
 
 // Test: Compound indexes accept nested field names
@@ -68,7 +68,7 @@ import { createSchema, type Document } from "../../src/index.js"
     ])
     .build()
 
-  expectType<typeof schema>(schema)
+  expectTypeOf(schema).toEqualTypeOf<typeof schema>()
 }
 
 // Test: Top-level fields still work normally
@@ -86,7 +86,7 @@ import { createSchema, type Document } from "../../src/index.js"
     .compoundIndex("name_age", ["name", "age"])
     .build()
 
-  expectType<typeof schema>(schema)
+  expectTypeOf(schema).toEqualTypeOf<typeof schema>()
 }
 
 // Test: Mix of top-level and nested fields
@@ -110,7 +110,7 @@ import { createSchema, type Document } from "../../src/index.js"
     .compoundIndex("warehouse_lookup", ["inventory.warehouse", "name"])
     .build()
 
-  expectType<typeof schema>(schema)
+  expectTypeOf(schema).toEqualTypeOf<typeof schema>()
 }
 
 // Test: Deeply nested fields (3+ levels)
@@ -136,7 +136,7 @@ import { createSchema, type Document } from "../../src/index.js"
     })
     .build()
 
-  expectType<typeof schema>(schema)
+  expectTypeOf(schema).toEqualTypeOf<typeof schema>()
 }
 
 // Test: Real-world Alert schema
@@ -171,5 +171,5 @@ import { createSchema, type Document } from "../../src/index.js"
     .timestamps(true)
     .build()
 
-  expectType<typeof schema>(schema)
+  expectTypeOf(schema).toEqualTypeOf<typeof schema>()
 }
