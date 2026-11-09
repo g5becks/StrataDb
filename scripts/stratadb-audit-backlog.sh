@@ -7,7 +7,7 @@
 #
 # Usage (from the StrataDb repo root, with stratadb-audit.md placed at the root):
 #   bash scripts/stratadb-audit-backlog.sh
-#   BACKLOG="bunx backlog.md" bash scripts/stratadb-audit-backlog.sh   # if `backlog` is not on PATH
+#   (uses the project-local CLI via `bunx backlog`; override with BACKLOG=...)
 #
 # Conventions (matching StrataDb/CLAUDE.md):
 #   - Tasks are created only through the Backlog.md CLI.
@@ -21,7 +21,7 @@
 # =============================================================================
 set -euo pipefail
 
-BACKLOG="${BACKLOG:-backlog}"
+BACKLOG="${BACKLOG:-bunx backlog}"
 AUDIT_DOC="stratadb-audit.md"
 
 if [[ ! -f backlog/config.yml ]]; then
