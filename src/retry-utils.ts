@@ -65,9 +65,11 @@ export function defaultShouldRetry(context: RetryContext): boolean {
     return true
   }
 
-  // Retry specific SQLite error codes
-  if ("code" in error && typeof error.code === "number") {
-    return RETRYABLE_SQLITE_CODES.includes(error.code as 5 | 6 | 7 | 10)
+  // Bun exposes numeric extended result codes as errno; code is a string.
+  if ("errno" in error && typeof error.errno === "number") {
+    // biome-ignore lint/suspicious/noBitwiseOperators: SQLite primary result code occupies the low byte
+    const primaryCode = error.errno & 0xff
+    return RETRYABLE_SQLITE_CODES.some((code) => code === primaryCode)
   }
 
   // Don't retry unknown errors
