@@ -147,7 +147,7 @@ test.failing("A4 [TASK-232] rolled back writes emit no insert events", async () 
   expect(events).toBe(0)
 })
 
-test.failing("A5 [TASK-230] insertOne returns a rejected promise on invalid insert", async () => {
+test("A5 [TASK-230] insertOne returns a rejected promise on invalid insert", async () => {
   let result: Promise<unknown> | undefined
   let synchronousError: unknown
   try {

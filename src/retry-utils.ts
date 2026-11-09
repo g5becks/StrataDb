@@ -91,13 +91,13 @@ export function defaultShouldRetry(context: RetryContext): boolean {
  * )
  * ```
  */
-export function withRetry<T>(
+export async function withRetry<T>(
   operation: () => Promise<T>,
   options?: RetryableOptions
 ): Promise<T> {
   // Skip retry wrapper if retries is 0 or undefined
   if (!options?.retries) {
-    return operation()
+    return await operation()
   }
 
   const pRetryOptions: Record<string, unknown> = {
@@ -132,7 +132,7 @@ export function withRetry<T>(
     pRetryOptions.signal = options.signal
   }
 
-  return pRetry(operation, pRetryOptions as Parameters<typeof pRetry>[1])
+  return await pRetry(operation, pRetryOptions as Parameters<typeof pRetry>[1])
 }
 
 /**
