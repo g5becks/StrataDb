@@ -1,9 +1,11 @@
 ---
 id: TASK-215
 title: Fix removeAllListeners() with no argument (Bun 1.4 EventEmitter semantics)
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-11-09T04:01:00Z'
+updated_date: '2026-11-09T12:45:00Z'
 labels:
   - api
 milestone: m-0
@@ -31,8 +33,25 @@ type: bug
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 collection.removeAllListeners() with no argument removes listeners for every event (new regression test)
-- [ ] #2 The 2 previously failing tests in test/unit/collection-events.test.ts pass on Bun 1.4.4
-- [ ] #3 bun test reports 0 failures
-- [ ] #4 CHANGELOG.md has an entry under ## [Unreleased] describing the change
+- [x] #1 collection.removeAllListeners() with no argument removes listeners for every event (new regression test)
+- [x] #2 The 2 previously failing tests in test/unit/collection-events.test.ts pass on Bun 1.4.4
+- [x] #3 bun test reports 0 failures
+- [x] #4 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Add a two-event listener-count regression and reproduce A18.
+2. Omit the emitter argument when no event is supplied; review related calls.
+3. Update Unreleased changelog and run tests, typecheck, lint, build, and type tests.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+- Fixed removeAllListeners() without an event by calling EventEmitter with no arguments. Named-event removal and collection chaining are preserved. Other emitter calls do not forward optional arguments.
+- Added an A18 regression checking listener counts across insert/update events. Before the fix the new test and the two existing cases failed (95 pass/3 fail); after the fix the full suite passes (713 pass/3 skip/0 fail).
+- Verification: bun test; bun run typecheck; bun run lint; bun run build; bun run test:types all pass on Bun 1.4.4. CHANGELOG Unreleased documents the fix.
+- Decisions: use the Node-compatible zero-argument call; no test.failing or skipped tests added.
+<!-- SECTION:NOTES:END -->

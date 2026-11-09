@@ -2181,7 +2181,11 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
   removeAllListeners(event?: CollectionEventName): Collection<T> {
     if (this._emitter) {
-      this._emitter.removeAllListeners(event)
+      if (event === undefined) {
+        this._emitter.removeAllListeners()
+      } else {
+        this._emitter.removeAllListeners(event)
+      }
     }
     return this
   }
