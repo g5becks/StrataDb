@@ -42,7 +42,7 @@ beforeEach(async () => {
 
 afterEach(() => db.close())
 
-test.failing("A1 [TASK-228] filter-key injection rejects without exposing rows", async () => {
+test("A1 [TASK-228] filter-key injection rejects without exposing rows", async () => {
   await expect(
     Promise.resolve().then(() =>
       users.find({ "x') IS NULL OR 1=1 OR jsonb_extract(body,'$.x": "zzz" })
@@ -51,7 +51,7 @@ test.failing("A1 [TASK-228] filter-key injection rejects without exposing rows",
   expect(await users.count({})).toBe(4)
 })
 
-test.failing("A1 [TASK-228] $index injection rejects", async () => {
+test("A1 [TASK-228] $index injection rejects", async () => {
   await expect(
     Promise.resolve().then(() =>
       users.find({
@@ -67,7 +67,7 @@ test.failing("A1 [TASK-228] $index injection rejects", async () => {
   expect(await users.count({})).toBe(4)
 })
 
-test.failing("A1 [TASK-228] limit injection rejects before SQL parsing", async () => {
+test("A1 [TASK-228] limit injection rejects before SQL parsing", async () => {
   await expect(
     Promise.resolve().then(() =>
       users.find({}, { limit: "0 UNION SELECT 1" } as never)
@@ -300,7 +300,7 @@ test.failing("A15 [TASK-246] unknown cursor raises QueryError", async () => {
 })
 
 for (const name of ["order", "user-data"]) {
-  test.failing(`A16 [TASK-228] quoted collection name ${name} supports CRUD`, async () => {
+  test(`A16 [TASK-228] quoted collection name ${name} supports CRUD`, async () => {
     const collection = db.collection(name, schema())
     const inserted = await collection.insertOne({ name: "legal", role: "user" })
     expect(await collection.findById(inserted._id)).toMatchObject({

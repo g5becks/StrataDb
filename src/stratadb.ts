@@ -14,6 +14,7 @@ import type {
   Transaction,
 } from "./database-types.js"
 import { ConnectionError } from "./errors.js"
+import { quoteIdent } from "./field-resolver.js"
 import { generateId } from "./id-generator.js"
 import type { RetryOptions } from "./retry-types.js"
 import type { SchemaDefinition } from "./schema-types.js"
@@ -128,6 +129,7 @@ export class Strata implements StrataDBInterface {
     schema?: SchemaDefinition<T>,
     options?: CollectionOptions
   ): Collection<T> | CollectionBuilder<T> {
+    quoteIdent(name)
     if (!schema) {
       assertDatabaseOpen(this.sqliteDb)
       // Return builder for fluent schema definition

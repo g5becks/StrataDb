@@ -21,6 +21,15 @@ import {
   UniqueConstraintError,
   ValidationError,
 } from "./errors.js"
+import {
+  bind,
+  ddlField,
+  fieldPath,
+  generatedColumn,
+  positional,
+  quoteIdent,
+  resolveField,
+} from "./field-resolver.js"
 import type {
   CursorSpec,
   ProjectionSpec,
@@ -107,6 +116,10 @@ const UNDERSCORE_PREFIX_REGEX = /^_/
 export class SQLiteCollection<T extends Document> implements Collection<T> {
   /** Collection name (table name in SQLite) */
   readonly name: string
+
+  private get tableSql(): string {
+    return quoteIdent(this.name)
+  }
 
   /** Schema definition for this collection */
   readonly schema: SchemaDefinition<T>
@@ -273,6 +286,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    */
   // biome-ignore lint/correctness/noUnusedPrivateClassMembers: called in constructor
   private createTable(): void {
+    quoteIdent(this.name)
+    for (const field of this.schema.fields) {
+      fieldPath(String(field.name))
+    }
     const columns: string[] = [
       "_id TEXT PRIMARY KEY",
       "body BLOB NOT NULL",
@@ -283,18 +300,18 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     // Add generated columns for indexed fields
     for (const field of this.schema.fields) {
       if (field.indexed) {
-        const columnName = `_${String(field.name)}`
+        const columnName = generatedColumn(String(field.name))
         const sqlType = this.mapTypeToSQLite(field.type)
-        const path = `$.${String(field.name)}`
+        const expression = ddlField(String(field.name))
         columns.push(
-          `${columnName} ${sqlType} GENERATED ALWAYS AS (jsonb_extract(body, '${path}')) VIRTUAL`
+          `${columnName} ${sqlType} GENERATED ALWAYS AS (${expression}) VIRTUAL`
         )
       }
     }
 
     // Create table
     const createTableSQL = `
-      CREATE TABLE IF NOT EXISTS ${this.name} (
+      CREATE TABLE IF NOT EXISTS ${this.tableSql} (
         ${columns.join(",\n        ")}
       )
     `
@@ -318,13 +335,13 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
   private createIndexes(): void {
     for (const field of this.schema.fields) {
       if (field.indexed) {
-        const columnName = `_${String(field.name)}`
-        const indexName = `idx_${this.name}_${String(field.name)}`
+        const columnName = generatedColumn(String(field.name))
+        const indexName = quoteIdent(`idx_${this.name}_${String(field.name)}`)
         const uniqueKeyword = field.unique ? "UNIQUE" : ""
 
         const createIndexSQL = `
           CREATE ${uniqueKeyword} INDEX IF NOT EXISTS ${indexName}
-          ON ${this.name}(${columnName})
+          ON ${this.tableSql}(${columnName})
         `
         this.db.run(createIndexSQL)
       }
@@ -459,7 +476,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    */
   private buildSearchClause(
     search: TextSearchSpec<T>
-  ): { sql: string; params: string[] } | undefined {
+  ): { sql: string; params: SQLQueryBindings[] } | undefined {
     if (!search.text || search.fields.length === 0) {
       return
     }
@@ -467,52 +484,16 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     const pattern = `%${search.text}%`
     const collate = search.caseSensitive ? "" : " COLLATE NOCASE"
     const clauses: string[] = []
-    const params: string[] = []
+    const params: SQLQueryBindings[] = []
 
     for (const field of search.fields) {
-      const fieldStr = String(field)
-
-      // Check if it's an indexed field (top-level only, no dots)
-      const isIndexed =
-        !fieldStr.includes(".") &&
-        this.schema.fields.some((f) => String(f.name) === fieldStr && f.indexed)
-
-      const column = isIndexed
-        ? `_${fieldStr}`
-        : `jsonb_extract(body, '$.${fieldStr}')`
-
-      clauses.push(`${column} LIKE ?${collate}`)
-      params.push(pattern)
+      const column = resolveField(String(field), this.schema.fields, params)
+      clauses.push(`${column} LIKE ${bind(pattern, params)}${collate}`)
     }
 
     return {
-      sql: `(${clauses.join(" OR ")})`,
-      params,
+      ...positional(`(${clauses.join(" OR ")})`, params),
     }
-  }
-
-  /**
-   * Builds SQL ORDER BY clause from sort specification.
-   *
-   * @param sort - Sort specification
-   * @returns SQL ORDER BY clause or empty string
-   *
-   * @internal
-   */
-  private buildSortClause(sort: SortSpec<T>): string {
-    const sortClauses: string[] = []
-    for (const [field, direction] of Object.entries(sort)) {
-      const order = direction === 1 ? "ASC" : "DESC"
-      // Use generated column name for indexed fields, otherwise jsonb_extract
-      const indexedField = this.schema.fields.find(
-        (f) => String(f.name) === field && f.indexed
-      )
-      const column = indexedField
-        ? `_${field}`
-        : `jsonb_extract(body, '$.${field}')`
-      sortClauses.push(`${column} ${order}`)
-    }
-    return sortClauses.length > 0 ? ` ORDER BY ${sortClauses.join(", ")}` : ""
   }
 
   /**
@@ -554,18 +535,17 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     const operator = isAfter === isAsc ? ">" : "<"
 
     // Get column reference for sort field
-    const indexedField = this.schema.fields.find(
-      (f) => String(f.name) === sortField && f.indexed
+    const fieldParams: SQLQueryBindings[] = []
+    const sortColumn = resolveField(sortField, this.schema.fields, fieldParams)
+    const cursorStatement = positional(
+      `SELECT ${sortColumn} as sortVal FROM ${this.tableSql} WHERE _id = ${bind(cursorId, fieldParams)}`,
+      fieldParams
     )
-    const sortColumn = indexedField
-      ? `_${sortField}`
-      : `jsonb_extract(body, '$.${sortField}')`
-
-    // Look up the cursor document's sort value
-    const cursorQuery = `SELECT ${sortColumn} as sortVal FROM ${this.name} WHERE _id = ?`
     const cursorRow = this.db
-      .prepare<{ sortVal: SQLQueryBindings }, [string]>(cursorQuery)
-      .get(cursorId)
+      .prepare<{ sortVal: SQLQueryBindings }, SQLQueryBindings[]>(
+        cursorStatement.sql
+      )
+      .get(...cursorStatement.params)
 
     if (!cursorRow) {
       return // Cursor document not found, skip cursor filtering
@@ -573,14 +553,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
     // Build compound comparison: (sortCol, _id) > (cursorSortVal, cursorId)
     // This ensures stable pagination even with duplicate sort values
-    const sql = `((${sortColumn} ${operator} ?) OR (${sortColumn} = ? AND _id ${operator} ?))`
-    const params: SQLQueryBindings[] = [
-      cursorRow.sortVal,
-      cursorRow.sortVal,
-      cursorId,
-    ]
-
-    return { sql, params }
+    const params: SQLQueryBindings[] = []
+    const column = resolveField(sortField, this.schema.fields, params)
+    const sql = `((${column} ${operator} ${bind(cursorRow.sortVal, params)}) OR (${column} = ${bind(cursorRow.sortVal, params)} AND _id ${operator} ${bind(cursorId, params)}))`
+    return positional(sql, params)
   }
 
   /**
@@ -693,7 +669,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         throwIfAborted(options?.signal)
 
         const stmt = this.db.prepare<{ _id: string; body: string }, [string]>(
-          `SELECT _id, json(body) as body FROM ${this.name} WHERE _id = ?`
+          `SELECT _id, json(body) as body FROM ${this.tableSql} WHERE _id = ?`
         )
         const row = stmt.get(id)
 
@@ -767,7 +743,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         const { sql: whereClause, params } = this.translator.translate(filter)
 
-        let sql = `SELECT _id, json(body) as body FROM ${this.name}`
+        let sql = `SELECT _id, json(body) as body FROM ${this.tableSql}`
 
         // Build WHERE clause combining filter and search
         const whereParts: string[] = []
@@ -802,17 +778,12 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           sql += ` WHERE ${whereParts.join(" AND ")}`
         }
 
-        // Apply sort
-        if (options?.sort) {
-          sql += this.buildSortClause(options.sort)
-        }
-
-        // Apply limit and skip
-        if (options?.limit !== undefined) {
-          sql += ` LIMIT ${options.limit}`
-        }
-        if (options?.skip !== undefined) {
-          sql += ` OFFSET ${options.skip}`
+        const translatedOptions = this.translator.translateOptions(
+          options ?? {}
+        )
+        if (translatedOptions.sql) {
+          sql += ` ${translatedOptions.sql}`
+          allParams.push(...translatedOptions.params)
         }
 
         const stmt = this.db.prepare<
@@ -913,7 +884,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         const { sql: whereClause, params } = this.translator.translate(filter)
 
-        let sql = `SELECT COUNT(*) as count FROM ${this.name}`
+        let sql = `SELECT COUNT(*) as count FROM ${this.tableSql}`
         if (whereClause) {
           sql += ` WHERE ${whereClause}`
         }
@@ -1071,7 +1042,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         try {
           const stmt = this.db.prepare(
-            `INSERT INTO ${this.name} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
+            `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
           )
           stmt.run(docId, body, now, now)
 
@@ -1203,7 +1174,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     const mergedBody = stringify(mergedBodyData)
     this.db
       .prepare(
-        `UPDATE ${this.name} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
+        `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
       )
       .run(mergedBody, now, mergedDocId)
 
@@ -1271,7 +1242,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         // Find the document ID to replace
         const { sql: whereClause, params } =
           this.translator.translate(normalizedFilter)
-        let querySql = `SELECT _id, json_extract(body, '$.createdAt') as createdAt FROM ${this.name}`
+        let querySql = `SELECT _id, json_extract(body, '$.createdAt') as createdAt FROM ${this.tableSql}`
         if (whereClause && whereClause !== "1=1") {
           querySql += ` WHERE ${whereClause}`
         }
@@ -1318,7 +1289,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         const body = stringify(bodyData)
         this.db
           .prepare(
-            `UPDATE ${this.name} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
+            `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
           )
           .run(body, now, replaceDocId)
 
@@ -1370,7 +1341,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           "_id" in normalizedFilter &&
           Object.keys(normalizedFilter).length === 1
         ) {
-          const stmt = this.db.prepare(`DELETE FROM ${this.name} WHERE _id = ?`)
+          const stmt = this.db.prepare(
+            `DELETE FROM ${this.tableSql} WHERE _id = ?`
+          )
           const result = stmt.run(normalizedFilter._id as string)
           const deleted = result.changes > 0
 
@@ -1386,7 +1359,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         // For complex filters: find first match, then delete by ID
         const { sql: whereClause, params } =
           this.translator.translate(normalizedFilter)
-        let findSql = `SELECT _id FROM ${this.name}`
+        let findSql = `SELECT _id FROM ${this.tableSql}`
         if (whereClause && whereClause !== "1=1") {
           findSql += ` WHERE ${whereClause}`
         }
@@ -1399,7 +1372,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           return Promise.resolve(false)
         }
 
-        const stmt = this.db.prepare(`DELETE FROM ${this.name} WHERE _id = ?`)
+        const stmt = this.db.prepare(
+          `DELETE FROM ${this.tableSql} WHERE _id = ?`
+        )
         const result = stmt.run(row._id)
         const deleted = result.changes > 0
 
@@ -1499,7 +1474,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         }[] = []
 
         const stmt = this.db.prepare(
-          `INSERT INTO ${this.name} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
+          `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
         )
 
         for (let i = 0; i < docs.length; i++) {
@@ -1602,7 +1577,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         const { sql: whereClause, params } = this.translator.translate(filter)
 
         // Find all matching documents
-        let selectSql = `SELECT _id, json(body) as body FROM ${this.name}`
+        let selectSql = `SELECT _id, json(body) as body FROM ${this.tableSql}`
         if (whereClause) {
           selectSql += ` WHERE ${whereClause}`
         }
@@ -1661,7 +1636,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         // Use transaction for atomic update
         const updateStmt = this.db.prepare(
-          `UPDATE ${this.name} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
+          `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
         )
 
         this.db.exec("BEGIN TRANSACTION")
@@ -1727,7 +1702,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         const { sql: whereClause, params } = this.translator.translate(filter)
 
-        let sql = `DELETE FROM ${this.name}`
+        let sql = `DELETE FROM ${this.tableSql}`
         if (whereClause) {
           sql += ` WHERE ${whereClause}`
         }
@@ -1818,7 +1793,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         }
 
         // Delete by ID
-        const stmt = this.db.prepare(`DELETE FROM ${this.name} WHERE _id = ?`)
+        const stmt = this.db.prepare(
+          `DELETE FROM ${this.tableSql} WHERE _id = ?`
+        )
         stmt.run(doc._id)
 
         // Emit findOneAndDelete event after successful operation
@@ -2015,26 +1992,25 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
-        const fieldStr = String(field)
-
-        // Determine if field is indexed
-        const indexedField = this.schema.fields.find(
-          (f) => String(f.name) === fieldStr && f.indexed
+        const columnParams: SQLQueryBindings[] = []
+        const column = resolveField(
+          String(field),
+          this.schema.fields,
+          columnParams
         )
-        const column = indexedField
-          ? `_${fieldStr}`
-          : `jsonb_extract(body, '$.${fieldStr}')`
-
-        // Build query
-        let sql = `SELECT DISTINCT ${column} as value FROM ${this.name}`
-        let params: SQLQueryBindings[] = []
+        const selection = positional(
+          `SELECT DISTINCT ${column} as value FROM ${this.tableSql}`,
+          columnParams
+        )
+        let sql = selection.sql
+        const params: SQLQueryBindings[] = [...selection.params]
 
         if (filter) {
           const { sql: whereClause, params: filterParams } =
             this.translator.translate(filter)
           if (whereClause) {
             sql += ` WHERE ${whereClause}`
-            params = filterParams
+            params.push(...filterParams)
           }
         }
 
@@ -2065,7 +2041,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         // Use SQLite's internal statistics for fast estimate
         const stmt = this.db.prepare<{ count: number }, []>(
-          `SELECT COUNT(*) as count FROM ${this.name}`
+          `SELECT COUNT(*) as count FROM ${this.tableSql}`
         )
         const result = stmt.get()
         return Promise.resolve(result?.count ?? 0)
@@ -2087,7 +2063,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       () => {
         assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
-        this.db.exec(`DROP TABLE IF EXISTS ${this.name}`)
+        this.db.exec(`DROP TABLE IF EXISTS ${this.tableSql}`)
 
         // Emit drop event after successful operation
         this.emitEvent("drop", () => ({
