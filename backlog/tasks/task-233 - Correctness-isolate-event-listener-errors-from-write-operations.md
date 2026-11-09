@@ -1,11 +1,11 @@
 ---
 id: TASK-233
 title: 'Correctness: isolate event listener errors from write operations'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T18:19:00Z'
+updated_date: '2026-11-09T18:20:00Z'
 labels:
   - api
 milestone: m-1
@@ -34,7 +34,7 @@ A throwing event listener makes a write whose row is already committed report fa
 - [x] #1 Regression case A6 passes: a throwing insert listener does not make insertOne reject; the row is committed
 - [x] #2 Listener errors are delivered to onListenerError or an error event (test for each path)
 - [x] #3 Event delivery guarantees are documented in docs/guide (events page)
-- [ ] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #5 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
 
@@ -53,4 +53,6 @@ A throwing event listener makes a write whose row is already committed report fa
 - Decision: use the existing error event plus console fallback instead of adding a new onListenerError option. Both reporting paths, recursive-error protection, async failures, once behavior, transaction flushing and retry non-duplication are tested. Delivery is synchronous after outer commit, at most once per registration/event; async listener completion is not awaited.
 - A6 is a normal passing test. Strengthened the original listener test to require successful insertion and delivery to the second listener. Regression-first new suite: 5 failures before, 5 passes after.
 - Breaking change: none; enforces documented listener guarantees. Updated docs/guide/events.md and CHANGELOG. Host gate PASS: TS 7.0.2 typecheck, lint 94 files, 854 pass/3 existing skips/0 fail, build, type tests, consumer TS 6/7 and CRUD, source TS 5.9.3/6.0.3. Local CI pending committed SHA.
+
+Verified with scripts/ci-local.sh (1a07cabc36e70ed51f3afee908b7739c14c6475d, PASS); GitHub Actions unavailable (billing lock). macOS/Linux pinned/latest Bun 1.4.4 PASS; TS 5.9.3/6.0.3/7.0.2 source/type tests PASS; TS 7.1.0-beta advisory PASS. Logs: /Users/takinprofit/Dev/StrataDb-release/ci-local/1a07cab/logs. Self-review complete; no follow-up required.
 <!-- SECTION:NOTES:END -->
