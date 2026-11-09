@@ -63,7 +63,8 @@
     "bench:all": "bun run bench && bun run bench:crud && bun run bench:batch",
     "docs:dev": "bun run --cwd docs dev",
     "docs:build": "bun run --cwd docs build",
-    "docs:preview": "bun run --cwd docs preview"
+    "docs:preview": "bun run --cwd docs preview",
+    "test:consumer": "bun run build && bun scripts/smoke-consumer.ts"
   },
   "license": "MIT",
   "repository": {

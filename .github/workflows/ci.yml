@@ -33,6 +33,7 @@ jobs:
       - run: bun test --coverage
       - run: bun run build
       - run: bun run test:types
+      - run: bun run test:consumer
 
   typescript:
     strategy:
