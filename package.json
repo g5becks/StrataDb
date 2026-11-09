@@ -29,6 +29,7 @@
     "@commitlint/config-conventional": "^20.0.0",
     "@types/bun": "latest",
     "arktype": "^2.1.27",
+    "backlog.md": "1.55.3",
     "lefthook": "^2.0.4",
     "mitata": "^1.0.34",
     "tsd": "^0.33.0",
