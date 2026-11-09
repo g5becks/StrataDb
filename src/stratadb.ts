@@ -14,10 +14,16 @@ import type {
   Transaction,
 } from "./database-types.js"
 import { ConnectionError } from "./errors.js"
+import { quoteIdent } from "./field-resolver.js"
 import { generateId } from "./id-generator.js"
 import type { RetryOptions } from "./retry-types.js"
 import type { SchemaDefinition } from "./schema-types.js"
+import { sqliteCall } from "./sqlite-boundary.js"
 import { SQLiteCollection } from "./sqlite-collection.js"
+import {
+  type TransactionFrame,
+  transactionManager,
+} from "./transaction-manager.js"
 
 /**
  * Main StrataDB database class.
@@ -71,20 +77,26 @@ export class Strata implements StrataDBInterface {
   constructor(options: DatabaseOptions) {
     // Initialize database connection
     if (typeof options.database === "string") {
-      this.sqliteDb = new SQLiteDatabase(options.database)
+      this.sqliteDb = sqliteCall(
+        () => new SQLiteDatabase(options.database as string),
+        { operation: "open" }
+      )
     } else {
       this.sqliteDb = options.database
     }
 
     assertDatabaseOpen(this.sqliteDb)
-    const version =
-      this.sqliteDb
-        .query<{ version: string }, []>("SELECT sqlite_version() AS version")
-        .get()?.version ?? "unknown"
+    const version = sqliteCall(
+      () =>
+        this.sqliteDb
+          .query<{ version: string }, []>("SELECT sqlite_version() AS version")
+          .get()?.version ?? "unknown",
+      { sql: "SELECT sqlite_version() AS version", operation: "open" }
+    )
     const [major = 0, minor = 0] = version.split(".").map(Number)
     if (!(major > 3 || (major === 3 && minor >= 45))) {
       if (typeof options.database === "string") {
-        this.sqliteDb.close()
+        sqliteCall(() => this.sqliteDb.close(), { operation: "close" })
       }
       throw new ConnectionError(
         `SQLite ${version} is unsupported; StrataDB requires SQLite >= 3.45.0 for JSONB. On macOS, call Database.setCustomSQLite() before opening a database to load a newer SQLite library.`
@@ -128,6 +140,7 @@ export class Strata implements StrataDBInterface {
     schema?: SchemaDefinition<T>,
     options?: CollectionOptions
   ): Collection<T> | CollectionBuilder<T> {
+    quoteIdent(name)
     if (!schema) {
       assertDatabaseOpen(this.sqliteDb)
       // Return builder for fluent schema definition
@@ -162,42 +175,23 @@ export class Strata implements StrataDBInterface {
     return collection
   }
 
-  /**
-   * Creates a new transaction.
-   *
-   * @returns Transaction instance
-   */
-  transaction(): Transaction {
-    assertDatabaseOpen(this.sqliteDb)
-    this.sqliteDb.exec("BEGIN TRANSACTION")
-
-    let committed = false
-
-    const tx: Transaction = {
+  private transactionHandle(frame: TransactionFrame): Transaction {
+    const manager = transactionManager(this.sqliteDb)
+    return {
       collection: <T extends Document>(
         name: string,
-        schema: SchemaDefinition<T>
-      ): Collection<T> => this.collection(name, schema),
-
-      commit: () => {
-        this.sqliteDb.exec("COMMIT")
-        committed = true
-      },
-
-      rollback: () => {
-        if (!committed) {
-          this.sqliteDb.exec("ROLLBACK")
-        }
-      },
-
-      [Symbol.dispose]: () => {
-        if (!committed) {
-          tx.rollback()
-        }
-      },
+        schema: SchemaDefinition<T>,
+        options?: CollectionOptions
+      ): Collection<T> => this.collection(name, schema, options),
+      commit: () => manager.commit(frame),
+      rollback: () => manager.rollback(frame),
+      [Symbol.dispose]: () => manager.rollback(frame),
     }
+  }
 
-    return tx
+  /** Creates a transaction handle; nested handles use savepoints. */
+  transaction(): Transaction {
+    return this.transactionHandle(transactionManager(this.sqliteDb).begin())
   }
 
   /**
@@ -212,15 +206,12 @@ export class Strata implements StrataDBInterface {
   ): Promise<R> {
     throwIfAborted(options?.signal)
 
-    const tx = this.transaction()
-    try {
-      const result = await fn(tx)
-      tx.commit()
+    return await transactionManager(this.sqliteDb).execute(async (frame) => {
+      throwIfAborted(options?.signal)
+      const result = await fn(this.transactionHandle(frame))
+      throwIfAborted(options?.signal)
       return result
-    } catch (error) {
-      tx.rollback()
-      throw error
-    }
+    })
   }
 
   /**
@@ -233,7 +224,7 @@ export class Strata implements StrataDBInterface {
     }
 
     this.onCloseCallback?.()
-    this.sqliteDb.close()
+    sqliteCall(() => this.sqliteDb.close(), { operation: "close" })
     markDatabaseClosed(this.sqliteDb)
   }
 

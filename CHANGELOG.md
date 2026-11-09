@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-09
+
+### Breaking changes
+
+- Enabled retries now use `defaultShouldRetry` when no predicate is supplied. Validation, constraint, query and unknown errors stop after the first attempt; real transient SQLite lock failures still retry. Supply a custom `shouldRetry` for application-specific transient errors. Retries remain disabled until configured.
+
+See [Migrating to 0.6](docs/guide/migrating-to-0.6.md) for before/after examples and the [semantics guide](docs/guide/mongodb-differences.md) for scalar query rules.
+
+- StrataDB now requires Bun `>=1.4.4`. Upgrade the application runtime before upgrading StrataDB. CI and the local fallback verify the 1.4.4 floor and latest Bun, alongside TypeScript 5.9/6.0/7.0 compatibility.
+
+- `$like`, `$contains`, `$startsWith` and `$endsWith` are case-sensitive. Substring/prefix/suffix and search text treat `%`, `_` and backslash literally. `$like`/`$ilike` retain `%`/`_` pattern wildcards with backslash escaping; `$ilike` and default search fold ASCII case only. Use `$ilike` or default search when ASCII-insensitive matching is required. `search({ caseSensitive: true })` now performs exact matching.
+
+- Null equality now matches explicit null and missing fields. `$ne: null` requires a non-null value; `$ne: value` and non-null `$nin` lists include missing/null fields. A `null` entry in `$nin` excludes both null and missing values; an empty list matches all documents. Review bulk-write filters that previously relied on SQL NULL comparisons dropping rows. See the [scalar semantics table](docs/guide/mongodb-differences.md#semantics-vs-mongodb-null-and-missing-scalar-fields).
+
+- Unique compound indexes are now enforced. Remove duplicate tuples before reopening an existing database with a unique compound index declaration that earlier versions ignored.
+
+- `execute()` calls and operations issued outside an active `execute()` now queue in call order. Await every transaction operation; outside writes survive a transaction rollback. Nested calls use savepoints, and events fire only after the outer commit (rolled-back events are discarded). Synchronous transaction/collection creation cannot join another caller's pending `execute()`; create collections beforehand or inside its callback. Transaction collection access now forwards collection options.
+
+- Promise-returning collection operations always reject on failure, including when retries are disabled. Replace synchronous `try/catch` around calls with `await` inside `try/catch` or a `.catch()` handler. Synchronous APIs such as `validateSync()`, `collection()`, and `transaction()` retain synchronous errors.
+
+- Unknown `$operators` now raise `InvalidQueryOperatorError` at every query nesting level. Malformed operator values and empty operator objects raise `QueryError` before SQL or cache lookup. Correct misspelled operators and supply arrays for `$in`/`$nin`/`$all`, strings for LIKE operators, a boolean for `$exists`, and a nonnegative integer for `$size`. Explicit empty-filter bulk operations (`deleteMany({})`, `updateMany({})`) remain supported.
+
+- Query field paths now require identifier segments (`A-Z`, `a-z`, `_`, then letters, digits or `_`). Invalid filter, sort, search, distinct and schema paths raise `QueryError`; rename keys containing punctuation and use dotted paths for nested fields. Numeric `limit`, `skip` and `$index.index` must be nonnegative safe integers. JSON paths and numeric options are bound, and collection/index/column identifiers are quoted, preventing SQL injection. Collection names such as `order` and `user-data` now work; empty/NUL names are rejected. Dotted indexed fields use distinct generated-column names; reopen existing databases after migrating any manually created generated columns.
+
+### Added
+
+- Tag-triggered release workflow with SHA-pinned actions, full verification, version/registry guards, npm OIDC trusted publishing and provenance. CONTRIBUTING.md documents the one-time setup and local/manual release fallback while Actions is unavailable.
+- Audit regression and identifier-injection suites cover the v0.6.0 safety and correctness fixes.
+
+### Fixed
+
+- `$exists` distinguishes present JSON null from missing fields, handles string values without parsing errors, and preserves true/false semantics across cached queries. Indexed and nested fields use the same presence rules.
+
+- `find()` supports `skip` without `limit`, including zero and past-end offsets, with a bound offset and SQLite's unlimited `LIMIT -1` form.
+
+- `timestamps(false)` now omits `createdAt` and `updatedAt` from all returned documents and event payloads, including projections and upserts. Timestamp columns remain populated internally, and default/enabled timestamp behavior is preserved.
+
+- Declared compound indexes are now created, including unique and nested-field indexes. Index names encode the collection/name pair to prevent collisions. Existing duplicate tuples must be cleaned before opening a schema that declares a unique compound index. Generated columns are used for indexed fields, validated JSON expressions otherwise; declare constituent fields indexed when query-plan use of the full compound key is required. SQLite's standard NULL uniqueness behavior is retained.
+
+- Library SQLite failures now map by numeric `errno` to query, connection, unique/constraint or database errors. Wrapped errors preserve the native `cause`, `errno`, `sqliteCodeName`, and operation/collection/SQL context; the library `code` remains stable. Lock errors remain retryable. Reserved `TypeMismatchError` and `TransactionAbortedError` classes are deprecated and retained for compatibility. Direct access through `sqliteDb` remains Bun's native API.
+
+- Listener failures are isolated per registration and reported through collection `error` observers, with console logging as the fallback. Later listeners still run, throwing `once()` listeners run once, async rejections are handled, and committed writes never fail or retry because of a listener. Events are synchronous after commit, in registration order, at most once per registration.
+
+- Single-document updates, replacements, `findOneAnd*` operations and upserts now select and write inside a synchronous SQLite immediate transaction. Conditional transitions have one winner, independent concurrent updates persist, and concurrent matching upserts insert once. Deep merges still replace arrays and preserve explicit null values. Document metadata is stored in its dedicated columns and hydrated on reads; writes remove duplicate metadata from JSON bodies.
+
 ## [0.5.1] - 2026-11-09
 
 ### Added

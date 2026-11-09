@@ -6,7 +6,7 @@
 type ArrayOperator<T> = T extends readonly infer U[] ? object : never;
 ```
 
-Defined in: [src/query-types.ts:286](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/query-types.ts#L286)
+Defined in: [src/query-types.ts:281](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-types.ts#L281)
 
 Array-specific query operators for MongoDB-like array operations.
 

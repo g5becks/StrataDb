@@ -1,5 +1,14 @@
 import type { Document } from "./core-types.js"
-import { QueryError } from "./errors.js"
+import { InvalidQueryOperatorError, QueryError } from "./errors.js"
+import {
+  arrayElement,
+  assertNonNegativeInt,
+  bind,
+  fieldPath,
+  positional,
+  resolveField,
+  resolvePresence,
+} from "./field-resolver.js"
 import type { QueryOptions } from "./query-options-types.js"
 import {
   createQueryResult,
@@ -8,7 +17,9 @@ import {
   type SQLiteBindValue,
 } from "./query-translator-types.js"
 import type { QueryFilter } from "./query-types.js"
+import { validateQuery } from "./query-validation.js"
 import type { SchemaDefinition, SchemaField } from "./schema-types.js"
+import { likeToGlob } from "./string-patterns.js"
 
 /**
  * SQLite-specific query translator for converting StrataDB queries to SQL.
@@ -176,6 +187,7 @@ export class SQLiteQueryTranslator<T extends Document>
    * due to their complex value extraction requirements.
    */
   translate(filter: QueryFilter<T>): QueryTranslatorResult {
+    validateQuery(filter)
     // Empty filter matches all documents
     if (!filter || Object.keys(filter).length === 0) {
       return createQueryResult("1=1", [])
@@ -185,7 +197,10 @@ export class SQLiteQueryTranslator<T extends Document>
     if (!this.queryCache) {
       const params: SQLiteBindValue[] = []
       const sql = this.translateFilter(filter, params)
-      return createQueryResult(sql, params)
+      return createQueryResult(
+        positional(sql, params).sql,
+        positional(sql, params).params
+      )
     }
 
     // Check if query contains non-cacheable operators
@@ -193,7 +208,10 @@ export class SQLiteQueryTranslator<T extends Document>
       // Skip cache for complex operators
       const params: SQLiteBindValue[] = []
       const sql = this.translateFilter(filter, params)
-      return createQueryResult(sql, params)
+      return createQueryResult(
+        positional(sql, params).sql,
+        positional(sql, params).params
+      )
     }
 
     // Generate cache key from query structure
@@ -211,7 +229,10 @@ export class SQLiteQueryTranslator<T extends Document>
     const sql = this.translateFilter(filter, params)
 
     // Store in cache with value paths
-    const valuePaths = this.collectValuePaths(filter)
+    const rawPaths = this.collectValuePaths(filter)
+    const valuePaths = positional(sql, params).indexes.map(
+      (index) => rawPaths[index] as string
+    )
 
     // Evict if necessary (simple FIFO)
     if (this.queryCache.size >= SQLiteQueryTranslator.MAX_CACHE_SIZE) {
@@ -221,9 +242,15 @@ export class SQLiteQueryTranslator<T extends Document>
       }
     }
 
-    this.queryCache.set(cacheKey, { sql, valuePaths })
+    this.queryCache.set(cacheKey, {
+      sql: positional(sql, params).sql,
+      valuePaths,
+    })
 
-    return createQueryResult(sql, params)
+    return createQueryResult(
+      positional(sql, params).sql,
+      positional(sql, params).params
+    )
   }
 
   /**
@@ -252,7 +279,15 @@ export class SQLiteQueryTranslator<T extends Document>
       } else if (this.isOperatorObject(value)) {
         // Check for non-cacheable operators in field conditions
         const ops = value as Record<string, unknown>
-        if ("$elemMatch" in ops || "$index" in ops || "$all" in ops) {
+        if (
+          "$elemMatch" in ops ||
+          "$index" in ops ||
+          "$all" in ops ||
+          "$contains" in ops ||
+          "$startsWith" in ops ||
+          "$endsWith" in ops ||
+          "$like" in ops
+        ) {
           return true
         }
       }
@@ -261,7 +296,7 @@ export class SQLiteQueryTranslator<T extends Document>
   }
 
   /**
-   * Generates a cache key from query structure (ignoring actual values).
+   * Generates a cache key from query structure, retaining SQL-dependent values.
    *
    * @param value - Any query value
    * @returns Cache key string representing the structure
@@ -279,8 +314,12 @@ export class SQLiteQueryTranslator<T extends Document>
 
     if (typeof value === "object") {
       const obj = value as Record<string, unknown>
-      const keys = Object.keys(obj).sort()
-      const parts = keys.map((k) => `${k}:${this.generateCacheKey(obj[k])}`)
+      const keys = Object.keys(obj)
+      const parts = keys.map((k) =>
+        k === "$exists"
+          ? `${k}:${String(obj[k])}`
+          : `${k}:${this.generateCacheKey(obj[k])}`
+      )
       return `{${parts.join(",")}}`
     }
 
@@ -299,11 +338,24 @@ export class SQLiteQueryTranslator<T extends Document>
    * @internal
    */
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: recursive query filter traversal requires complex logic
-  private collectValuePaths(filter: QueryFilter<T>, prefix = ""): string[] {
+  private collectValuePaths(
+    filter: QueryFilter<T>,
+    prefix: string[] = []
+  ): string[] {
     const paths: string[] = []
 
     for (const [key, value] of Object.entries(filter)) {
-      const currentPath = prefix ? `${prefix}.${key}` : key
+      const currentPath = [...prefix, key]
+
+      if (
+        !(
+          key.startsWith("$") ||
+          this.fieldMap.get(key as keyof T)?.indexed ||
+          ["_id", "createdAt", "updatedAt"].includes(key)
+        )
+      ) {
+        paths.push(`!path:${key}`)
+      }
 
       if (this.isLogicalOperator(key)) {
         // Logical operators contain arrays of filters
@@ -311,7 +363,7 @@ export class SQLiteQueryTranslator<T extends Document>
         for (let i = 0; i < filters.length; i++) {
           const subPaths = this.collectValuePaths(
             filters[i] as QueryFilter<T>,
-            `${currentPath}.[${i}]`
+            [...currentPath, String(i)]
           )
           paths.push(...subPaths)
         }
@@ -322,6 +374,12 @@ export class SQLiteQueryTranslator<T extends Document>
         )
         paths.push(...subPaths)
       } else if (this.isOperatorObject(value)) {
+        if (
+          "$exists" in value &&
+          !["_id", "createdAt", "updatedAt"].includes(key)
+        ) {
+          paths.push(`!path:${key}`)
+        }
         // Operator object like { $gt: 18, $lt: 65 }
         for (const [op, opValue] of Object.entries(
           value as Record<string, unknown>
@@ -330,19 +388,24 @@ export class SQLiteQueryTranslator<T extends Document>
             // Skip $exists (no value)
             continue
           }
+          if ((op === "$eq" || op === "$ne") && opValue === null) {
+            continue
+          }
 
           if (Array.isArray(opValue)) {
             // Array values like $in: [1, 2, 3]
             for (let i = 0; i < opValue.length; i++) {
-              paths.push(`${currentPath}.${op}.[${i}]`)
+              if (op === "$nin" && opValue[i] === null) {
+                continue
+              }
+              paths.push(JSON.stringify([...currentPath, op, String(i)]))
             }
           } else {
-            paths.push(`${currentPath}.${op}`)
+            paths.push(JSON.stringify([...currentPath, op]))
           }
         }
-      } else {
-        // Direct value comparison like { name: "Alice" }
-        paths.push(currentPath)
+      } else if (value !== null) {
+        paths.push(JSON.stringify(currentPath))
       }
     }
 
@@ -365,7 +428,9 @@ export class SQLiteQueryTranslator<T extends Document>
     const values: SQLiteBindValue[] = []
 
     for (const path of paths) {
-      const value = this.getValueAtPath(filter, path)
+      const value = path.startsWith("!path:")
+        ? fieldPath(path.slice(6))
+        : this.getValueAtPath(filter, path)
       values.push(this.toBindValue(value))
     }
 
@@ -373,16 +438,16 @@ export class SQLiteQueryTranslator<T extends Document>
   }
 
   /**
-   * Gets a value from a nested object using a dot-separated path.
+   * Gets a value using a JSON-encoded list of path segments.
    *
    * @param obj - The object to traverse
-   * @param path - Dot-separated path (e.g., "age.$gt" or "name")
+   * @param path - Encoded segments preserve literal dotted field keys
    * @returns The value at the path
    *
    * @internal
    */
   private getValueAtPath(obj: unknown, path: string): unknown {
-    const parts = path.split(".")
+    const parts = JSON.parse(path) as string[]
     let current: unknown = obj
 
     for (const part of parts) {
@@ -390,13 +455,7 @@ export class SQLiteQueryTranslator<T extends Document>
         return
       }
 
-      if (part.startsWith("[") && part.endsWith("]")) {
-        // Array index
-        const index = Number.parseInt(part.slice(1, -1), 10)
-        current = (current as unknown[])[index]
-      } else {
-        current = (current as Record<string, unknown>)[part]
-      }
+      current = (current as Record<string, unknown>)[part]
     }
 
     return current
@@ -537,17 +596,18 @@ export class SQLiteQueryTranslator<T extends Document>
     value: unknown,
     params: SQLiteBindValue[]
   ): string | null {
-    const fieldSql = this.resolveFieldName(fieldName)
+    const fieldSql = this.resolveFieldName(fieldName, params)
+    if (value === null) {
+      return `${fieldSql} IS NULL`
+    }
 
     // Direct value comparison (e.g., { name: 'Alice' })
     if (
-      value === null ||
       typeof value === "string" ||
       typeof value === "number" ||
       typeof value === "boolean"
     ) {
-      params.push(this.toBindValue(value))
-      return `${fieldSql} = ?`
+      return `${fieldSql} = ${bind(this.toBindValue(value), params)}`
     }
 
     // Operator conditions (e.g., { age: { $gt: 18 } })
@@ -555,7 +615,10 @@ export class SQLiteQueryTranslator<T extends Document>
       const operatorSql = this.translateFieldOperators(
         fieldSql,
         value as Record<string, unknown>,
-        params
+        params,
+        "$exists" in value
+          ? resolvePresence(String(fieldName), params)
+          : undefined
       )
       return operatorSql || null
     }
@@ -576,7 +639,8 @@ export class SQLiteQueryTranslator<T extends Document>
   private translateFieldOperators(
     fieldSql: string,
     operators: Record<string, unknown>,
-    params: SQLiteBindValue[]
+    params: SQLiteBindValue[],
+    presenceSql?: string | undefined
   ): string {
     const conditions: string[] = []
 
@@ -587,6 +651,7 @@ export class SQLiteQueryTranslator<T extends Document>
         value,
         operators,
         params,
+        presenceSql,
       })
       if (condition) {
         conditions.push(condition)
@@ -610,32 +675,31 @@ export class SQLiteQueryTranslator<T extends Document>
     value: unknown
     operators: Record<string, unknown>
     params: SQLiteBindValue[]
+    presenceSql?: string | undefined
   }): string | null {
     const { fieldSql, op, value, params } = context
     switch (op) {
       case "$eq":
-        params.push(this.toBindValue(value))
-        return `${fieldSql} = ?`
+        return value === null
+          ? `${fieldSql} IS NULL`
+          : `${fieldSql} = ${bind(this.toBindValue(value), params)}`
 
       case "$ne":
-        params.push(this.toBindValue(value))
-        return `${fieldSql} != ?`
+        return value === null
+          ? `${fieldSql} IS NOT NULL`
+          : `(${fieldSql} IS NULL OR ${fieldSql} != ${bind(this.toBindValue(value), params)})`
 
       case "$gt":
-        params.push(this.toBindValue(value))
-        return `${fieldSql} > ?`
+        return `${fieldSql} > ${bind(this.toBindValue(value), params)}`
 
       case "$gte":
-        params.push(this.toBindValue(value))
-        return `${fieldSql} >= ?`
+        return `${fieldSql} >= ${bind(this.toBindValue(value), params)}`
 
       case "$lt":
-        params.push(this.toBindValue(value))
-        return `${fieldSql} < ?`
+        return `${fieldSql} < ${bind(this.toBindValue(value), params)}`
 
       case "$lte":
-        params.push(this.toBindValue(value))
-        return `${fieldSql} <= ?`
+        return `${fieldSql} <= ${bind(this.toBindValue(value), params)}`
 
       case "$in":
         return this.translateInOperator(fieldSql, value, params)
@@ -644,32 +708,18 @@ export class SQLiteQueryTranslator<T extends Document>
         return this.translateNotInOperator(fieldSql, value, params)
 
       case "$like":
-        params.push(this.toBindValue(value))
-        return `${fieldSql} LIKE ?`
-
-      // Case-insensitive LIKE pattern matching using SQLite's COLLATE NOCASE
+        return `${fieldSql} GLOB ${bind(likeToGlob(value as string), params)}`
       case "$ilike":
-        params.push(this.toBindValue(value))
-        return `${fieldSql} LIKE ? COLLATE NOCASE`
-
-      // Substring containment: sugar for $like: '%value%'
-      case "$contains": {
-        const pattern = `%${this.toBindValue(value)}%`
-        params.push(pattern)
-        return `${fieldSql} LIKE ?`
-      }
-
-      case "$startsWith": {
-        const pattern = `${this.toBindValue(value)}%`
-        params.push(pattern)
-        return `${fieldSql} LIKE ?`
-      }
-
-      case "$endsWith": {
-        const pattern = `%${this.toBindValue(value)}`
-        params.push(pattern)
-        return `${fieldSql} LIKE ?`
-      }
+        return `lower(${fieldSql}) LIKE lower(${bind(this.toBindValue(value), params)}) ESCAPE '\\'`
+      case "$contains":
+      case "$startsWith":
+      case "$endsWith":
+        return this.translateLiteralString(
+          fieldSql,
+          op,
+          value as string,
+          params
+        )
 
       case "$all":
         return this.translateAllOperator(fieldSql, value, params)
@@ -684,14 +734,38 @@ export class SQLiteQueryTranslator<T extends Document>
         return this.translateIndexOperator(fieldSql, value, params)
 
       case "$exists":
-        return this.translateExistsOperator(fieldSql, value)
+        return this.translateExistsOperator(
+          context.presenceSql ?? `json_type(${fieldSql})`,
+          value
+        )
 
       // Additional operators will be added in subsequent tasks
 
       default:
-        // Unknown operator - ignore
+        if (op.startsWith("$")) {
+          throw new InvalidQueryOperatorError(`Unknown query operator ${op}`)
+        }
+        // Object-element field translation is handled by TASK-245.
         return null
     }
+  }
+
+  private translateLiteralString(
+    fieldSql: string,
+    operator: "$contains" | "$startsWith" | "$endsWith",
+    value: string,
+    params: SQLiteBindValue[]
+  ): string {
+    if (operator === "$contains") {
+      return `instr(${fieldSql}, ${bind(value, params)}) > 0`
+    }
+    if (operator === "$startsWith") {
+      return `substr(${fieldSql}, 1, length(${bind(value, params)})) = ${bind(value, params)}`
+    }
+    if (value.length === 0) {
+      return `${fieldSql} IS NOT NULL`
+    }
+    return `substr(${fieldSql}, -length(${bind(value, params)})) = ${bind(value, params)}`
   }
 
   /**
@@ -715,10 +789,9 @@ export class SQLiteQueryTranslator<T extends Document>
       return "0=1"
     }
 
-    const placeholders = valuesArray.map(() => "?").join(", ")
-    for (const v of valuesArray) {
-      params.push(this.toBindValue(v))
-    }
+    const placeholders = valuesArray
+      .map((value) => bind(this.toBindValue(value), params))
+      .join(", ")
     return `${fieldSql} IN (${placeholders})`
   }
 
@@ -743,11 +816,17 @@ export class SQLiteQueryTranslator<T extends Document>
       return "1=1"
     }
 
-    const placeholders = valuesArray.map(() => "?").join(", ")
-    for (const v of valuesArray) {
-      params.push(this.toBindValue(v))
+    const nonNullValues = valuesArray.filter((value) => value !== null)
+    if (nonNullValues.length === 0) {
+      return `${fieldSql} IS NOT NULL`
     }
-    return `${fieldSql} NOT IN (${placeholders})`
+    const placeholders = nonNullValues
+      .map((value) => bind(this.toBindValue(value), params))
+      .join(", ")
+    const exclusion = `${fieldSql} NOT IN (${placeholders})`
+    return valuesArray.includes(null)
+      ? `(${fieldSql} IS NOT NULL AND ${exclusion})`
+      : `(${fieldSql} IS NULL OR ${exclusion})`
   }
 
   /**
@@ -763,27 +842,11 @@ export class SQLiteQueryTranslator<T extends Document>
    *
    * @internal
    */
-  private resolveFieldName(fieldName: keyof T): string {
-    const fieldStr = String(fieldName)
-
-    // Special handling for built-in table columns
-    if (
-      fieldStr === "_id" ||
-      fieldStr === "createdAt" ||
-      fieldStr === "updatedAt"
-    ) {
-      return fieldStr
-    }
-
-    const field = this.fieldMap.get(fieldName)
-
-    if (field?.indexed) {
-      // Indexed field uses generated column with underscore prefix
-      return `_${fieldStr}`
-    }
-
-    // Non-indexed field uses jsonb_extract
-    return `jsonb_extract(body, '$.${fieldStr}')`
+  private resolveFieldName(
+    fieldName: keyof T,
+    params: SQLiteBindValue[]
+  ): string {
+    return resolveField(String(fieldName), [...this.fieldMap.values()], params)
   }
 
   /**
@@ -813,10 +876,9 @@ export class SQLiteQueryTranslator<T extends Document>
 
     const conditions: string[] = []
     for (const v of valuesArray) {
-      params.push(this.toBindValue(v))
       // Check if value exists in the array using json_each
       conditions.push(
-        `EXISTS (SELECT 1 FROM json_each(${fieldSql}) WHERE json_each.value = ?)`
+        `EXISTS (SELECT 1 FROM json_each(${fieldSql}) WHERE json_each.value = ${bind(this.toBindValue(v), params)})`
       )
     }
 
@@ -842,8 +904,7 @@ export class SQLiteQueryTranslator<T extends Document>
     size: unknown,
     params: SQLiteBindValue[]
   ): string {
-    params.push(this.toBindValue(size))
-    return `json_array_length(${fieldSql}) = ?`
+    return `json_array_length(${fieldSql}) = ${bind(this.toBindValue(size), params)}`
   }
 
   /**
@@ -915,7 +976,10 @@ export class SQLiteQueryTranslator<T extends Document>
     // Extract the element at the specified index
     // For generated columns: json_extract(_field, '$[index]')
     // For non-indexed: json_extract(jsonb_extract(body, '$.field'), '$[index]')
-    const elementSql = `json_extract(${fieldSql}, '$[${index}]')`
+    const elementSql = arrayElement(fieldSql, index, params)
+    if (condition === null) {
+      return `${elementSql} IS NULL`
+    }
 
     // Handle the condition on that element
     if (
@@ -924,8 +988,7 @@ export class SQLiteQueryTranslator<T extends Document>
       (Object.getPrototypeOf(condition) !== Object.prototype &&
         Object.getPrototypeOf(condition) !== null)
     ) {
-      params.push(this.toBindValue(condition))
-      return `${elementSql} = ?`
+      return `${elementSql} = ${bind(this.toBindValue(condition), params)}`
     }
 
     // Handle operator conditions
@@ -955,7 +1018,7 @@ export class SQLiteQueryTranslator<T extends Document>
   /**
    * Translates $exists operator to SQL.
    *
-   * @param fieldSql - The SQL representation of the field
+   * @param presenceSql - A nullable expression indicating field presence
    * @param shouldExist - Whether field should exist (true) or not (false)
    * @returns SQL string fragment
    *
@@ -966,15 +1029,15 @@ export class SQLiteQueryTranslator<T extends Document>
    * @internal
    */
   private translateExistsOperator(
-    fieldSql: string,
+    presenceSql: string,
     shouldExist: unknown
   ): string {
     if (shouldExist === true) {
       // Field exists if json_type is not NULL
-      return `json_type(${fieldSql}) IS NOT NULL`
+      return `${presenceSql} IS NOT NULL`
     }
     // Field doesn't exist if json_type is NULL
-    return `json_type(${fieldSql}) IS NULL`
+    return `${presenceSql} IS NULL`
   }
 
   /**
@@ -1031,7 +1094,7 @@ export class SQLiteQueryTranslator<T extends Document>
 
     // Handle sort (ORDER BY clause)
     if (options.sort) {
-      const orderBy = this.translateSort(options.sort)
+      const orderBy = this.translateSort(options.sort, params)
       if (orderBy) {
         clauses.push(orderBy)
       }
@@ -1039,19 +1102,23 @@ export class SQLiteQueryTranslator<T extends Document>
 
     // Handle limit (LIMIT clause)
     if (options.limit !== undefined) {
-      params.push(this.toBindValue(options.limit))
-      clauses.push("LIMIT ?")
+      assertNonNegativeInt(options.limit, "limit")
+      clauses.push(`LIMIT ${bind(options.limit, params)}`)
     }
 
     // Handle skip (OFFSET clause)
     if (options.skip !== undefined) {
-      params.push(this.toBindValue(options.skip))
-      clauses.push("OFFSET ?")
+      assertNonNegativeInt(options.skip, "skip")
+      if (options.limit === undefined) {
+        clauses.push("LIMIT -1")
+      }
+      clauses.push(`OFFSET ${bind(options.skip, params)}`)
     }
 
     // Note: projection is handled by the collection layer during SELECT construction
 
-    return createQueryResult(clauses.join(" "), params)
+    const result = positional(clauses.join(" "), params)
+    return createQueryResult(result.sql, result.params)
   }
 
   /**
@@ -1066,7 +1133,10 @@ export class SQLiteQueryTranslator<T extends Document>
    *
    * @internal
    */
-  private translateSort(sort: QueryOptions<T>["sort"]): string {
+  private translateSort(
+    sort: QueryOptions<T>["sort"],
+    params: SQLiteBindValue[]
+  ): string {
     if (!sort) {
       return ""
     }
@@ -1074,7 +1144,10 @@ export class SQLiteQueryTranslator<T extends Document>
     const sortFields: string[] = []
 
     for (const [fieldName, direction] of Object.entries(sort)) {
-      const fieldSql = this.resolveFieldName(fieldName as keyof T)
+      if (direction !== 1 && direction !== -1) {
+        throw new QueryError("Sort direction must be 1 or -1")
+      }
+      const fieldSql = this.resolveFieldName(fieldName as keyof T, params)
       const dir = direction === 1 ? "ASC" : "DESC"
       sortFields.push(`${fieldSql} ${dir}`)
     }

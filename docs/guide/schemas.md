@@ -115,6 +115,8 @@ await users.find({ age: { $gte: 18 }, status: 'active' })
 
 ### Unique Constraints
 
+Compound declarations create real SQLite indexes. Opening an existing database with a unique declaration fails if duplicate tuples already exist. Fields explicitly marked indexed use generated columns; other compound fields use validated JSON expressions. SQLite permits multiple NULL tuples in unique indexes.
+
 ```typescript
 // Single field unique
 .field('email', { type: 'TEXT', indexed: true, unique: true })
@@ -125,7 +127,7 @@ await users.find({ age: { $gte: 18 }, status: 'active' })
 
 ## Timestamps
 
-Enable automatic timestamp management:
+Timestamps are enabled by default. Disable their public fields with `.timestamps(false)`; every returned/event document then omits `createdAt` and `updatedAt`. Internal timestamp columns stay populated, and metadata is kept out of JSON bodies.
 
 ```typescript
 const schema = createSchema<User>()

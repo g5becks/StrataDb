@@ -259,7 +259,7 @@ await users.insertOne(userData, {
 
 ### Default Retry Behavior
 
-By default, StrataDB only retries operations that fail with:
+Retries are disabled unless configured. Enabled retries automatically use the exported `defaultShouldRetry` policy, which classifies these failures as retryable. A custom `shouldRetry` predicate overrides it:
 
 - **ConnectionError** - Database connection issues
 - **TransactionError** - Transaction conflicts
@@ -269,7 +269,7 @@ By default, StrataDB only retries operations that fail with:
   - `7` (SQLITE_NOMEM) - Out of memory
   - `10` (SQLITE_IOERR) - Disk I/O error
 
-The following are **never** retried:
+This policy excludes the following errors and unknown errors:
 
 - `ValidationError`
 - `SchemaValidationError`

@@ -1721,21 +1721,16 @@ describe("Collection Events - Registration Methods", () => {
       // Second listener should still receive event
       collection.on("insert", (event) => events.push(event))
 
-      // This should not throw despite first listener error
-      try {
-        await collection.insertOne({
-          name: "Test",
-          email: "test@example.com",
-          age: 25,
-        })
-      } catch {
-        // EventEmitter may or may not propagate listener errors
-        // depending on implementation
-      }
+      await collection.insertOne({
+        name: "Test",
+        email: "test@example.com",
+        age: 25,
+      })
 
       // Document should still be inserted
-      const count = await collection.count()
+      const count = await collection.count({})
       expect(count).toBe(1)
+      expect(events).toHaveLength(1)
     })
 
     it("should support chaining event registrations", async () => {

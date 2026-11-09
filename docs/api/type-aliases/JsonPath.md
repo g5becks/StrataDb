@@ -6,7 +6,7 @@
 type JsonPath = `$.${string}`;
 ```
 
-Defined in: [src/path-types.ts:19](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/path-types.ts#L19)
+Defined in: [src/path-types.ts:19](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/path-types.ts#L19)
 
 JSON path for accessing nested document properties in SQLite.
 

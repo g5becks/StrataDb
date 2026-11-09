@@ -16,8 +16,24 @@
         "link": "/api/classes/ConnectionError.md"
       },
       {
+        "text": "ConstraintError",
+        "link": "/api/classes/ConstraintError.md"
+      },
+      {
+        "text": "DatabaseError",
+        "link": "/api/classes/DatabaseError.md"
+      },
+      {
+        "text": "InvalidQueryOperatorError",
+        "link": "/api/classes/InvalidQueryOperatorError.md"
+      },
+      {
         "text": "QueryError",
         "link": "/api/classes/QueryError.md"
+      },
+      {
+        "text": "SchemaValidationError",
+        "link": "/api/classes/SchemaValidationError.md"
       },
       {
         "text": "Strata",
@@ -28,8 +44,16 @@
         "link": "/api/classes/StrataDBError.md"
       },
       {
+        "text": "TransactionAbortedError",
+        "link": "/api/classes/TransactionAbortedError.md"
+      },
+      {
         "text": "TransactionError",
         "link": "/api/classes/TransactionError.md"
+      },
+      {
+        "text": "TypeMismatchError",
+        "link": "/api/classes/TypeMismatchError.md"
       },
       {
         "text": "UniqueConstraintError",

@@ -1,9 +1,11 @@
 ---
 id: TASK-227
 title: 'Testing: encode audit Appendix A repros as test.failing regression suite'
-status: To Do
-assignee: []
+status: Done
+assignee:
+  - '@codex'
 created_date: '2026-11-09T04:01:00Z'
+updated_date: '2026-11-09T17:50:00Z'
 labels:
   - testing
 milestone: m-1
@@ -45,7 +47,25 @@ Every v0.6.0 fix must be self-validating. Encode the audit's Appendix A repros a
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 test/regression/ contains one test.failing case per audit repro A1-A17 listed in the description, each named with its audit id
-- [ ] #2 Every case asserts the correct (post-fix) behavior and currently fails; bun test is green because they are marked test.failing
-- [ ] #3 test/regression/README.md documents that fix tasks must convert their cases from test.failing to test
+- [x] #1 test/regression/ contains one test.failing case per audit repro A1-A17 listed in the description, each named with its audit id
+- [x] #2 Every case asserts the correct (post-fix) behavior and currently fails; bun test is green because they are marked test.failing
+- [x] #3 test/regression/README.md documents that fix tasks must convert their cases from test.failing to test
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Encode each listed Appendix A repro with exact post-fix assertions against real SQLite, named by audit ID and owning task.
+2. Inspect expected failure output and document the conversion convention.
+3. Run the full quality gate and compiler matrix; record only verified criteria.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+- Encoded 30 exact regression cases across A1-A6 and A8-A17, named with owning task IDs. A7/A18 already have passing v0.5.1 coverage.
+- Inspected all 30 failures with test.failing temporarily converted to test: injection accepted/raw LIMIT parser error; destructive typo; two CAS winners/lost a; nested BEGIN errors/outside rollback/event leak; synchronous unique error; listener boom; absent compound index/duplicate accepted; timestamp keys; missing generated column; null omissions; elemMatch syntax; LIKE/search overmatching; OFFSET syntax; unknown cursor accepted; unquoted names; missing event ids. Restored expected failures.
+- Breaking change: none. Decisions: null equality will include missing fields; separate assertions cover non-null $ne. Deferred promises give deterministic transaction interleaving without sleeps or mocks.
+- Verification: typecheck (TS 7.0.2), lint (85 files), bun test (763 pass, 3 existing skips, 0 fail), build, test:types, packed consumer TS 6.0.3/7.0.2 and CRUD, source tsc 5.9.3/6.0.3 all PASS.
+- Follow-ups: owning tasks convert their cases to normal tests; no new follow-up required.
+<!-- SECTION:NOTES:END -->

@@ -789,8 +789,7 @@ describe("Complex Query Integration Tests", () => {
   })
 
   describe("Edge Cases", () => {
-    // biome-ignore lint/suspicious/noSkippedTests: TODO: Null value queries need proper implementation
-    it.skip("should distinguish between null and undefined correctly", async () => {
+    it("should distinguish between null and undefined correctly", async () => {
       type TestDoc = Document<{
         name: string
         optional?: string

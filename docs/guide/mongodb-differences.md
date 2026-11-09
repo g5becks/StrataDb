@@ -1,6 +1,25 @@
 # MongoDB Compatibility Guide
 
-StrataDB provides a MongoDB-compatible API for developers familiar with MongoDB who want the simplicity and performance of SQLite. This guide explains the philosophy, what's the same, key differences, and migration considerations.
+StrataDB provides a MongoDB-style API for developers familiar with MongoDB who want an embedded SQLite database. This guide defines its scalar semantics, shared operations, differences and migration considerations.
+
+## Semantics vs MongoDB: null and missing scalar fields
+
+StrataDB matches explicit JSON `null` and missing fields with `{ nick: null }` or `{ nick: { $eq: null } }`. A document property set to `undefined` is omitted during serialization and therefore counts as missing. An `undefined` query operand is invalid and raises `QueryError`.
+
+`$exists: true` matches every present field, including explicit JSON null. `$exists: false` matches only missing fields. These rules apply to indexed and dotted fields with query caching enabled or disabled.
+
+`$ne: null` requires a present, non-null value. `$ne: 'B'` and `$nin: ['B']` include null and missing fields as well as other values. This follows the scalar null-query patterns described in [MongoDB's null-field reference](https://www.mongodb.com/docs/v7.0/tutorial/query-for-null-fields/).
+
+| Stored `nick` | `nick: null` | `$ne: null` | `$ne: 'B'` / `$nin: ['B']` |
+| --- | --- | --- | --- |
+| Missing | Matches | No match | Matches |
+| `null` | Matches | No match | Matches |
+| `'A'` | No match | Matches | Matches |
+| `'B'` | No match | Matches | No match |
+
+For `$nin`, an empty exclusion list matches all documents. Including `null` in the list excludes both null and missing fields: `$nin: [null]` requires a non-null value, and `$nin: [null, 'B']` additionally excludes `'B'`. These are StrataDB's explicit scalar rules; MongoDB also documents array-specific membership behavior in its [`$nin` reference](https://www.mongodb.com/docs/manual/reference/operator/query/nin/).
+
+The same rules apply to indexed and unindexed fields and to read and write filters. Migrating from earlier StrataDB versions can therefore change the documents matched by bulk updates and deletes.
 
 ## Philosophy
 

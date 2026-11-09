@@ -2,7 +2,7 @@
 
 # Class: ValidationError
 
-Defined in: [src/errors.ts:76](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L76)
+Defined in: [src/errors.ts:86](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L86)
 
 Base class for validation-related errors.
 
@@ -34,13 +34,13 @@ try {
 
 ```ts
 new ValidationError(
-   message, 
-   field?, 
+   message,
+   field?,
    value?
 ): ValidationError;
 ```
 
-Defined in: [src/errors.ts:86](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L86)
+Defined in: [src/errors.ts:96](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L96)
 
 #### Parameters
 
@@ -72,7 +72,7 @@ Defined in: [src/errors.ts:86](https://github.com/g5becks/StrataDb/blob/324b1e89
 readonly category: "validation";
 ```
 
-Defined in: [src/errors.ts:77](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L77)
+Defined in: [src/errors.ts:87](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L87)
 
 Error category for grouping related error types
 
@@ -85,10 +85,10 @@ Error category for grouping related error types
 ### cause?
 
 ```ts
-cause?: unknown;
+readonly cause?: unknown;
 ```
 
-Defined in: docs/node\_modules/typescript/lib/lib.es2022.error.d.ts:24
+Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L45)
 
 The cause of the error.
 
@@ -104,7 +104,7 @@ The cause of the error.
 readonly code: "VALIDATION_ERROR" = "VALIDATION_ERROR";
 ```
 
-Defined in: [src/errors.ts:78](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L78)
+Defined in: [src/errors.ts:88](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L88)
 
 Unique error code for programmatic identification
 
@@ -114,13 +114,41 @@ Unique error code for programmatic identification
 
 ***
 
+### context?
+
+```ts
+readonly context?: SQLiteErrorContext;
+```
+
+Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L44)
+
+#### Inherited from
+
+[`StrataDBError`](StrataDBError.md).[`context`](StrataDBError.md#context)
+
+***
+
+### errno?
+
+```ts
+readonly errno?: number;
+```
+
+Defined in: [src/errors.ts:42](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L42)
+
+#### Inherited from
+
+[`StrataDBError`](StrataDBError.md).[`errno`](StrataDBError.md#errno)
+
+***
+
 ### field?
 
 ```ts
 readonly field?: string;
 ```
 
-Defined in: [src/errors.ts:81](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L81)
+Defined in: [src/errors.ts:91](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L91)
 
 Optional field name that failed validation
 
@@ -154,6 +182,20 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 
 ***
 
+### sqliteCodeName?
+
+```ts
+readonly sqliteCodeName?: string;
+```
+
+Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L43)
+
+#### Inherited from
+
+[`StrataDBError`](StrataDBError.md).[`sqliteCodeName`](StrataDBError.md#sqlitecodename)
+
+***
+
 ### stack?
 
 ```ts
@@ -174,7 +216,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1076
 readonly value?: unknown;
 ```
 
-Defined in: [src/errors.ts:84](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/errors.ts#L84)
+Defined in: [src/errors.ts:94](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L94)
 
 The value that failed validation
 

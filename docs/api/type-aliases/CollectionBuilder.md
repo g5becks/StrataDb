@@ -6,7 +6,7 @@
 type CollectionBuilder<T> = object;
 ```
 
-Defined in: [src/collection-builder.ts:33](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-builder.ts#L33)
+Defined in: [src/collection-builder.ts:33](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L33)
 
 Fluent builder for creating collections with inline schema definition.
 
@@ -43,7 +43,7 @@ The document type extending Document
 build(): Collection<T>;
 ```
 
-Defined in: [src/collection-builder.ts:94](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-builder.ts#L94)
+Defined in: [src/collection-builder.ts:94](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L94)
 
 Build and return the collection with the defined schema.
 
@@ -61,7 +61,7 @@ The collection instance ready for operations
 cache(enabled): CollectionBuilder<T>;
 ```
 
-Defined in: [src/collection-builder.ts:87](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-builder.ts#L87)
+Defined in: [src/collection-builder.ts:87](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L87)
 
 Enable or disable query caching for this collection.
 
@@ -100,13 +100,13 @@ const users = db.collection<User>('users')
 
 ```ts
 compoundIndex(
-   name, 
-   fields, 
+   name,
+   fields,
    options?
 ): CollectionBuilder<T>;
 ```
 
-Defined in: [src/collection-builder.ts:52](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-builder.ts#L52)
+Defined in: [src/collection-builder.ts:52](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L52)
 
 Define a compound index spanning multiple fields.
 
@@ -138,7 +138,7 @@ readonly (keyof `T`)[]
 field<K>(name, options): CollectionBuilder<T>;
 ```
 
-Defined in: [src/collection-builder.ts:37](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-builder.ts#L37)
+Defined in: [src/collection-builder.ts:37](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L37)
 
 Define an indexed field with type checking.
 
@@ -192,7 +192,7 @@ Define an indexed field with type checking.
 timestamps(enabled?): CollectionBuilder<T>;
 ```
 
-Defined in: [src/collection-builder.ts:61](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-builder.ts#L61)
+Defined in: [src/collection-builder.ts:61](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L61)
 
 Enable automatic timestamp management.
 
@@ -214,7 +214,7 @@ Enable automatic timestamp management.
 validate(validator): CollectionBuilder<T>;
 ```
 
-Defined in: [src/collection-builder.ts:66](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-builder.ts#L66)
+Defined in: [src/collection-builder.ts:66](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L66)
 
 Add validation function using a type predicate.
 

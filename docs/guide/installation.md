@@ -10,7 +10,8 @@ StrataDB **only works with Bun**. It uses `bun:sqlite` which is not available in
 StrataDB is an ESM-only package. It does not provide CommonJS exports.
 :::
 
-- [Bun](https://bun.sh) v1.0 or later
+- [Bun](https://bun.com) **1.4.4 or newer**
+- SQLite **3.45.0 or newer** for JSONB. On macOS, use `Database.setCustomSQLite()` before opening a connection if the system SQLite is older.
 
 ## Install StrataDB
 
@@ -41,7 +42,8 @@ StrataDB is written in TypeScript and includes type definitions. For best result
     "strict": true,
     "moduleResolution": "bundler",
     "target": "ESNext",
-    "module": "ESNext"
+    "module": "ESNext",
+    "types": ["bun"]
   }
 }
 ```

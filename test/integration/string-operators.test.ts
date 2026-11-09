@@ -197,11 +197,9 @@ describe("String Operators Integration", () => {
       expect(results[0].name).toBe("Diana Prince")
     })
 
-    it("should be case-insensitive (SQLite LIKE default behavior)", async () => {
+    it("should match substring case exactly", async () => {
       const users = db.collection("users", createUserSchema())
 
-      // Note: SQLite LIKE is case-insensitive for ASCII characters by default
-      // So $contains (which uses LIKE) is also case-insensitive
       const upperResults = await users.find({
         name: { $contains: "ALICE" },
       })
@@ -210,9 +208,8 @@ describe("String Operators Integration", () => {
         name: { $contains: "alice" },
       })
 
-      // Both should match all Alice variants due to SQLite's case-insensitive LIKE
-      expect(upperResults).toHaveLength(3)
-      expect(lowerResults).toHaveLength(3)
+      expect(upperResults.map((user) => user.name)).toEqual(["ALICE JONES"])
+      expect(lowerResults.map((user) => user.name)).toEqual(["alice brown"])
     })
 
     it("should work with non-indexed field", async () => {

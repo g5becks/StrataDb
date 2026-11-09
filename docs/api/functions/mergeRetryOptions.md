@@ -4,13 +4,13 @@
 
 ```ts
 function mergeRetryOptions(
-   database?, 
-   collection?, 
+   database?,
+   collection?,
    operation?
 ): RetryOptions | undefined;
 ```
 
-Defined in: [src/retry-utils.ts:157](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/retry-utils.ts#L157)
+Defined in: [src/retry-utils.ts:155](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/retry-utils.ts#L155)
 
 Merges retry options from database, collection, and operation levels.
 Operation-level options take precedence over collection-level, which take precedence over database-level.

@@ -18,9 +18,21 @@ import { mergeDocumentUpdate } from "./deep-merge.js"
 import { buildCompleteDocument } from "./document-builder.js"
 import {
   ConnectionError,
+  SchemaValidationError,
   UniqueConstraintError,
   ValidationError,
 } from "./errors.js"
+import {
+  bind,
+  compoundIndexName,
+  ddlField,
+  fieldPath,
+  generatedColumn,
+  positional,
+  quoteIdent,
+  resolveDDLField,
+  resolveField,
+} from "./field-resolver.js"
 import type {
   CursorSpec,
   ProjectionSpec,
@@ -38,13 +50,26 @@ import {
   withRetry,
 } from "./retry-utils.js"
 import type { SchemaDefinition } from "./schema-types.js"
+import {
+  SQLiteBoundary,
+  sqliteOperation,
+  wrapSqliteError,
+} from "./sqlite-boundary.js"
 import { SQLiteQueryTranslator } from "./sqlite-query-translator.js"
+import { escapeLikeLiteral } from "./string-patterns.js"
+import { transactionManager } from "./transaction-manager.js"
 
-/** Regex to extract field name from SQLite unique constraint error */
-const UNIQUE_CONSTRAINT_REGEX = /UNIQUE constraint failed: \w+\.(\w+)/
-
-/** Regex to remove underscore prefix from generated column names */
-const UNDERSCORE_PREFIX_REGEX = /^_/
+type StoredRow = {
+  _id: string
+  body: string
+  createdAt: number
+  updatedAt: number
+}
+type MutationResult<T> = {
+  before: T | null
+  after: T | null
+  upserted: boolean
+}
 
 /**
  * SQLite-based implementation of the Collection interface.
@@ -108,11 +133,16 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
   /** Collection name (table name in SQLite) */
   readonly name: string
 
+  private get tableSql(): string {
+    return quoteIdent(this.name)
+  }
+
   /** Schema definition for this collection */
   readonly schema: SchemaDefinition<T>
 
   /** SQLite database instance */
   private readonly db: SQLiteDatabase
+  private readonly sql: SQLiteBoundary
 
   /** Query translator for converting filters to SQL */
   private readonly translator: SQLiteQueryTranslator<T>
@@ -168,8 +198,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
     // Only create payload if listeners exist
     const payload = createPayload()
-    // @ts-expect-error - EventEmitter's emit typing is complex with tuple types
-    this._emitter.emit(event, payload)
+    const emitter = this._emitter
+    transactionManager(this.db).event(() => {
+      emitter.dispatch(event, payload)
+    })
   }
 
   /**
@@ -191,15 +223,188 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
   private runOperation<R>(
     operation: () => Promise<R>,
-    options?: RetryableOptions
+    options?: RetryableOptions,
+    operationName = "collection"
   ): Promise<R> {
     if (isDatabaseClosed(this.db)) {
       return Promise.reject(new ConnectionError("StrataDB database is closed"))
     }
-    return withRetry(() => {
-      assertDatabaseOpen(this.db)
-      return operation()
-    }, options)
+    return sqliteOperation.run(operationName, () =>
+      withRetry(async () => {
+        try {
+          assertDatabaseOpen(this.db)
+          return await transactionManager(this.db).run(operation)
+        } catch (error) {
+          throw wrapSqliteError(error, {
+            collection: this.name,
+            operation: operationName,
+          })
+        }
+      }, options)
+    )
+  }
+
+  private visibleDocument(doc: T): T {
+    if (this.schema.timestamps !== false) {
+      return doc
+    }
+    const { createdAt: _createdAt, updatedAt: _updatedAt, ...visible } = doc
+    return visible as T
+  }
+
+  private hydrate(row: StoredRow, internal = false): T {
+    const doc = {
+      ...JSON.parse(row.body),
+      _id: row._id,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    } as T
+    return internal ? doc : this.visibleDocument(doc)
+  }
+
+  private validateMutationDocument(doc: T): void {
+    if (this.schema.validate && !this.schema.validate(doc)) {
+      throw new ValidationError(
+        "Document validation failed during mutation",
+        undefined,
+        doc
+      )
+    }
+  }
+
+  private serializeDocument(doc: T): string {
+    const {
+      _id: _identity,
+      createdAt: _createdAt,
+      updatedAt: _updatedAt,
+      ...body
+    } = doc
+    return stringify(body)
+  }
+
+  private readOneSync(
+    filter: string | QueryFilter<T>,
+    sort?: SortSpec<T>
+  ): T | null {
+    const translated = this.translator.translate(this.normalizeFilter(filter))
+    const options = this.translator.translateOptions(
+      sort ? { sort, limit: 1 } : { limit: 1 }
+    )
+    const row = this.sql
+      .prepare<StoredRow, SQLQueryBindings[]>(
+        `SELECT _id, json(body) AS body, createdAt, updatedAt FROM ${this.tableSql} WHERE ${translated.sql} ${options.sql}`
+      )
+      .get(...translated.params, ...options.params)
+    return row ? this.hydrate(row, true) : null
+  }
+
+  private buildMutationDocument(context: {
+    kind: "update" | "replace"
+    before: T | null
+    filter: string | QueryFilter<T>
+    data: Partial<T>
+    now: number
+  }): T {
+    const { kind, before, filter, data, now } = context
+    const equalities =
+      typeof filter === "string"
+        ? { _id: filter }
+        : Object.fromEntries(
+            Object.entries(filter).filter(
+              ([key, value]) =>
+                !key.startsWith("$") &&
+                (value === null || typeof value !== "object")
+            )
+          )
+    let contents: Partial<T> = data
+    if (!before) {
+      contents = { ...equalities, ...data } as Partial<T>
+    } else if (kind === "update") {
+      contents = mergeDocumentUpdate<T, T>(before, {
+        ...data,
+        _id: before._id,
+      } as T)
+    }
+    const after = buildCompleteDocument<T>(
+      contents as Omit<T, "_id" | "createdAt" | "updatedAt">,
+      {
+        _id:
+          before?._id ??
+          (typeof equalities._id === "string"
+            ? equalities._id
+            : this.idGenerator()),
+        createdAt:
+          typeof before?.createdAt === "number" ? before.createdAt : now,
+        updatedAt: now,
+      }
+    )
+    if (this.schema.validate && !this.schema.validate(after)) {
+      throw new ValidationError(
+        "Document validation failed during atomic mutation",
+        undefined,
+        after
+      )
+    }
+
+    return after
+  }
+
+  private writeMutation(after: T, exists: boolean, now: number): void {
+    if (exists) {
+      this.sql
+        .prepare(
+          `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
+        )
+        .run(this.serializeDocument(after), now, after._id)
+    } else {
+      this.sql
+        .prepare(
+          `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
+        )
+        .run(after._id, this.serializeDocument(after), now, now)
+    }
+  }
+
+  private mutateOne(
+    kind: "update" | "replace" | "delete",
+    filter: string | QueryFilter<T>,
+    data: Partial<T>,
+    options?: { sort?: SortSpec<T>; upsert?: boolean; signal?: AbortSignal }
+  ): MutationResult<T> {
+    assertDatabaseOpen(this.db)
+    throwIfAborted(options?.signal)
+    const result = this.db
+      .transaction(() => {
+        const before = this.readOneSync(filter, options?.sort)
+        if (kind === "delete") {
+          if (before) {
+            this.sql
+              .prepare(`DELETE FROM ${this.tableSql} WHERE _id = ?`)
+              .run(before._id)
+          }
+          return { before, after: null, upserted: false }
+        }
+        if (!(before || options?.upsert)) {
+          return { before: null, after: null, upserted: false }
+        }
+        const now = Date.now()
+        const after = this.buildMutationDocument({
+          kind,
+          before,
+          filter,
+          data,
+          now,
+        })
+        throwIfAborted(options?.signal)
+        this.writeMutation(after, before !== null, now)
+        return { before, after, upserted: !before }
+      })
+      .immediate()
+    return {
+      before: result.before ? this.visibleDocument(result.before) : null,
+      after: result.after ? this.visibleDocument(result.after) : null,
+      upserted: result.upserted,
+    }
   }
 
   /**
@@ -228,6 +433,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
   ) {
     assertDatabaseOpen(db)
     this.db = db
+    this.sql = new SQLiteBoundary(db, name)
     this.name = name
     this.schema = schema
     this.idGenerator = idGenerator
@@ -238,6 +444,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     )
 
     // Initialize table and indexes
+    transactionManager(this.db).assertSynchronousAccess()
     this.createTable()
   }
 
@@ -273,6 +480,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    */
   // biome-ignore lint/correctness/noUnusedPrivateClassMembers: called in constructor
   private createTable(): void {
+    quoteIdent(this.name)
+    for (const field of this.schema.fields) {
+      fieldPath(String(field.name))
+    }
     const columns: string[] = [
       "_id TEXT PRIMARY KEY",
       "body BLOB NOT NULL",
@@ -283,22 +494,22 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     // Add generated columns for indexed fields
     for (const field of this.schema.fields) {
       if (field.indexed) {
-        const columnName = `_${String(field.name)}`
+        const columnName = generatedColumn(String(field.name))
         const sqlType = this.mapTypeToSQLite(field.type)
-        const path = `$.${String(field.name)}`
+        const expression = ddlField(String(field.name))
         columns.push(
-          `${columnName} ${sqlType} GENERATED ALWAYS AS (jsonb_extract(body, '${path}')) VIRTUAL`
+          `${columnName} ${sqlType} GENERATED ALWAYS AS (${expression}) VIRTUAL`
         )
       }
     }
 
     // Create table
     const createTableSQL = `
-      CREATE TABLE IF NOT EXISTS ${this.name} (
+      CREATE TABLE IF NOT EXISTS ${this.tableSql} (
         ${columns.join(",\n        ")}
       )
     `
-    this.db.run(createTableSQL)
+    this.sql.run(createTableSQL)
 
     // Create indexes
     this.createIndexes()
@@ -318,16 +529,31 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
   private createIndexes(): void {
     for (const field of this.schema.fields) {
       if (field.indexed) {
-        const columnName = `_${String(field.name)}`
-        const indexName = `idx_${this.name}_${String(field.name)}`
+        const columnName = generatedColumn(String(field.name))
+        const indexName = quoteIdent(`idx_${this.name}_${String(field.name)}`)
         const uniqueKeyword = field.unique ? "UNIQUE" : ""
 
         const createIndexSQL = `
           CREATE ${uniqueKeyword} INDEX IF NOT EXISTS ${indexName}
-          ON ${this.name}(${columnName})
+          ON ${this.tableSql}(${columnName})
         `
-        this.db.run(createIndexSQL)
+        this.sql.run(createIndexSQL)
       }
+    }
+    for (const index of this.schema.compoundIndexes ?? []) {
+      if (!Array.isArray(index.fields) || index.fields.length === 0) {
+        throw new SchemaValidationError(
+          "A compound index requires at least one field"
+        )
+      }
+      const name = compoundIndexName(this.name, index.name)
+      const columns = index.fields.map((field) =>
+        resolveDDLField(String(field), this.schema.fields)
+      )
+      const unique = index.unique ? "UNIQUE" : ""
+      this.sql.run(
+        `CREATE ${unique} INDEX IF NOT EXISTS ${name} ON ${this.tableSql} (${columns.join(", ")})`
+      )
     }
   }
 
@@ -459,60 +685,27 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    */
   private buildSearchClause(
     search: TextSearchSpec<T>
-  ): { sql: string; params: string[] } | undefined {
+  ): { sql: string; params: SQLQueryBindings[] } | undefined {
     if (!search.text || search.fields.length === 0) {
       return
     }
 
-    const pattern = `%${search.text}%`
-    const collate = search.caseSensitive ? "" : " COLLATE NOCASE"
+    const pattern = `%${escapeLikeLiteral(search.text)}%`
     const clauses: string[] = []
-    const params: string[] = []
+    const params: SQLQueryBindings[] = []
 
     for (const field of search.fields) {
-      const fieldStr = String(field)
-
-      // Check if it's an indexed field (top-level only, no dots)
-      const isIndexed =
-        !fieldStr.includes(".") &&
-        this.schema.fields.some((f) => String(f.name) === fieldStr && f.indexed)
-
-      const column = isIndexed
-        ? `_${fieldStr}`
-        : `jsonb_extract(body, '$.${fieldStr}')`
-
-      clauses.push(`${column} LIKE ?${collate}`)
-      params.push(pattern)
+      const column = resolveField(String(field), this.schema.fields, params)
+      clauses.push(
+        search.caseSensitive
+          ? `instr(${column}, ${bind(search.text, params)}) > 0`
+          : `lower(${column}) LIKE lower(${bind(pattern, params)}) ESCAPE '\\'`
+      )
     }
 
     return {
-      sql: `(${clauses.join(" OR ")})`,
-      params,
+      ...positional(`(${clauses.join(" OR ")})`, params),
     }
-  }
-
-  /**
-   * Builds SQL ORDER BY clause from sort specification.
-   *
-   * @param sort - Sort specification
-   * @returns SQL ORDER BY clause or empty string
-   *
-   * @internal
-   */
-  private buildSortClause(sort: SortSpec<T>): string {
-    const sortClauses: string[] = []
-    for (const [field, direction] of Object.entries(sort)) {
-      const order = direction === 1 ? "ASC" : "DESC"
-      // Use generated column name for indexed fields, otherwise jsonb_extract
-      const indexedField = this.schema.fields.find(
-        (f) => String(f.name) === field && f.indexed
-      )
-      const column = indexedField
-        ? `_${field}`
-        : `jsonb_extract(body, '$.${field}')`
-      sortClauses.push(`${column} ${order}`)
-    }
-    return sortClauses.length > 0 ? ` ORDER BY ${sortClauses.join(", ")}` : ""
   }
 
   /**
@@ -554,18 +747,17 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     const operator = isAfter === isAsc ? ">" : "<"
 
     // Get column reference for sort field
-    const indexedField = this.schema.fields.find(
-      (f) => String(f.name) === sortField && f.indexed
+    const fieldParams: SQLQueryBindings[] = []
+    const sortColumn = resolveField(sortField, this.schema.fields, fieldParams)
+    const cursorStatement = positional(
+      `SELECT ${sortColumn} as sortVal FROM ${this.tableSql} WHERE _id = ${bind(cursorId, fieldParams)}`,
+      fieldParams
     )
-    const sortColumn = indexedField
-      ? `_${sortField}`
-      : `jsonb_extract(body, '$.${sortField}')`
-
-    // Look up the cursor document's sort value
-    const cursorQuery = `SELECT ${sortColumn} as sortVal FROM ${this.name} WHERE _id = ?`
-    const cursorRow = this.db
-      .prepare<{ sortVal: SQLQueryBindings }, [string]>(cursorQuery)
-      .get(cursorId)
+    const cursorRow = this.sql
+      .prepare<{ sortVal: SQLQueryBindings }, SQLQueryBindings[]>(
+        cursorStatement.sql
+      )
+      .get(...cursorStatement.params)
 
     if (!cursorRow) {
       return // Cursor document not found, skip cursor filtering
@@ -573,14 +765,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
     // Build compound comparison: (sortCol, _id) > (cursorSortVal, cursorId)
     // This ensures stable pagination even with duplicate sort values
-    const sql = `((${sortColumn} ${operator} ?) OR (${sortColumn} = ? AND _id ${operator} ?))`
-    const params: SQLQueryBindings[] = [
-      cursorRow.sortVal,
-      cursorRow.sortVal,
-      cursorId,
-    ]
-
-    return { sql, params }
+    const params: SQLQueryBindings[] = []
+    const column = resolveField(sortField, this.schema.fields, params)
+    const sql = `((${column} ${operator} ${bind(cursorRow.sortVal, params)}) OR (${column} = ${bind(cursorRow.sortVal, params)} AND _id ${operator} ${bind(cursorId, params)}))`
+    return positional(sql, params)
   }
 
   /**
@@ -692,8 +880,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
-        const stmt = this.db.prepare<{ _id: string; body: string }, [string]>(
-          `SELECT _id, json(body) as body FROM ${this.name} WHERE _id = ?`
+        const stmt = this.sql.prepare<StoredRow, [string]>(
+          `SELECT _id, json(body) as body, createdAt, updatedAt FROM ${this.tableSql} WHERE _id = ?`
         )
         const row = stmt.get(id)
 
@@ -701,10 +889,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           return Promise.resolve(null)
         }
 
-        const doc = JSON.parse(row.body) as Omit<T, "_id">
-        return Promise.resolve({ _id: row._id, ...doc } as T)
+        return Promise.resolve(this.hydrate(row))
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "findById"
     )
   }
 
@@ -767,7 +955,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         const { sql: whereClause, params } = this.translator.translate(filter)
 
-        let sql = `SELECT _id, json(body) as body FROM ${this.name}`
+        let sql = `SELECT _id, json(body) as body, createdAt, updatedAt FROM ${this.tableSql}`
 
         // Build WHERE clause combining filter and search
         const whereParts: string[] = []
@@ -802,32 +990,21 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           sql += ` WHERE ${whereParts.join(" AND ")}`
         }
 
-        // Apply sort
-        if (options?.sort) {
-          sql += this.buildSortClause(options.sort)
+        const translatedOptions = this.translator.translateOptions(
+          options ?? {}
+        )
+        if (translatedOptions.sql) {
+          sql += ` ${translatedOptions.sql}`
+          allParams.push(...translatedOptions.params)
         }
 
-        // Apply limit and skip
-        if (options?.limit !== undefined) {
-          sql += ` LIMIT ${options.limit}`
-        }
-        if (options?.skip !== undefined) {
-          sql += ` OFFSET ${options.skip}`
-        }
-
-        const stmt = this.db.prepare<
-          { _id: string; body: string },
-          SQLQueryBindings[]
-        >(sql)
+        const stmt = this.sql.prepare<StoredRow, SQLQueryBindings[]>(sql)
         const rows = stmt.all(...allParams)
 
         assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
-        let results = rows.map((row) => {
-          const doc = JSON.parse(row.body) as Omit<T, "_id">
-          return { _id: row._id, ...doc } as T
-        })
+        let results = rows.map((row) => this.hydrate(row))
 
         // Apply projection (select/omit/projection)
         const projection = this.normalizeProjection(options)
@@ -837,7 +1014,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         return Promise.resolve(results)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "find"
     )
   }
 
@@ -913,16 +1091,19 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         const { sql: whereClause, params } = this.translator.translate(filter)
 
-        let sql = `SELECT COUNT(*) as count FROM ${this.name}`
+        let sql = `SELECT COUNT(*) as count FROM ${this.tableSql}`
         if (whereClause) {
           sql += ` WHERE ${whereClause}`
         }
 
-        const stmt = this.db.prepare<{ count: number }, SQLQueryBindings[]>(sql)
+        const stmt = this.sql.prepare<{ count: number }, SQLQueryBindings[]>(
+          sql
+        )
         const row = stmt.get(...params)
         return Promise.resolve(row?.count ?? 0)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "count"
     )
   }
 
@@ -1040,7 +1221,6 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<T> {
     return this.runOperation(
-      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex insert logic
       () => {
         assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
@@ -1066,48 +1246,31 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         }
 
         // Serialize body (excludes id which is stored separately)
-        const { _id: docId, ...bodyData } = fullDoc
-        const body = stringify(bodyData)
+        const docId = fullDoc._id
+        const body = this.serializeDocument(fullDoc)
 
         try {
-          const stmt = this.db.prepare(
-            `INSERT INTO ${this.name} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
+          const stmt = this.sql.prepare(
+            `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
           )
           stmt.run(docId, body, now, now)
 
           // Emit insert event after successful operation
-          this.emitEvent("insert", () => ({ document: fullDoc }))
+          const document = this.visibleDocument(fullDoc)
+          this.emitEvent("insert", () => ({ document }))
 
-          return Promise.resolve(fullDoc)
+          return Promise.resolve(document)
         } catch (error) {
-          // Handle unique constraint violations
-          if (
-            error instanceof Error &&
-            error.message.includes("UNIQUE constraint failed")
-          ) {
-            // Extract field name from error message
-            const match = error.message.match(UNIQUE_CONSTRAINT_REGEX)
-            const field = match?.[1]?.replace(UNDERSCORE_PREFIX_REGEX, "") // Remove underscore prefix from generated columns
-
-            // Get the value that violated the constraint
-            const value = field
-              ? (fullDoc as Record<string, unknown>)[field]
-              : undefined
-
-            // Use helper to build actionable error message
-            const message = field
-              ? `Duplicate value for unique field '${field}': ${JSON.stringify(value)} in collection '${this.name}'. ` +
-                "A document with this value already exists. " +
-                "Use updateOne() with { upsert: true } to update existing documents, " +
-                "or use findOne() to check for existence before inserting."
-              : "Unique constraint violation occurred"
-
-            throw new UniqueConstraintError(message, field, value)
+          if (error instanceof UniqueConstraintError && error.field) {
+            Object.assign(error, {
+              value: (fullDoc as Record<string, unknown>)[error.field],
+            })
           }
           throw error
         }
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "insertOne"
     )
   }
 
@@ -1135,87 +1298,35 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    * );
    * ```
    */
-  async updateOne(
+  updateOne(
     filter: string | QueryFilter<T>,
     update: Omit<Partial<T>, "_id" | "createdAt" | "updatedAt">,
     options?: { upsert?: boolean; signal?: AbortSignal }
   ): Promise<T | null> {
-    assertDatabaseOpen(this.db)
-    throwIfAborted(options?.signal)
-
-    const normalizedFilter = this.normalizeFilter(filter)
-    const existing = await this.findOne(
-      normalizedFilter,
-      options?.signal ? { signal: options.signal } : undefined
-    )
-
-    assertDatabaseOpen(this.db)
-    throwIfAborted(options?.signal)
-
-    if (!existing) {
-      if (options?.upsert) {
-        // Merge filter fields into document for upsert
-        const filterFields =
-          typeof filter === "string" ? { _id: filter } : filter
-        const signalOpt = options?.signal
-          ? { signal: options.signal }
-          : undefined
-        const upsertDoc = { ...filterFields, ...update } as Omit<
-          T,
-          "_id" | "createdAt" | "updatedAt"
-        >
-        const inserted = await this.insertOne(upsertDoc, signalOpt)
-
-        // Emit update event with upserted flag
-        this.emitEvent("update", () => ({
+    return this.runOperation(
+      () => {
+        const result = this.mutateOne(
+          "update",
           filter,
-          update: update as Partial<T>,
-          document: inserted,
-          upserted: true,
-        }))
-
-        return inserted
-      }
-      return null
-    }
-
-    // Document exists - update it
-    const now = Date.now()
-    const mergedDoc = mergeDocumentUpdate<
-      T,
-      typeof update & { _id: string; updatedAt: number }
-    >(existing, {
-      ...update,
-      _id: existing._id,
-      updatedAt: now,
-    })
-
-    if (this.schema.validate && !this.schema.validate(mergedDoc)) {
-      throw new ValidationError(
-        "Document validation failed after merge: Document does not match the schema. " +
-          "Check that all required fields are present and have correct types.",
-        undefined,
-        mergedDoc
-      )
-    }
-
-    const { _id: mergedDocId, ...mergedBodyData } = mergedDoc
-    const mergedBody = stringify(mergedBodyData)
-    this.db
-      .prepare(
-        `UPDATE ${this.name} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
-      )
-      .run(mergedBody, now, mergedDocId)
-
-    // Emit update event after successful operation
-    this.emitEvent("update", () => ({
-      filter,
-      update: update as Partial<T>,
-      document: mergedDoc,
-      upserted: false,
-    }))
-
-    return mergedDoc
+          update as Partial<T>,
+          options
+        )
+        if (result.upserted && result.after) {
+          this.emitEvent("insert", () => ({ document: result.after as T }))
+        }
+        if (result.after) {
+          this.emitEvent("update", () => ({
+            filter,
+            update: update as Partial<T>,
+            document: result.after,
+            upserted: result.upserted,
+          }))
+        }
+        return Promise.resolve(result.after)
+      },
+      this.buildRetryOptions(undefined, options?.signal),
+      "updateOne"
+    )
   }
 
   /**
@@ -1263,74 +1374,17 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
   ): Promise<T | null> {
     return this.runOperation(
       () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
-
-        const normalizedFilter = this.normalizeFilter(filter)
-
-        // Find the document ID to replace
-        const { sql: whereClause, params } =
-          this.translator.translate(normalizedFilter)
-        let querySql = `SELECT _id, json_extract(body, '$.createdAt') as createdAt FROM ${this.name}`
-        if (whereClause && whereClause !== "1=1") {
-          querySql += ` WHERE ${whereClause}`
-        }
-        querySql += " LIMIT 1"
-
-        const row = this.db
-          .prepare<{ _id: string; createdAt: number }, SQLQueryBindings[]>(
-            querySql
-          )
-          .get(...params)
-
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
-
-        if (!row) {
-          // Emit replace event with null document
-          this.emitEvent("replace", () => ({
-            filter,
-            document: null,
-          }))
-
-          return Promise.resolve(null)
-        }
-
-        const now = Date.now()
-
-        // Build full document with preserved _id and createdAt
-        const fullDoc = buildCompleteDocument<T>(doc, {
-          _id: row._id,
-          createdAt: row.createdAt,
-          updatedAt: now,
-        })
-
-        if (this.schema.validate && !this.schema.validate(fullDoc)) {
-          throw new ValidationError(
-            `Document validation failed during replace for filter '${JSON.stringify(filter)}': Document does not match the schema. ` +
-              "Check that all required fields are present and have correct types.",
-            undefined,
-            fullDoc
-          )
-        }
-
-        const { _id: replaceDocId, ...bodyData } = fullDoc
-        const body = stringify(bodyData)
-        this.db
-          .prepare(
-            `UPDATE ${this.name} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
-          )
-          .run(body, now, replaceDocId)
-
-        // Emit replace event after successful operation
-        this.emitEvent("replace", () => ({
+        const result = this.mutateOne(
+          "replace",
           filter,
-          document: fullDoc,
-        }))
-
-        return Promise.resolve(fullDoc)
+          doc as Partial<T>,
+          options
+        )
+        this.emitEvent("replace", () => ({ filter, document: result.after }))
+        return Promise.resolve(result.after)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "replaceOne"
     )
   }
 
@@ -1370,7 +1424,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           "_id" in normalizedFilter &&
           Object.keys(normalizedFilter).length === 1
         ) {
-          const stmt = this.db.prepare(`DELETE FROM ${this.name} WHERE _id = ?`)
+          const stmt = this.sql.prepare(
+            `DELETE FROM ${this.tableSql} WHERE _id = ?`
+          )
           const result = stmt.run(normalizedFilter._id as string)
           const deleted = result.changes > 0
 
@@ -1386,20 +1442,22 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         // For complex filters: find first match, then delete by ID
         const { sql: whereClause, params } =
           this.translator.translate(normalizedFilter)
-        let findSql = `SELECT _id FROM ${this.name}`
+        let findSql = `SELECT _id FROM ${this.tableSql}`
         if (whereClause && whereClause !== "1=1") {
           findSql += ` WHERE ${whereClause}`
         }
         findSql += " LIMIT 1"
 
-        const row = this.db
+        const row = this.sql
           .prepare<{ _id: string }, SQLQueryBindings[]>(findSql)
           .get(...params)
         if (!row) {
           return Promise.resolve(false)
         }
 
-        const stmt = this.db.prepare(`DELETE FROM ${this.name} WHERE _id = ?`)
+        const stmt = this.sql.prepare(
+          `DELETE FROM ${this.tableSql} WHERE _id = ?`
+        )
         const result = stmt.run(row._id)
         const deleted = result.changes > 0
 
@@ -1411,7 +1469,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         return Promise.resolve(deleted)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "deleteOne"
     )
   }
 
@@ -1426,19 +1485,6 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     errors: { index: number; error: Error; document: typeof doc }[]
   ): Error {
     const err = error instanceof Error ? error : new Error(String(error))
-
-    if (err.message.includes("UNIQUE constraint failed")) {
-      const match = err.message.match(UNIQUE_CONSTRAINT_REGEX)
-      const field = match?.[1]?.replace(UNDERSCORE_PREFIX_REGEX, "")
-      const uniqueErr = new UniqueConstraintError(
-        `Duplicate value for unique field '${field}'`,
-        field,
-        undefined
-      )
-      errors.push({ index, error: uniqueErr, document: doc })
-      return uniqueErr
-    }
-
     errors.push({ index, error: err, document: doc })
     return err
   }
@@ -1481,80 +1527,84 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     }
   ): Promise<InsertManyResult<T>> {
     return this.runOperation(
-      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex batch insert logic
-      () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
+      () =>
+        Promise.resolve(
+          // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex batch insert logic
+          transactionManager(this.db).sync(() => {
+            assertDatabaseOpen(this.db)
+            throwIfAborted(options?.signal)
 
-        const ordered = options?.ordered ?? true
-        const now = Date.now()
-        const insertedDocs: T[] = []
-        const insertedIds: string[] = []
-        const errors: {
-          index: number
-          error: Error
-          document: Omit<T, "_id" | "createdAt" | "updatedAt"> & {
-            _id?: string
-          }
-        }[] = []
+            const ordered = options?.ordered ?? true
+            const now = Date.now()
+            const insertedDocs: T[] = []
+            const insertedIds: string[] = []
+            const errors: {
+              index: number
+              error: Error
+              document: Omit<T, "_id" | "createdAt" | "updatedAt"> & {
+                _id?: string
+              }
+            }[] = []
 
-        const stmt = this.db.prepare(
-          `INSERT INTO ${this.name} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
-        )
+            const stmt = this.sql.prepare(
+              `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
+            )
 
-        for (let i = 0; i < docs.length; i++) {
-          assertDatabaseOpen(this.db)
-          throwIfAborted(options?.signal)
+            for (let i = 0; i < docs.length; i++) {
+              assertDatabaseOpen(this.db)
+              throwIfAborted(options?.signal)
 
-          const doc = docs[i]
-          if (!doc) {
-            continue
-          }
+              const doc = docs[i]
+              if (!doc) {
+                continue
+              }
 
-          try {
-            const _id = doc._id ?? this.idGenerator()
-            const fullDoc = buildCompleteDocument<T>(doc, {
-              _id,
-              createdAt: now,
-              updatedAt: now,
-            })
+              try {
+                const _id = doc._id ?? this.idGenerator()
+                const fullDoc = buildCompleteDocument<T>(doc, {
+                  _id,
+                  createdAt: now,
+                  updatedAt: now,
+                })
 
-            // Validate if validator is provided
-            if (this.schema.validate && !this.schema.validate(fullDoc)) {
-              throw new ValidationError(
-                `Document validation failed in batch insert at index ${i}: Document does not match the schema. ` +
-                  "Check that all required fields are present and have correct types.",
-                undefined,
-                fullDoc
-              )
+                // Validate if validator is provided
+                if (this.schema.validate && !this.schema.validate(fullDoc)) {
+                  throw new ValidationError(
+                    `Document validation failed in batch insert at index ${i}: Document does not match the schema. ` +
+                      "Check that all required fields are present and have correct types.",
+                    undefined,
+                    fullDoc
+                  )
+                }
+
+                const docId = fullDoc._id
+                const body = this.serializeDocument(fullDoc)
+                stmt.run(docId, body, now, now)
+
+                insertedDocs.push(this.visibleDocument(fullDoc))
+                insertedIds.push(_id)
+              } catch (error) {
+                const err = this.handleInsertError(error, i, doc, errors)
+                if (ordered && err) {
+                  break
+                }
+              }
             }
 
-            const { _id: docId, ...bodyData } = fullDoc
-            const body = stringify(bodyData)
-            stmt.run(docId, body, now, now)
+            // Emit insertMany event after successful operation
+            this.emitEvent("insertMany", () => ({
+              documents: insertedDocs,
+              insertedCount: insertedDocs.length,
+            }))
 
-            insertedDocs.push(fullDoc)
-            insertedIds.push(_id)
-          } catch (error) {
-            const err = this.handleInsertError(error, i, doc, errors)
-            if (ordered && err) {
-              break
+            return {
+              documents: insertedDocs,
+              insertedCount: insertedDocs.length,
             }
-          }
-        }
-
-        // Emit insertMany event after successful operation
-        this.emitEvent("insertMany", () => ({
-          documents: insertedDocs,
-          insertedCount: insertedDocs.length,
-        }))
-
-        return Promise.resolve({
-          documents: insertedDocs,
-          insertedCount: insertedDocs.length,
-        })
-      },
-      this.buildRetryOptions(options?.retry, options?.signal)
+          })
+        ),
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "insertMany"
     )
   }
 
@@ -1595,102 +1645,92 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<UpdateResult> {
     return this.runOperation(
-      () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
+      () =>
+        Promise.resolve(
+          transactionManager(this.db).sync(() => {
+            assertDatabaseOpen(this.db)
+            throwIfAborted(options?.signal)
 
-        const { sql: whereClause, params } = this.translator.translate(filter)
+            const { sql: whereClause, params } =
+              this.translator.translate(filter)
 
-        // Find all matching documents
-        let selectSql = `SELECT _id, json(body) as body FROM ${this.name}`
-        if (whereClause) {
-          selectSql += ` WHERE ${whereClause}`
-        }
+            // Find all matching documents
+            let selectSql = `SELECT _id, json(body) as body, createdAt, updatedAt FROM ${this.tableSql}`
+            if (whereClause) {
+              selectSql += ` WHERE ${whereClause}`
+            }
 
-        const stmt = this.db.prepare<
-          { _id: string; body: string },
-          SQLQueryBindings[]
-        >(selectSql)
-        const rows = stmt.all(...params)
-        const matchedCount = rows.length
-
-        if (matchedCount === 0) {
-          // Emit updateMany event even when no matches
-          this.emitEvent("updateMany", () => ({
-            filter,
-            update: update as Partial<T>,
-            matchedCount: 0,
-            modifiedCount: 0,
-          }))
-
-          return Promise.resolve({
-            matchedCount: 0,
-            modifiedCount: 0,
-          })
-        }
-
-        const now = Date.now()
-        const updatedDocs: T[] = []
-
-        // Prepare all updated documents and validate before committing
-        for (const row of rows) {
-          assertDatabaseOpen(this.db)
-          throwIfAborted(options?.signal)
-
-          const existingDoc = JSON.parse(row.body) as Omit<T, "_id">
-          const mergedDoc = mergeDocumentUpdate<
-            T,
-            typeof update & { _id: string; updatedAt: number }
-          >(existingDoc, {
-            ...update,
-            _id: row._id,
-            updatedAt: now,
-          })
-
-          if (this.schema.validate && !this.schema.validate(mergedDoc)) {
-            throw new ValidationError(
-              `Document validation failed during batch update for id '${row._id}': Document does not match the schema. ` +
-                "Check that all required fields are present and have correct types.",
-              undefined,
-              mergedDoc
+            const stmt = this.sql.prepare<StoredRow, SQLQueryBindings[]>(
+              selectSql
             )
-          }
+            const rows = stmt.all(...params)
+            const matchedCount = rows.length
 
-          updatedDocs.push(mergedDoc)
-        }
+            if (matchedCount === 0) {
+              // Emit updateMany event even when no matches
+              this.emitEvent("updateMany", () => ({
+                filter,
+                update: update as Partial<T>,
+                matchedCount: 0,
+                modifiedCount: 0,
+              }))
 
-        // Use transaction for atomic update
-        const updateStmt = this.db.prepare(
-          `UPDATE ${this.name} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
-        )
+              return {
+                matchedCount: 0,
+                modifiedCount: 0,
+              }
+            }
 
-        this.db.exec("BEGIN TRANSACTION")
-        try {
-          for (const doc of updatedDocs) {
-            const { _id, ...bodyData } = doc
-            const body = stringify(bodyData)
-            updateStmt.run(body, now, _id)
-          }
-          this.db.exec("COMMIT")
-        } catch (error) {
-          this.db.exec("ROLLBACK")
-          throw error
-        }
+            const now = Date.now()
+            const updatedDocs: T[] = []
 
-        // Emit updateMany event after successful operation
-        this.emitEvent("updateMany", () => ({
-          filter,
-          update: update as Partial<T>,
-          matchedCount,
-          modifiedCount: updatedDocs.length,
-        }))
+            // Prepare all updated documents and validate before committing
+            for (const row of rows) {
+              assertDatabaseOpen(this.db)
+              throwIfAborted(options?.signal)
 
-        return Promise.resolve({
-          matchedCount,
-          modifiedCount: updatedDocs.length,
-        })
-      },
-      this.buildRetryOptions(options?.retry, options?.signal)
+              const existingDoc = this.hydrate(row, true)
+              const mergedDoc = mergeDocumentUpdate<
+                T,
+                typeof update & { _id: string; updatedAt: number }
+              >(existingDoc, {
+                ...update,
+                _id: row._id,
+                updatedAt: now,
+              })
+
+              this.validateMutationDocument(mergedDoc)
+
+              updatedDocs.push(mergedDoc)
+            }
+
+            // Use transaction for atomic update
+            const updateStmt = this.sql.prepare(
+              `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
+            )
+
+            for (const doc of updatedDocs) {
+              const _id = doc._id
+              const body = this.serializeDocument(doc)
+              updateStmt.run(body, now, _id)
+            }
+
+            // Emit updateMany event after successful operation
+            this.emitEvent("updateMany", () => ({
+              filter,
+              update: update as Partial<T>,
+              matchedCount,
+              modifiedCount: updatedDocs.length,
+            }))
+
+            return {
+              matchedCount,
+              modifiedCount: updatedDocs.length,
+            }
+          })
+        ),
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "updateMany"
     )
   }
 
@@ -1721,40 +1761,38 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<DeleteResult> {
     return this.runOperation(
-      () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
+      () =>
+        Promise.resolve(
+          transactionManager(this.db).sync(() => {
+            assertDatabaseOpen(this.db)
+            throwIfAborted(options?.signal)
 
-        const { sql: whereClause, params } = this.translator.translate(filter)
+            const { sql: whereClause, params } =
+              this.translator.translate(filter)
 
-        let sql = `DELETE FROM ${this.name}`
-        if (whereClause) {
-          sql += ` WHERE ${whereClause}`
-        }
+            let sql = `DELETE FROM ${this.tableSql}`
+            if (whereClause) {
+              sql += ` WHERE ${whereClause}`
+            }
 
-        this.db.exec("BEGIN TRANSACTION")
-        try {
-          const stmt = this.db.prepare(sql)
-          const result = stmt.run(...params)
-          this.db.exec("COMMIT")
+            const stmt = this.sql.prepare(sql)
+            const result = stmt.run(...params)
 
-          const deletedCount = result.changes
+            const deletedCount = result.changes
 
-          // Emit deleteMany event after successful operation
-          this.emitEvent("deleteMany", () => ({
-            filter,
-            deletedCount,
-          }))
+            // Emit deleteMany event after successful operation
+            this.emitEvent("deleteMany", () => ({
+              filter,
+              deletedCount,
+            }))
 
-          return Promise.resolve({
-            deletedCount,
+            return {
+              deletedCount,
+            }
           })
-        } catch (error) {
-          this.db.exec("ROLLBACK")
-          throw error
-        }
-      },
-      this.buildRetryOptions(options?.retry, options?.signal)
+        ),
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "deleteMany"
     )
   }
 
@@ -1786,8 +1824,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    * );
    * ```
    */
-  // biome-ignore lint/suspicious/useAwait: wrapper for retry logic
-  async findOneAndDelete(
+  findOneAndDelete(
     filter: string | QueryFilter<T>,
     options?: {
       sort?: SortSpec<T>
@@ -1796,40 +1833,16 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     }
   ): Promise<T | null> {
     return this.runOperation(
-      async () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
-
-        // Normalize and find the document first
-        const normalizedFilter = this.normalizeFilter(filter)
-        const doc = await this.findOne(normalizedFilter, options)
-
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
-
-        if (!doc) {
-          // Emit findOneAndDelete event with null document
-          this.emitEvent("findOneAndDelete", () => ({
-            filter,
-            document: null,
-          }))
-
-          return null
-        }
-
-        // Delete by ID
-        const stmt = this.db.prepare(`DELETE FROM ${this.name} WHERE _id = ?`)
-        stmt.run(doc._id)
-
-        // Emit findOneAndDelete event after successful operation
+      () => {
+        const result = this.mutateOne("delete", filter, {}, options)
         this.emitEvent("findOneAndDelete", () => ({
           filter,
-          document: doc,
+          document: result.before,
         }))
-
-        return doc
+        return Promise.resolve(result.before)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "findOneAndDelete"
     )
   }
 
@@ -1841,8 +1854,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    * @param options - Update options (sort, returnDocument, upsert)
    * @returns Promise resolving to the document before or after update, or null if not found
    */
-  // biome-ignore lint/suspicious/useAwait: wrapper for retry logic
-  async findOneAndUpdate(
+  findOneAndUpdate(
     filter: string | QueryFilter<T>,
     update: Omit<Partial<T>, "_id" | "createdAt" | "updatedAt">,
     options?: {
@@ -1854,66 +1866,36 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     }
   ): Promise<T | null> {
     return this.runOperation(
-      async () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
-
-        const returnDoc = options?.returnDocument ?? "after"
-        const normalizedFilter = this.normalizeFilter(filter)
-
-        // Find the document
-        const findOptions = options?.sort ? { sort: options.sort } : undefined
-        const existing = await this.findOne(normalizedFilter, findOptions)
-
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
-
-        if (!existing) {
-          // Handle upsert
-          if (options?.upsert) {
-            const inserted = await this.insertOne(
-              update as Omit<T, "_id" | "createdAt" | "updatedAt">
-            )
-            const resultDoc = returnDoc === "after" ? inserted : null
-
-            // Emit findOneAndUpdate event with upserted flag
-            this.emitEvent("findOneAndUpdate", () => ({
-              filter,
-              update: update as Partial<T>,
-              document: resultDoc,
-              upserted: true,
-            }))
-
-            return resultDoc
-          }
-
-          // Emit findOneAndUpdate event with null document
-          this.emitEvent("findOneAndUpdate", () => ({
+      () => {
+        const result = this.mutateOne(
+          "update",
+          filter,
+          update as Partial<T>,
+          options
+        )
+        if (result.upserted && result.after) {
+          this.emitEvent("insert", () => ({ document: result.after as T }))
+        }
+        if (result.before) {
+          this.emitEvent("update", () => ({
             filter,
             update: update as Partial<T>,
-            document: null,
             upserted: false,
+            document: result.after,
           }))
-
-          return null
         }
-
-        // Update by _id
-        const before = existing
-        const afterUpdate = await this.updateOne(existing._id, update)
-        const resultDoc = returnDoc === "before" ? before : afterUpdate
-
-        // Emit findOneAndUpdate event after successful operation
+        const document =
+          options?.returnDocument === "before" ? result.before : result.after
         this.emitEvent("findOneAndUpdate", () => ({
           filter,
           update: update as Partial<T>,
-          document: resultDoc,
-          upserted: false,
+          document,
+          upserted: result.upserted,
         }))
-
-        return resultDoc
+        return Promise.resolve(document)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "findOneAndUpdate"
     )
   }
 
@@ -1925,8 +1907,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    * @param options - Replace options (sort, returnDocument, upsert)
    * @returns Promise resolving to the document before or after replacement, or null if not found
    */
-  // biome-ignore lint/suspicious/useAwait: wrapper for retry logic
-  async findOneAndReplace(
+  findOneAndReplace(
     filter: string | QueryFilter<T>,
     replacement: Omit<T, "_id" | "createdAt" | "updatedAt">,
     options?: {
@@ -1938,65 +1919,32 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     }
   ): Promise<T | null> {
     return this.runOperation(
-      async () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
-
-        const returnDoc = options?.returnDocument ?? "after"
-        const normalizedFilter = this.normalizeFilter(filter)
-
-        // Find the document
-        const findOptions = options?.sort ? { sort: options.sort } : undefined
-        const existing = await this.findOne(normalizedFilter, findOptions)
-
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
-
-        if (!existing) {
-          // Handle upsert
-          if (options?.upsert) {
-            const inserted = await this.insertOne(replacement)
-            const resultDoc = returnDoc === "after" ? inserted : null
-
-            // Emit findOneAndReplace event with upserted flag
-            this.emitEvent("findOneAndReplace", () => ({
-              filter,
-              document: resultDoc,
-              upserted: true,
-            }))
-
-            return resultDoc
-          }
-
-          // Emit findOneAndReplace event with null document
-          this.emitEvent("findOneAndReplace", () => ({
-            filter,
-            document: null,
-            upserted: false,
-          }))
-
-          return null
+      () => {
+        const result = this.mutateOne(
+          "replace",
+          filter,
+          replacement as Partial<T>,
+          options
+        )
+        if (result.upserted && result.after) {
+          this.emitEvent("insert", () => ({ document: result.after as T }))
         }
-
-        // Replace by _id
-        const before = existing
-        const afterReplace = await this.replaceOne(existing._id, replacement)
-        const resultDoc = returnDoc === "before" ? before : afterReplace
-
-        // Emit findOneAndReplace event after successful operation
+        if (result.before) {
+          this.emitEvent("replace", () => ({ filter, document: result.after }))
+        }
+        const document =
+          options?.returnDocument === "before" ? result.before : result.after
         this.emitEvent("findOneAndReplace", () => ({
           filter,
-          document: resultDoc,
-          upserted: false,
+          document,
+          upserted: result.upserted,
         }))
-
-        return resultDoc
+        return Promise.resolve(document)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "findOneAndReplace"
     )
   }
-
-  // ===== Utility Methods =====
 
   /**
    * Find distinct values for a specified field across the collection.
@@ -2015,37 +1963,37 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
-        const fieldStr = String(field)
-
-        // Determine if field is indexed
-        const indexedField = this.schema.fields.find(
-          (f) => String(f.name) === fieldStr && f.indexed
+        const columnParams: SQLQueryBindings[] = []
+        const column = resolveField(
+          String(field),
+          this.schema.fields,
+          columnParams
         )
-        const column = indexedField
-          ? `_${fieldStr}`
-          : `jsonb_extract(body, '$.${fieldStr}')`
-
-        // Build query
-        let sql = `SELECT DISTINCT ${column} as value FROM ${this.name}`
-        let params: SQLQueryBindings[] = []
+        const selection = positional(
+          `SELECT DISTINCT ${column} as value FROM ${this.tableSql}`,
+          columnParams
+        )
+        let sql = selection.sql
+        const params: SQLQueryBindings[] = [...selection.params]
 
         if (filter) {
           const { sql: whereClause, params: filterParams } =
             this.translator.translate(filter)
           if (whereClause) {
             sql += ` WHERE ${whereClause}`
-            params = filterParams
+            params.push(...filterParams)
           }
         }
 
         sql += " ORDER BY value"
 
-        const stmt = this.db.prepare<{ value: T[K] }, SQLQueryBindings[]>(sql)
+        const stmt = this.sql.prepare<{ value: T[K] }, SQLQueryBindings[]>(sql)
         const rows = stmt.all(...params)
 
         return Promise.resolve(rows.map((row) => row.value))
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "distinct"
     )
   }
 
@@ -2064,13 +2012,14 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         throwIfAborted(options?.signal)
 
         // Use SQLite's internal statistics for fast estimate
-        const stmt = this.db.prepare<{ count: number }, []>(
-          `SELECT COUNT(*) as count FROM ${this.name}`
+        const stmt = this.sql.prepare<{ count: number }, []>(
+          `SELECT COUNT(*) as count FROM ${this.tableSql}`
         )
         const result = stmt.get()
         return Promise.resolve(result?.count ?? 0)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "estimatedDocumentCount"
     )
   }
 
@@ -2084,22 +2033,26 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     retry?: RetryOptions | false
   }): Promise<void> {
     return this.runOperation(
-      () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
-        this.db.exec(`DROP TABLE IF EXISTS ${this.name}`)
+      () =>
+        Promise.resolve(
+          transactionManager(this.db).sync(() => {
+            assertDatabaseOpen(this.db)
+            throwIfAborted(options?.signal)
+            this.sql.exec(`DROP TABLE IF EXISTS ${this.tableSql}`)
 
-        // Emit drop event after successful operation
-        this.emitEvent("drop", () => ({
-          name: this.name,
-        }))
+            // Emit drop event after successful operation
+            this.emitEvent("drop", () => ({
+              name: this.name,
+            }))
 
-        // Clean up event resources after emitting drop event
-        this.cleanupEvents()
+            // Clean up event resources after emitting drop event
+            transactionManager(this.db).event(() => this.cleanupEvents())
 
-        return Promise.resolve()
-      },
-      this.buildRetryOptions(options?.retry, options?.signal)
+            return
+          })
+        ),
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "drop"
     )
   }
 
@@ -2155,7 +2108,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         throw new ValidationError("Document validation failed", undefined, doc)
       },
-      this.buildRetryOptions(options?.retry, options?.signal)
+      this.buildRetryOptions(options?.retry, options?.signal),
+      "validate"
     )
   }
 

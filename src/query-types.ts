@@ -122,10 +122,10 @@ export type ComparisonOperator<T> = T extends number | Date
  * For complex pattern matching that would typically use regular expressions,
  * consider using these alternatives:
  * - `$like`: For SQL-style pattern matching with % wildcards (case-sensitive)
- * - `$ilike`: For SQL-style pattern matching with % wildcards (case-insensitive)
- * - `$contains`: For substring containment (sugar for `$like: '%value%'`)
- * - `$startsWith`: For prefix matching (more efficient than regex)
- * - `$endsWith`: For suffix matching (more efficient than regex)
+ * - `$ilike`: For SQL-style patterns with ASCII case folding
+ * - `$contains`: For case-sensitive literal substring containment
+ * - `$startsWith`: For case-sensitive literal prefix matching
+ * - `$endsWith`: For case-sensitive literal suffix matching
  *
  * @example
  * ```typescript
@@ -141,7 +141,7 @@ export type ComparisonOperator<T> = T extends number | Date
  *   $ilike: '%alice%'          // Matches 'Alice', 'ALICE', 'alice', etc.
  * };
  *
- * // ✅ Substring containment (sugar for $like: '%value%')
+ * // ✅ Literal substring containment
  * const containsQuery: StringOperator = {
  *   $contains: 'admin'         // Equivalent to: $like: '%admin%'
  * };
@@ -169,7 +169,7 @@ export type StringOperator = {
    *
    * @remarks
    * The `$ilike` operator performs case-insensitive pattern matching using
-   * SQLite's `COLLATE NOCASE`. Use the same `%` and `_` wildcards as `$like`:
+   * ASCII case folding. Use the same `%` and `_` wildcards as `$like`:
    * - `%` matches zero or more characters
    * - `_` matches exactly one character
    *
@@ -197,13 +197,8 @@ export type StringOperator = {
    * Substring containment check (case-sensitive).
    *
    * @remarks
-   * The `$contains` operator is syntactic sugar for `$like: '%value%'`.
-   * It checks if the field value contains the specified substring anywhere
-   * within the string. The search is case-sensitive.
-   *
-   * This is a convenience operator that saves you from manually adding
-   * the `%` wildcards. Internally, the query translator wraps your value
-   * with `%` wildcards and uses SQL LIKE for the match.
+   * Checks for a literal substring with exact case. Percent, underscore and
+   * backslash are ordinary characters; the translator uses SQLite instr().
    *
    * For case-insensitive containment checks, combine with `$ilike`:
    * `{ field: { $ilike: '%value%' } }`

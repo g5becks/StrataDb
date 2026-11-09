@@ -365,7 +365,7 @@ const result = await db.execute(async (tx) => {
 })
 
 // ✅ Manual transaction with proper error handling
-const tx = db.transaction()
+using tx = db.transaction()
 try {
   const users = tx.collection('users', userSchema)
   await users.insertOne(userData)
@@ -381,35 +381,23 @@ try {
 
 **Problem**: Issues with nested or concurrent transactions
 
-**Solution**: StrataDB doesn't support nested transactions. Instead, pass transaction context:
+**Solution**: Use nested `execute()` calls for savepoints, and await each transaction operation. Catch an inner failure inside the outer callback to keep its earlier writes. Competing callbacks and outside operations are serialized. Create collections before starting independent concurrent work.
 
 ```typescript
-// ❌ Don't create nested transactions
-async function outerFunction() {
-  return await db.execute(async (tx1) => {
-    await innerFunction() // This might try to create another transaction
-  })
-}
-
-async function innerFunction() {
-  return await db.execute(async (tx2) => { // ❌ Creates nested transaction
-    // operations
-  })
-}
-
-// ✅ Pass transaction to inner functions
-async function outerFunction() {
-  return await db.execute(async (tx) => {
-    await innerFunction(tx) // Pass the existing transaction
-  })
-}
-
-async function innerFunction(tx: Transaction) {
-  const users = tx.collection('users', userSchema)
-  // Use the passed transaction
-  return await users.find({})
-}
+await db.execute(async () => {
+  await users.insertOne(firstUser)
+  try {
+    await db.execute(async () => {
+      await users.insertOne(secondUser)
+      throw new Error('Roll back this savepoint')
+    })
+  } catch {
+    // Only the second insert was rolled back.
+  }
+})
 ```
+
+See [transaction ownership and nesting](/guide/transactions#nested-transactions-and-concurrent-work).
 
 ## Advanced Troubleshooting
 

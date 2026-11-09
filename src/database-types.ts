@@ -208,7 +208,8 @@ export type Transaction = {
    */
   collection<T extends Document>(
     name: string,
-    schema: SchemaDefinition<T>
+    schema: SchemaDefinition<T>,
+    options?: CollectionOptions
   ): Collection<T>
 
   /**

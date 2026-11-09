@@ -6,7 +6,7 @@
 type FindOneAndUpdateEvent<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:247](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L247)
+Defined in: [src/collection-events.ts:247](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L247)
 
 Event payload for findOneAndUpdate operations.
 
@@ -45,7 +45,7 @@ The document type extending Document
 readonly document: T | null;
 ```
 
-Defined in: [src/collection-events.ts:253](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L253)
+Defined in: [src/collection-events.ts:253](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L253)
 
 The document (before or after based on options), or null if not found
 
@@ -57,7 +57,7 @@ The document (before or after based on options), or null if not found
 readonly filter: string | QueryFilter<T>;
 ```
 
-Defined in: [src/collection-events.ts:249](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L249)
+Defined in: [src/collection-events.ts:249](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L249)
 
 The filter used to find the document
 
@@ -69,7 +69,7 @@ The filter used to find the document
 readonly update: Partial<T>;
 ```
 
-Defined in: [src/collection-events.ts:251](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L251)
+Defined in: [src/collection-events.ts:251](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L251)
 
 The update that was applied
 
@@ -81,6 +81,6 @@ The update that was applied
 readonly upserted: boolean;
 ```
 
-Defined in: [src/collection-events.ts:255](https://github.com/g5becks/StrataDb/blob/324b1e89d26e7464969bf83f47d2ad5aec8926a8/src/collection-events.ts#L255)
+Defined in: [src/collection-events.ts:255](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L255)
 
 Whether this was an upsert (document was created)

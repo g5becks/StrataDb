@@ -3,9 +3,11 @@ id: TASK-231
 title: >-
   Correctness: make updateOne/replaceOne/findOneAnd* atomic (no CAS races, no
   lost updates)
-status: To Do
-assignee: []
+status: Done
+assignee:
+  - '@codex'
 created_date: '2026-11-09T04:01:00Z'
+updated_date: '2026-11-09T18:11:00Z'
 labels:
   - api
 milestone: m-1
@@ -37,9 +39,30 @@ type: bug
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Regression case A3 passes: of two concurrent conditional updateOne calls exactly one returns a document; concurrent updates to different fields both persist
-- [ ] #2 The same concurrency tests pass for replaceOne and findOneAndUpdate; upsert under concurrency creates exactly one document
-- [ ] #3 Stored JSON bodies no longer contain createdAt/updatedAt/_id (test reads raw body)
-- [ ] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
-- [ ] #5 CHANGELOG.md has an entry under ## [Unreleased] describing the change
+- [x] #1 Regression case A3 passes: of two concurrent conditional updateOne calls exactly one returns a document; concurrent updates to different fields both persist
+- [x] #2 The same concurrency tests pass for replaceOne and findOneAndUpdate; upsert under concurrency creates exactly one document
+- [x] #3 Stored JSON bodies no longer contain createdAt/updatedAt/_id (test reads raw body)
+- [x] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #5 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Add real Promise.all races for each single-document mutation/upsert and raw-body metadata assertions before the fix.
+2. Perform selection, deep merge/replace/insert/delete and validation synchronously inside SQLite immediate transactions, with no await in the critical section.
+3. Hydrate metadata from columns and keep it out of JSON bodies on every write; preserve existing merge and event behavior.
+4. Convert A3, document decisions, run all quality gates and local CI.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+- Selection, validation and mutations now execute synchronously in SQLite immediate transactions, including upserts and findOneAnd* operations. No await occurs in the critical section. Both A3 cases are normal passing tests.
+- Retained JS deep merge semantics: arrays replace, explicit null remains a value, undefined fields serialize away. Chose synchronous transactions instead of RFC 7396 jsonb_patch to avoid changing document merge semantics. Events retain their existing names and emit after the mutation transaction; outer execute buffering belongs to TASK-232.
+- Metadata lives in columns only on every insert/update/replace path and is hydrated for reads, preserving createdAt. Raw-body checks run after every write path.
+- Regression-first evidence: new Promise.all suite initially had 10 failures/1 pass; now 11/11 pass. Covers conditional races on all five methods, independent-field updates on both merge methods, and 12-way upserts on three methods.
+- Breaking change: none; fixes documented atomicity and storage duplication. Host gate PASS: typecheck TS 7.0.2; lint 91 files; 832 pass/3 existing skips/0 fail; build; type tests; consumer TS 6/7 and CRUD; source TS 5.9.3/6.0.3. Local CI pending committed SHA.
+
+Verified with scripts/ci-local.sh (f3916e679874d32633b81699548b458ca881abe1, PASS); GitHub Actions unavailable (billing lock). macOS/Linux pinned/latest Bun 1.4.4 PASS; TS 5.9.3/6.0.3/7.0.2 source and type tests PASS; TS 7.1.0-beta advisory PASS. Logs: /Users/takinprofit/Dev/StrataDb-release/ci-local/f3916e6/logs. Self-review complete; no follow-up required.
+<!-- SECTION:NOTES:END -->

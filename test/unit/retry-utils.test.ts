@@ -178,6 +178,7 @@ describe("withRetry", () => {
         minTimeout: 1,
         maxTimeout: 1,
         shouldConsumeRetry: () => false,
+        shouldRetry: () => true,
         maxRetryTime: 50,
       })
       expect.unreachable()

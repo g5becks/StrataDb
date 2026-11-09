@@ -59,7 +59,7 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     const filter: QueryFilter<User> = { name: "Alice" }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("_name = ?")
+    expect(result.sql).toBe('"_name" = ?')
     expect(result.params).toEqual(["Alice"])
   })
 
@@ -67,7 +67,7 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     const filter: QueryFilter<User> = { age: 30 }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("_age = ?")
+    expect(result.sql).toBe('"_age" = ?')
     expect(result.params).toEqual([30])
   })
 
@@ -75,23 +75,23 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     const filter: QueryFilter<User> = { active: true }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("jsonb_extract(body, '$.active') = ?")
-    expect(result.params).toEqual([true])
+    expect(result.sql).toBe("jsonb_extract(body, ?) = ?")
+    expect(result.params).toEqual(["$.active", true])
   })
 
   it("should translate direct null equality", () => {
     const filter: QueryFilter<User> = { status: null }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("jsonb_extract(body, '$.status') = ?")
-    expect(result.params).toEqual([null])
+    expect(result.sql).toBe("jsonb_extract(body, ?) IS NULL")
+    expect(result.params).toEqual(["$.status"])
   })
 
   it("should translate $eq operator", () => {
     const filter: QueryFilter<User> = { email: { $eq: "alice@example.com" } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(_email = ?)")
+    expect(result.sql).toBe('("_email" = ?)')
     expect(result.params).toEqual(["alice@example.com"])
   })
 
@@ -99,15 +99,17 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     const filter: QueryFilter<User> = { status: { $ne: "inactive" } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(jsonb_extract(body, '$.status') != ?)")
-    expect(result.params).toEqual(["inactive"])
+    expect(result.sql).toBe(
+      "((jsonb_extract(body, ?) IS NULL OR jsonb_extract(body, ?) != ?))"
+    )
+    expect(result.params).toEqual(["$.status", "$.status", "inactive"])
   })
 
   it("should translate $gt operator", () => {
     const filter: QueryFilter<User> = { age: { $gt: 18 } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(_age > ?)")
+    expect(result.sql).toBe('("_age" > ?)')
     expect(result.params).toEqual([18])
   })
 
@@ -115,7 +117,7 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     const filter: QueryFilter<User> = { age: { $gte: 18 } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(_age >= ?)")
+    expect(result.sql).toBe('("_age" >= ?)')
     expect(result.params).toEqual([18])
   })
 
@@ -123,7 +125,7 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     const filter: QueryFilter<User> = { age: { $lt: 65 } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(_age < ?)")
+    expect(result.sql).toBe('("_age" < ?)')
     expect(result.params).toEqual([65])
   })
 
@@ -131,7 +133,7 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     const filter: QueryFilter<User> = { age: { $lte: 65 } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(_age <= ?)")
+    expect(result.sql).toBe('("_age" <= ?)')
     expect(result.params).toEqual([65])
   })
 
@@ -139,7 +141,7 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     const filter: QueryFilter<User> = { age: { $gte: 18, $lt: 65 } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(_age >= ? AND _age < ?)")
+    expect(result.sql).toBe('("_age" >= ? AND "_age" < ?)')
     expect(result.params).toEqual([18, 65])
   })
 
@@ -147,7 +149,7 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     const filter: QueryFilter<User> = { age: { $in: [18, 25, 30] } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(_age IN (?, ?, ?))")
+    expect(result.sql).toBe('("_age" IN (?, ?, ?))')
     expect(result.params).toEqual([18, 25, 30])
   })
 
@@ -157,8 +159,15 @@ describe("SQLiteQueryTranslator - Comparison Operators", () => {
     }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(jsonb_extract(body, '$.status') NOT IN (?, ?))")
-    expect(result.params).toEqual(["inactive", "suspended"])
+    expect(result.sql).toBe(
+      "((jsonb_extract(body, ?) IS NULL OR jsonb_extract(body, ?) NOT IN (?, ?)))"
+    )
+    expect(result.params).toEqual([
+      "$.status",
+      "$.status",
+      "inactive",
+      "suspended",
+    ])
   })
 
   it("should handle empty $in array", () => {
@@ -191,24 +200,24 @@ describe("SQLiteQueryTranslator - String Operators", () => {
     const filter: QueryFilter<User> = { name: { $like: "%admin%" } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(_name LIKE ?)")
-    expect(result.params).toEqual(["%admin%"])
+    expect(result.sql).toBe('("_name" GLOB ?)')
+    expect(result.params).toEqual(["*admin*"])
   })
 
   it("should translate $startsWith operator", () => {
     const filter: QueryFilter<User> = { name: { $startsWith: "Admin" } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(_name LIKE ?)")
-    expect(result.params).toEqual(["Admin%"])
+    expect(result.sql).toBe('(substr("_name", 1, length(?)) = ?)')
+    expect(result.params).toEqual(["Admin", "Admin"])
   })
 
   it("should translate $endsWith operator", () => {
     const filter: QueryFilter<User> = { email: { $endsWith: "@company.com" } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(_email LIKE ?)")
-    expect(result.params).toEqual(["%@company.com"])
+    expect(result.sql).toBe('(substr("_email", -length(?)) = ?)')
+    expect(result.params).toEqual(["@company.com", "@company.com"])
   })
 })
 
@@ -228,9 +237,14 @@ describe("SQLiteQueryTranslator - Array Operators", () => {
     const result = userTranslator.translate(filter)
 
     expect(result.sql).toBe(
-      "((EXISTS (SELECT 1 FROM json_each(jsonb_extract(body, '$.tags')) WHERE json_each.value = ?) AND EXISTS (SELECT 1 FROM json_each(jsonb_extract(body, '$.tags')) WHERE json_each.value = ?)))"
+      "((EXISTS (SELECT 1 FROM json_each(jsonb_extract(body, ?)) WHERE json_each.value = ?) AND EXISTS (SELECT 1 FROM json_each(jsonb_extract(body, ?)) WHERE json_each.value = ?)))"
     )
-    expect(result.params).toEqual(["developer", "typescript"])
+    expect(result.params).toEqual([
+      "$.tags",
+      "developer",
+      "$.tags",
+      "typescript",
+    ])
   })
 
   it("should handle empty $all array", () => {
@@ -245,20 +259,16 @@ describe("SQLiteQueryTranslator - Array Operators", () => {
     const filter: QueryFilter<User> = { tags: { $size: 3 } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe(
-      "(json_array_length(jsonb_extract(body, '$.tags')) = ?)"
-    )
-    expect(result.params).toEqual([3])
+    expect(result.sql).toBe("(json_array_length(jsonb_extract(body, ?)) = ?)")
+    expect(result.params).toEqual(["$.tags", 3])
   })
 
   it("should translate $size with zero", () => {
     const filter: QueryFilter<User> = { tags: { $size: 0 } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe(
-      "(json_array_length(jsonb_extract(body, '$.tags')) = ?)"
-    )
-    expect(result.params).toEqual([0])
+    expect(result.sql).toBe("(json_array_length(jsonb_extract(body, ?)) = ?)")
+    expect(result.params).toEqual(["$.tags", 0])
   })
 })
 
@@ -278,9 +288,9 @@ describe("SQLiteQueryTranslator - Logical Operators", () => {
     const result = userTranslator.translate(filter)
 
     expect(result.sql).toBe(
-      "((_age >= ?) AND jsonb_extract(body, '$.active') = ? AND jsonb_extract(body, '$.status') = ?)"
+      '(("_age" >= ?) AND jsonb_extract(body, ?) = ? AND jsonb_extract(body, ?) = ?)'
     )
-    expect(result.params).toEqual([18, true, "active"])
+    expect(result.params).toEqual([18, "$.active", true, "$.status", "active"])
   })
 
   it("should translate $or with multiple conditions", () => {
@@ -290,9 +300,16 @@ describe("SQLiteQueryTranslator - Logical Operators", () => {
     const result = userTranslator.translate(filter)
 
     expect(result.sql).toBe(
-      "(jsonb_extract(body, '$.status') = ? OR jsonb_extract(body, '$.status') = ? OR jsonb_extract(body, '$.active') = ?)"
+      "(jsonb_extract(body, ?) = ? OR jsonb_extract(body, ?) = ? OR jsonb_extract(body, ?) = ?)"
     )
-    expect(result.params).toEqual(["active", "pending", true])
+    expect(result.params).toEqual([
+      "$.status",
+      "active",
+      "$.status",
+      "pending",
+      "$.active",
+      true,
+    ])
   })
 
   it("should translate $nor with multiple conditions", () => {
@@ -302,9 +319,9 @@ describe("SQLiteQueryTranslator - Logical Operators", () => {
     const result = userTranslator.translate(filter)
 
     expect(result.sql).toBe(
-      "NOT (jsonb_extract(body, '$.status') = ? OR jsonb_extract(body, '$.active') = ?)"
+      "NOT (jsonb_extract(body, ?) = ? OR jsonb_extract(body, ?) = ?)"
     )
-    expect(result.params).toEqual(["inactive", false])
+    expect(result.params).toEqual(["$.status", "inactive", "$.active", false])
   })
 
   it("should translate $not with single condition", () => {
@@ -313,8 +330,8 @@ describe("SQLiteQueryTranslator - Logical Operators", () => {
     }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("NOT (jsonb_extract(body, '$.status') = ?)")
-    expect(result.params).toEqual(["inactive"])
+    expect(result.sql).toBe("NOT (jsonb_extract(body, ?) = ?)")
+    expect(result.params).toEqual(["$.status", "inactive"])
   })
 
   it("should translate $not with complex condition", () => {
@@ -323,7 +340,7 @@ describe("SQLiteQueryTranslator - Logical Operators", () => {
     }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("NOT ((_age >= ? AND _age < ?))")
+    expect(result.sql).toBe('NOT (("_age" >= ? AND "_age" < ?))')
     expect(result.params).toEqual([18, 65])
   })
 
@@ -369,9 +386,9 @@ describe("SQLiteQueryTranslator - Nested Queries", () => {
     // - NOT: NOT (condition) without extra outer parens
     // This ensures predictable SQL generation with proper precedence
     expect(result.sql).toBe(
-      "((_name != ?) AND (((_age >= ?) AND (_age < ?)) OR NOT (jsonb_extract(body, '$.status') = ?)))"
+      '((("_name" IS NULL OR "_name" != ?)) AND ((("_age" >= ?) AND ("_age" < ?)) OR NOT (jsonb_extract(body, ?) = ?)))'
     )
-    expect(result.params).toEqual(["System", 18, 65, "suspended"])
+    expect(result.params).toEqual(["System", 18, 65, "$.status", "suspended"])
   })
 })
 
@@ -388,7 +405,7 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const options: QueryOptions<User> = { sort: { name: 1 } }
     const result = userTranslator.translateOptions(options)
 
-    expect(result.sql).toBe("ORDER BY _name ASC")
+    expect(result.sql).toBe('ORDER BY "_name" ASC')
     expect(result.params).toEqual([])
   })
 
@@ -399,9 +416,9 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const result = userTranslator.translateOptions(options)
 
     expect(result.sql).toBe(
-      "ORDER BY _age DESC, _name ASC, jsonb_extract(body, '$.status') ASC"
+      'ORDER BY "_age" DESC, "_name" ASC, jsonb_extract(body, ?) ASC'
     )
-    expect(result.params).toEqual([])
+    expect(result.params).toEqual(["$.status"])
   })
 
   it("should translate non-indexed field sort", () => {
@@ -411,9 +428,9 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const result = userTranslator.translateOptions(options)
 
     expect(result.sql).toBe(
-      "ORDER BY jsonb_extract(body, '$.status') ASC, jsonb_extract(body, '$.active') DESC"
+      "ORDER BY jsonb_extract(body, ?) ASC, jsonb_extract(body, ?) DESC"
     )
-    expect(result.params).toEqual([])
+    expect(result.params).toEqual(["$.status", "$.active"])
   })
 
   it("should translate limit option", () => {
@@ -428,7 +445,7 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const options: QueryOptions<User> = { skip: 20 }
     const result = userTranslator.translateOptions(options)
 
-    expect(result.sql).toBe("OFFSET ?")
+    expect(result.sql).toBe("LIMIT -1 OFFSET ?")
     expect(result.params).toEqual([20])
   })
 
@@ -448,7 +465,9 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     }
     const result = userTranslator.translateOptions(options)
 
-    expect(result.sql).toBe("ORDER BY _age DESC, _name ASC LIMIT ? OFFSET ?")
+    expect(result.sql).toBe(
+      'ORDER BY "_age" DESC, "_name" ASC LIMIT ? OFFSET ?'
+    )
     expect(result.params).toEqual([10, 20])
   })
 
@@ -470,16 +489,16 @@ describe("SQLiteQueryTranslator - Existence Operators", () => {
     const filter: QueryFilter<User> = { name: { $exists: true } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(json_type(_name) IS NOT NULL)")
-    expect(result.params).toEqual([])
+    expect(result.sql).toBe("(json_type(body, ?) IS NOT NULL)")
+    expect(result.params).toEqual(["$.name"])
   })
 
   it("should translate $exists: false", () => {
     const filter: QueryFilter<User> = { name: { $exists: false } }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("(json_type(_name) IS NULL)")
-    expect(result.params).toEqual([])
+    expect(result.sql).toBe("(json_type(body, ?) IS NULL)")
+    expect(result.params).toEqual(["$.name"])
   })
 })
 
@@ -512,7 +531,7 @@ describe("SQLiteQueryTranslator - toString() Query Introspection", () => {
 
     const str = result.toString()
     expect(str).toContain("SQL:")
-    expect(str).toContain("_name = ?")
+    expect(str).toContain('"_name" = ?')
     expect(str).toContain("Parameters:")
     expect(str).toContain('"Alice"')
   })
@@ -525,8 +544,8 @@ describe("SQLiteQueryTranslator - toString() Query Introspection", () => {
 
     const str = result.toString()
     expect(str).toContain("SQL:")
-    expect(str).toContain("_age >= ?")
-    expect(str).toContain("_age < ?")
+    expect(str).toContain('"_age" >= ?')
+    expect(str).toContain('"_age" < ?')
     expect(str).toContain("Parameters:")
     expect(str).toContain("18")
     expect(str).toContain("65")
@@ -551,7 +570,7 @@ describe("SQLiteQueryTranslator - toString() Query Introspection", () => {
 
     const str = result.toString()
     expect(str).toContain("SQL:")
-    expect(str).toContain("ORDER BY _age DESC")
+    expect(str).toContain('ORDER BY "_age" DESC')
     expect(str).toContain("LIMIT ?")
     expect(str).toContain("OFFSET ?")
     expect(str).toContain("Parameters:")

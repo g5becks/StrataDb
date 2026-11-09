@@ -54,7 +54,7 @@ describe("SQLiteQueryTranslator - $ilike Operator", () => {
     const filter: QueryFilter<User> = { name: { $ilike: "%alice%" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(_name LIKE ? COLLATE NOCASE)")
+    expect(result.sql).toBe("(lower(\"_name\") LIKE lower(?) ESCAPE '\\')")
     expect(result.params).toEqual(["%alice%"])
   })
 
@@ -63,16 +63,16 @@ describe("SQLiteQueryTranslator - $ilike Operator", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "(jsonb_extract(body, '$.description') LIKE ? COLLATE NOCASE)"
+      "(lower(jsonb_extract(body, ?)) LIKE lower(?) ESCAPE '\\')"
     )
-    expect(result.params).toEqual(["%important%"])
+    expect(result.params).toEqual(["$.description", "%important%"])
   })
 
   it("should preserve pattern as-is in params for $ilike", () => {
     const filter: QueryFilter<User> = { email: { $ilike: "%@GMAIL.COM" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(_email LIKE ? COLLATE NOCASE)")
+    expect(result.sql).toBe("(lower(\"_email\") LIKE lower(?) ESCAPE '\\')")
     expect(result.params).toEqual(["%@GMAIL.COM"])
   })
 
@@ -80,7 +80,7 @@ describe("SQLiteQueryTranslator - $ilike Operator", () => {
     const filter: QueryFilter<User> = { name: { $ilike: "A_ice" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(_name LIKE ? COLLATE NOCASE)")
+    expect(result.sql).toBe("(lower(\"_name\") LIKE lower(?) ESCAPE '\\')")
     expect(result.params).toEqual(["A_ice"])
   })
 
@@ -88,7 +88,7 @@ describe("SQLiteQueryTranslator - $ilike Operator", () => {
     const filter: QueryFilter<User> = { name: { $ilike: "Alice" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(_name LIKE ? COLLATE NOCASE)")
+    expect(result.sql).toBe("(lower(\"_name\") LIKE lower(?) ESCAPE '\\')")
     expect(result.params).toEqual(["Alice"])
   })
 })
@@ -106,8 +106,8 @@ describe("SQLiteQueryTranslator - $contains Operator", () => {
     const filter: QueryFilter<User> = { name: { $contains: "admin" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(_name LIKE ?)")
-    expect(result.params).toEqual(["%admin%"])
+    expect(result.sql).toBe('(instr("_name", ?) > 0)')
+    expect(result.params).toEqual(["admin"])
   })
 
   it("should translate $contains to LIKE ? with wrapped value for non-indexed field", () => {
@@ -116,32 +116,32 @@ describe("SQLiteQueryTranslator - $contains Operator", () => {
     }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(jsonb_extract(body, '$.description') LIKE ?)")
-    expect(result.params).toEqual(["%important%"])
+    expect(result.sql).toBe("(instr(jsonb_extract(body, ?), ?) > 0)")
+    expect(result.params).toEqual(["$.description", "important"])
   })
 
   it("should wrap value with % on both sides for $contains", () => {
     const filter: QueryFilter<User> = { email: { $contains: "@example" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(_email LIKE ?)")
-    expect(result.params).toEqual(["%@example%"])
+    expect(result.sql).toBe('(instr("_email", ?) > 0)')
+    expect(result.params).toEqual(["@example"])
   })
 
   it("should handle $contains with special characters", () => {
     const filter: QueryFilter<User> = { description: { $contains: "foo.bar" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(jsonb_extract(body, '$.description') LIKE ?)")
-    expect(result.params).toEqual(["%foo.bar%"])
+    expect(result.sql).toBe("(instr(jsonb_extract(body, ?), ?) > 0)")
+    expect(result.params).toEqual(["$.description", "foo.bar"])
   })
 
   it("should handle $contains with empty string", () => {
     const filter: QueryFilter<User> = { name: { $contains: "" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(_name LIKE ?)")
-    expect(result.params).toEqual(["%%"])
+    expect(result.sql).toBe('(instr("_name", ?) > 0)')
+    expect(result.params).toEqual([""])
   })
 })
 
@@ -160,8 +160,10 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(_name LIKE ? COLLATE NOCASE AND _name LIKE ?)")
-    expect(result.params).toEqual(["%smith%", "Dr.%"])
+    expect(result.sql).toBe(
+      '(lower("_name") LIKE lower(?) ESCAPE \'\\\' AND substr("_name", 1, length(?)) = ?)'
+    )
+    expect(result.params).toEqual(["%smith%", "Dr.", "Dr."])
   })
 
   it("should combine $contains with $endsWith", () => {
@@ -170,8 +172,10 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(_email LIKE ? AND _email LIKE ?)")
-    expect(result.params).toEqual(["%admin%", "%.com"])
+    expect(result.sql).toBe(
+      '(instr("_email", ?) > 0 AND substr("_email", -length(?)) = ?)'
+    )
+    expect(result.params).toEqual(["admin", ".com", ".com"])
   })
 
   it("should combine $ilike with $eq", () => {
@@ -181,9 +185,9 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "((_name LIKE ? COLLATE NOCASE) AND jsonb_extract(body, '$.status') = ?)"
+      "((lower(\"_name\") LIKE lower(?) ESCAPE '\\') AND jsonb_extract(body, ?) = ?)"
     )
-    expect(result.params).toEqual(["%alice%", "active"])
+    expect(result.params).toEqual(["%alice%", "$.status", "active"])
   })
 
   it("should combine $contains with $ne", () => {
@@ -196,9 +200,15 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "((jsonb_extract(body, '$.description') LIKE ?) AND (jsonb_extract(body, '$.status') != ?))"
+      "((instr(jsonb_extract(body, ?), ?) > 0) AND ((jsonb_extract(body, ?) IS NULL OR jsonb_extract(body, ?) != ?)))"
     )
-    expect(result.params).toEqual(["%urgent%", "inactive"])
+    expect(result.params).toEqual([
+      "$.description",
+      "urgent",
+      "$.status",
+      "$.status",
+      "inactive",
+    ])
   })
 
   it("should combine $ilike with $in", () => {
@@ -209,9 +219,9 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "(_name LIKE ? COLLATE NOCASE) AND (jsonb_extract(body, '$.status') IN (?, ?))"
+      "(lower(\"_name\") LIKE lower(?) ESCAPE '\\') AND (jsonb_extract(body, ?) IN (?, ?))"
     )
-    expect(result.params).toEqual(["%test%", "active", "pending"])
+    expect(result.params).toEqual(["%test%", "$.status", "active", "pending"])
   })
 
   it("should use $ilike in $or condition", () => {
@@ -221,7 +231,7 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "((_name LIKE ? COLLATE NOCASE) OR (_email LIKE ? COLLATE NOCASE))"
+      "((lower(\"_name\") LIKE lower(?) ESCAPE '\\') OR (lower(\"_email\") LIKE lower(?) ESCAPE '\\'))"
     )
     expect(result.params).toEqual(["%alice%", "%alice%"])
   })
@@ -236,9 +246,9 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "((_name LIKE ?) OR (jsonb_extract(body, '$.description') LIKE ?))"
+      '((instr("_name", ?) > 0) OR (instr(jsonb_extract(body, ?), ?) > 0))'
     )
-    expect(result.params).toEqual(["%admin%", "%admin%"])
+    expect(result.params).toEqual(["admin", "$.description", "admin"])
   })
 
   it("should use $ilike with $not", () => {
@@ -247,7 +257,9 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("NOT ((_name LIKE ? COLLATE NOCASE))")
+    expect(result.sql).toBe(
+      "NOT ((lower(\"_name\") LIKE lower(?) ESCAPE '\\'))"
+    )
     expect(result.params).toEqual(["%test%"])
   })
 
@@ -257,8 +269,8 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("NOT ((_email LIKE ?))")
-    expect(result.params).toEqual(["%spam%"])
+    expect(result.sql).toBe('NOT ((instr("_email", ?) > 0))')
+    expect(result.params).toEqual(["spam"])
   })
 })
 
@@ -276,7 +288,7 @@ describe("SQLiteQueryTranslator - String Operators Edge Cases", () => {
     const filter: QueryFilter<User> = { name: { $ilike: "100%%" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(_name LIKE ? COLLATE NOCASE)")
+    expect(result.sql).toBe("(lower(\"_name\") LIKE lower(?) ESCAPE '\\')")
     expect(result.params).toEqual(["100%%"])
   })
 
@@ -285,8 +297,8 @@ describe("SQLiteQueryTranslator - String Operators Edge Cases", () => {
     const filter: QueryFilter<User> = { description: { $contains: "50%" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(jsonb_extract(body, '$.description') LIKE ?)")
-    expect(result.params).toEqual(["%50%%"])
+    expect(result.sql).toBe("(instr(jsonb_extract(body, ?), ?) > 0)")
+    expect(result.params).toEqual(["$.description", "50%"])
   })
 
   it("should handle multiple fields with different string operators", () => {
@@ -298,8 +310,13 @@ describe("SQLiteQueryTranslator - String Operators Edge Cases", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "(_name LIKE ? COLLATE NOCASE) AND (_email LIKE ?) AND (jsonb_extract(body, '$.description') LIKE ?)"
+      '(lower("_name") LIKE lower(?) ESCAPE \'\\\') AND (instr("_email", ?) > 0) AND (jsonb_extract(body, ?) GLOB ?)'
     )
-    expect(result.params).toEqual(["%alice%", "%example%", "Important%"])
+    expect(result.params).toEqual([
+      "%alice%",
+      "example",
+      "$.description",
+      "Important*",
+    ])
   })
 })

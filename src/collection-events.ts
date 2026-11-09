@@ -309,9 +309,9 @@ export type DropEvent = {
  * Event payload for error events.
  *
  * @remarks
- * Emitted when an operation encounters an error. This allows for
- * centralized error handling and logging. The `context` field may
- * contain additional information about the operation that failed.
+ * Emitted when a collection listener throws or rejects. The `operation`
+ * identifies its event, and `context.source` is "listener". Database operation
+ * failures are delivered through their returned promises.
  *
  * @example
  * ```typescript
@@ -324,7 +324,7 @@ export type DropEvent = {
  * ```
  */
 export type ErrorEvent = {
-  /** The operation that failed */
+  /** The event whose listener failed */
   readonly operation: string
   /** The error that occurred */
   readonly error: Error
@@ -423,4 +423,44 @@ export type CollectionEventName = keyof CollectionEventMap<Document>
  */
 export class CollectionEventEmitter<T extends Document> extends EventEmitter<
   CollectionEventMap<T>
-> {}
+> {
+  /** Invoke a registration snapshot in order, retaining once-wrapper behavior. */
+  dispatch<E extends CollectionEventName>(
+    event: E,
+    payload: CollectionEventMap<T>[E][0]
+  ): void {
+    for (const listener of this.rawListeners(event)) {
+      try {
+        const result: unknown = Reflect.apply(listener, this, [payload])
+        if (
+          result !== null &&
+          (typeof result === "object" || typeof result === "function")
+        ) {
+          Promise.resolve(result).catch((error: unknown) =>
+            this.listenerError(event, error)
+          )
+        }
+      } catch (error) {
+        this.listenerError(event, error)
+      }
+    }
+  }
+
+  private listenerError(event: CollectionEventName, failure: unknown): void {
+    const error =
+      failure instanceof Error ? failure : new Error(String(failure))
+    if (event !== "error" && this.listenerCount("error") > 0) {
+      this.dispatch("error", {
+        operation: event,
+        error,
+        context: { source: "listener", event },
+      })
+      return
+    }
+    try {
+      console.error(`[StrataDB] Listener for "${event}" failed`, error)
+    } catch {
+      /* Logging must not fail a committed write. */
+    }
+  }
+}
