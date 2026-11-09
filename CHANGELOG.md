@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- `execute()` calls and operations issued outside an active `execute()` now queue in call order. Await every transaction operation; outside writes survive a transaction rollback. Nested calls use savepoints, and events fire only after the outer commit (rolled-back events are discarded). Synchronous transaction/collection creation cannot join another caller's pending `execute()`; create collections beforehand or inside its callback. Transaction collection access now forwards collection options.
+
 - Promise-returning collection operations always reject on failure, including when retries are disabled. Replace synchronous `try/catch` around calls with `await` inside `try/catch` or a `.catch()` handler. Synchronous APIs such as `validateSync()`, `collection()`, and `transaction()` retain synchronous errors.
 
 - Unknown `$operators` now raise `InvalidQueryOperatorError` at every query nesting level. Malformed operator values and empty operator objects raise `QueryError` before SQL or cache lookup. Correct misspelled operators and supply arrays for `$in`/`$nin`/`$all`, strings for LIKE operators, a boolean for `$exists`, and a nonnegative integer for `$size`. Explicit empty-filter bulk operations (`deleteMany({})`, `updateMany({})`) remain supported.

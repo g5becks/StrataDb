@@ -19,6 +19,10 @@ import { generateId } from "./id-generator.js"
 import type { RetryOptions } from "./retry-types.js"
 import type { SchemaDefinition } from "./schema-types.js"
 import { SQLiteCollection } from "./sqlite-collection.js"
+import {
+  type TransactionFrame,
+  transactionManager,
+} from "./transaction-manager.js"
 
 /**
  * Main StrataDB database class.
@@ -164,42 +168,23 @@ export class Strata implements StrataDBInterface {
     return collection
   }
 
-  /**
-   * Creates a new transaction.
-   *
-   * @returns Transaction instance
-   */
-  transaction(): Transaction {
-    assertDatabaseOpen(this.sqliteDb)
-    this.sqliteDb.exec("BEGIN TRANSACTION")
-
-    let committed = false
-
-    const tx: Transaction = {
+  private transactionHandle(frame: TransactionFrame): Transaction {
+    const manager = transactionManager(this.sqliteDb)
+    return {
       collection: <T extends Document>(
         name: string,
-        schema: SchemaDefinition<T>
-      ): Collection<T> => this.collection(name, schema),
-
-      commit: () => {
-        this.sqliteDb.exec("COMMIT")
-        committed = true
-      },
-
-      rollback: () => {
-        if (!committed) {
-          this.sqliteDb.exec("ROLLBACK")
-        }
-      },
-
-      [Symbol.dispose]: () => {
-        if (!committed) {
-          tx.rollback()
-        }
-      },
+        schema: SchemaDefinition<T>,
+        options?: CollectionOptions
+      ): Collection<T> => this.collection(name, schema, options),
+      commit: () => manager.commit(frame),
+      rollback: () => manager.rollback(frame),
+      [Symbol.dispose]: () => manager.rollback(frame),
     }
+  }
 
-    return tx
+  /** Creates a transaction handle; nested handles use savepoints. */
+  transaction(): Transaction {
+    return this.transactionHandle(transactionManager(this.sqliteDb).begin())
   }
 
   /**
@@ -214,15 +199,12 @@ export class Strata implements StrataDBInterface {
   ): Promise<R> {
     throwIfAborted(options?.signal)
 
-    const tx = this.transaction()
-    try {
-      const result = await fn(tx)
-      tx.commit()
+    return await transactionManager(this.sqliteDb).execute(async (frame) => {
+      throwIfAborted(options?.signal)
+      const result = await fn(this.transactionHandle(frame))
+      throwIfAborted(options?.signal)
       return result
-    } catch (error) {
-      tx.rollback()
-      throw error
-    }
+    })
   }
 
   /**

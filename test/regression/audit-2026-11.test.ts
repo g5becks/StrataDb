@@ -101,13 +101,13 @@ test("A3 [TASK-231] concurrent updateOne preserves both fields", async () => {
   expect(await users.findOne({ name: "alice" })).toMatchObject({ a: 1, b: 2 })
 })
 
-test.failing("A4 [TASK-232] deleteMany nests inside execute", async () => {
+test("A4 [TASK-232] deleteMany nests inside execute", async () => {
   const result = await db.execute(() => users.deleteMany({ role: "user" }))
   expect(result.deletedCount).toBe(2)
   expect(await users.count({})).toBe(2)
 })
 
-test.failing("A4 [TASK-232] updateMany nests inside execute", async () => {
+test("A4 [TASK-232] updateMany nests inside execute", async () => {
   const result = await db.execute(() =>
     users.updateMany({ role: "user" }, { role: "changed" })
   )
@@ -115,7 +115,7 @@ test.failing("A4 [TASK-232] updateMany nests inside execute", async () => {
   expect(await users.count({ role: "changed" })).toBe(2)
 })
 
-test.failing("A4 [TASK-232] outside write survives execute rollback", async () => {
+test("A4 [TASK-232] outside write survives execute rollback", async () => {
   const entered = Promise.withResolvers<void>()
   const release = Promise.withResolvers<void>()
   const transaction = db.execute(async () => {
@@ -132,7 +132,7 @@ test.failing("A4 [TASK-232] outside write survives execute rollback", async () =
   expect(await users.findOne({ name: "outside" })).not.toBeNull()
 })
 
-test.failing("A4 [TASK-232] rolled back writes emit no insert events", async () => {
+test("A4 [TASK-232] rolled back writes emit no insert events", async () => {
   let events = 0
   users.on("insert", () => {
     events += 1

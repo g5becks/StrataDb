@@ -48,6 +48,7 @@ import {
 } from "./retry-utils.js"
 import type { SchemaDefinition } from "./schema-types.js"
 import { SQLiteQueryTranslator } from "./sqlite-query-translator.js"
+import { transactionManager } from "./transaction-manager.js"
 
 /** Regex to extract field name from SQLite unique constraint error */
 const UNIQUE_CONSTRAINT_REGEX = /UNIQUE constraint failed: \w+\.(\w+)/
@@ -193,8 +194,11 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
     // Only create payload if listeners exist
     const payload = createPayload()
-    // @ts-expect-error - EventEmitter's emit typing is complex with tuple types
-    this._emitter.emit(event, payload)
+    const emitter = this._emitter
+    transactionManager(this.db).event(() => {
+      // @ts-expect-error - EventEmitter's emit typing is complex with tuple types
+      emitter.emit(event, payload)
+    })
   }
 
   /**
@@ -223,7 +227,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     }
     return withRetry(() => {
       assertDatabaseOpen(this.db)
-      return operation()
+      return transactionManager(this.db).run(operation)
     }, options)
   }
 
@@ -234,6 +238,16 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     } as T
+  }
+
+  private validateMutationDocument(doc: T): void {
+    if (this.schema.validate && !this.schema.validate(doc)) {
+      throw new ValidationError(
+        "Document validation failed during mutation",
+        undefined,
+        doc
+      )
+    }
   }
 
   private serializeDocument(doc: T): string {
@@ -412,6 +426,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     )
 
     // Initialize table and indexes
+    transactionManager(this.db).assertSynchronousAccess()
     this.createTable()
   }
 
@@ -1499,79 +1514,82 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     }
   ): Promise<InsertManyResult<T>> {
     return this.runOperation(
-      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex batch insert logic
-      () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
+      () =>
+        Promise.resolve(
+          // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: complex batch insert logic
+          transactionManager(this.db).sync(() => {
+            assertDatabaseOpen(this.db)
+            throwIfAborted(options?.signal)
 
-        const ordered = options?.ordered ?? true
-        const now = Date.now()
-        const insertedDocs: T[] = []
-        const insertedIds: string[] = []
-        const errors: {
-          index: number
-          error: Error
-          document: Omit<T, "_id" | "createdAt" | "updatedAt"> & {
-            _id?: string
-          }
-        }[] = []
+            const ordered = options?.ordered ?? true
+            const now = Date.now()
+            const insertedDocs: T[] = []
+            const insertedIds: string[] = []
+            const errors: {
+              index: number
+              error: Error
+              document: Omit<T, "_id" | "createdAt" | "updatedAt"> & {
+                _id?: string
+              }
+            }[] = []
 
-        const stmt = this.db.prepare(
-          `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
-        )
+            const stmt = this.db.prepare(
+              `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
+            )
 
-        for (let i = 0; i < docs.length; i++) {
-          assertDatabaseOpen(this.db)
-          throwIfAborted(options?.signal)
+            for (let i = 0; i < docs.length; i++) {
+              assertDatabaseOpen(this.db)
+              throwIfAborted(options?.signal)
 
-          const doc = docs[i]
-          if (!doc) {
-            continue
-          }
+              const doc = docs[i]
+              if (!doc) {
+                continue
+              }
 
-          try {
-            const _id = doc._id ?? this.idGenerator()
-            const fullDoc = buildCompleteDocument<T>(doc, {
-              _id,
-              createdAt: now,
-              updatedAt: now,
-            })
+              try {
+                const _id = doc._id ?? this.idGenerator()
+                const fullDoc = buildCompleteDocument<T>(doc, {
+                  _id,
+                  createdAt: now,
+                  updatedAt: now,
+                })
 
-            // Validate if validator is provided
-            if (this.schema.validate && !this.schema.validate(fullDoc)) {
-              throw new ValidationError(
-                `Document validation failed in batch insert at index ${i}: Document does not match the schema. ` +
-                  "Check that all required fields are present and have correct types.",
-                undefined,
-                fullDoc
-              )
+                // Validate if validator is provided
+                if (this.schema.validate && !this.schema.validate(fullDoc)) {
+                  throw new ValidationError(
+                    `Document validation failed in batch insert at index ${i}: Document does not match the schema. ` +
+                      "Check that all required fields are present and have correct types.",
+                    undefined,
+                    fullDoc
+                  )
+                }
+
+                const docId = fullDoc._id
+                const body = this.serializeDocument(fullDoc)
+                stmt.run(docId, body, now, now)
+
+                insertedDocs.push(fullDoc)
+                insertedIds.push(_id)
+              } catch (error) {
+                const err = this.handleInsertError(error, i, doc, errors)
+                if (ordered && err) {
+                  break
+                }
+              }
             }
 
-            const docId = fullDoc._id
-            const body = this.serializeDocument(fullDoc)
-            stmt.run(docId, body, now, now)
+            // Emit insertMany event after successful operation
+            this.emitEvent("insertMany", () => ({
+              documents: insertedDocs,
+              insertedCount: insertedDocs.length,
+            }))
 
-            insertedDocs.push(fullDoc)
-            insertedIds.push(_id)
-          } catch (error) {
-            const err = this.handleInsertError(error, i, doc, errors)
-            if (ordered && err) {
-              break
+            return {
+              documents: insertedDocs,
+              insertedCount: insertedDocs.length,
             }
-          }
-        }
-
-        // Emit insertMany event after successful operation
-        this.emitEvent("insertMany", () => ({
-          documents: insertedDocs,
-          insertedCount: insertedDocs.length,
-        }))
-
-        return Promise.resolve({
-          documents: insertedDocs,
-          insertedCount: insertedDocs.length,
-        })
-      },
+          })
+        ),
       this.buildRetryOptions(options?.retry, options?.signal)
     )
   }
@@ -1613,98 +1631,90 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<UpdateResult> {
     return this.runOperation(
-      () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
+      () =>
+        Promise.resolve(
+          transactionManager(this.db).sync(() => {
+            assertDatabaseOpen(this.db)
+            throwIfAborted(options?.signal)
 
-        const { sql: whereClause, params } = this.translator.translate(filter)
+            const { sql: whereClause, params } =
+              this.translator.translate(filter)
 
-        // Find all matching documents
-        let selectSql = `SELECT _id, json(body) as body, createdAt, updatedAt FROM ${this.tableSql}`
-        if (whereClause) {
-          selectSql += ` WHERE ${whereClause}`
-        }
+            // Find all matching documents
+            let selectSql = `SELECT _id, json(body) as body, createdAt, updatedAt FROM ${this.tableSql}`
+            if (whereClause) {
+              selectSql += ` WHERE ${whereClause}`
+            }
 
-        const stmt = this.db.prepare<StoredRow, SQLQueryBindings[]>(selectSql)
-        const rows = stmt.all(...params)
-        const matchedCount = rows.length
-
-        if (matchedCount === 0) {
-          // Emit updateMany event even when no matches
-          this.emitEvent("updateMany", () => ({
-            filter,
-            update: update as Partial<T>,
-            matchedCount: 0,
-            modifiedCount: 0,
-          }))
-
-          return Promise.resolve({
-            matchedCount: 0,
-            modifiedCount: 0,
-          })
-        }
-
-        const now = Date.now()
-        const updatedDocs: T[] = []
-
-        // Prepare all updated documents and validate before committing
-        for (const row of rows) {
-          assertDatabaseOpen(this.db)
-          throwIfAborted(options?.signal)
-
-          const existingDoc = this.hydrate(row)
-          const mergedDoc = mergeDocumentUpdate<
-            T,
-            typeof update & { _id: string; updatedAt: number }
-          >(existingDoc, {
-            ...update,
-            _id: row._id,
-            updatedAt: now,
-          })
-
-          if (this.schema.validate && !this.schema.validate(mergedDoc)) {
-            throw new ValidationError(
-              `Document validation failed during batch update for id '${row._id}': Document does not match the schema. ` +
-                "Check that all required fields are present and have correct types.",
-              undefined,
-              mergedDoc
+            const stmt = this.db.prepare<StoredRow, SQLQueryBindings[]>(
+              selectSql
             )
-          }
+            const rows = stmt.all(...params)
+            const matchedCount = rows.length
 
-          updatedDocs.push(mergedDoc)
-        }
+            if (matchedCount === 0) {
+              // Emit updateMany event even when no matches
+              this.emitEvent("updateMany", () => ({
+                filter,
+                update: update as Partial<T>,
+                matchedCount: 0,
+                modifiedCount: 0,
+              }))
 
-        // Use transaction for atomic update
-        const updateStmt = this.db.prepare(
-          `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
-        )
+              return {
+                matchedCount: 0,
+                modifiedCount: 0,
+              }
+            }
 
-        this.db.exec("BEGIN TRANSACTION")
-        try {
-          for (const doc of updatedDocs) {
-            const _id = doc._id
-            const body = this.serializeDocument(doc)
-            updateStmt.run(body, now, _id)
-          }
-          this.db.exec("COMMIT")
-        } catch (error) {
-          this.db.exec("ROLLBACK")
-          throw error
-        }
+            const now = Date.now()
+            const updatedDocs: T[] = []
 
-        // Emit updateMany event after successful operation
-        this.emitEvent("updateMany", () => ({
-          filter,
-          update: update as Partial<T>,
-          matchedCount,
-          modifiedCount: updatedDocs.length,
-        }))
+            // Prepare all updated documents and validate before committing
+            for (const row of rows) {
+              assertDatabaseOpen(this.db)
+              throwIfAborted(options?.signal)
 
-        return Promise.resolve({
-          matchedCount,
-          modifiedCount: updatedDocs.length,
-        })
-      },
+              const existingDoc = this.hydrate(row)
+              const mergedDoc = mergeDocumentUpdate<
+                T,
+                typeof update & { _id: string; updatedAt: number }
+              >(existingDoc, {
+                ...update,
+                _id: row._id,
+                updatedAt: now,
+              })
+
+              this.validateMutationDocument(mergedDoc)
+
+              updatedDocs.push(mergedDoc)
+            }
+
+            // Use transaction for atomic update
+            const updateStmt = this.db.prepare(
+              `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
+            )
+
+            for (const doc of updatedDocs) {
+              const _id = doc._id
+              const body = this.serializeDocument(doc)
+              updateStmt.run(body, now, _id)
+            }
+
+            // Emit updateMany event after successful operation
+            this.emitEvent("updateMany", () => ({
+              filter,
+              update: update as Partial<T>,
+              matchedCount,
+              modifiedCount: updatedDocs.length,
+            }))
+
+            return {
+              matchedCount,
+              modifiedCount: updatedDocs.length,
+            }
+          })
+        ),
       this.buildRetryOptions(options?.retry, options?.signal)
     )
   }
@@ -1736,39 +1746,36 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<DeleteResult> {
     return this.runOperation(
-      () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
+      () =>
+        Promise.resolve(
+          transactionManager(this.db).sync(() => {
+            assertDatabaseOpen(this.db)
+            throwIfAborted(options?.signal)
 
-        const { sql: whereClause, params } = this.translator.translate(filter)
+            const { sql: whereClause, params } =
+              this.translator.translate(filter)
 
-        let sql = `DELETE FROM ${this.tableSql}`
-        if (whereClause) {
-          sql += ` WHERE ${whereClause}`
-        }
+            let sql = `DELETE FROM ${this.tableSql}`
+            if (whereClause) {
+              sql += ` WHERE ${whereClause}`
+            }
 
-        this.db.exec("BEGIN TRANSACTION")
-        try {
-          const stmt = this.db.prepare(sql)
-          const result = stmt.run(...params)
-          this.db.exec("COMMIT")
+            const stmt = this.db.prepare(sql)
+            const result = stmt.run(...params)
 
-          const deletedCount = result.changes
+            const deletedCount = result.changes
 
-          // Emit deleteMany event after successful operation
-          this.emitEvent("deleteMany", () => ({
-            filter,
-            deletedCount,
-          }))
+            // Emit deleteMany event after successful operation
+            this.emitEvent("deleteMany", () => ({
+              filter,
+              deletedCount,
+            }))
 
-          return Promise.resolve({
-            deletedCount,
+            return {
+              deletedCount,
+            }
           })
-        } catch (error) {
-          this.db.exec("ROLLBACK")
-          throw error
-        }
-      },
+        ),
       this.buildRetryOptions(options?.retry, options?.signal)
     )
   }
@@ -2005,21 +2012,24 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     retry?: RetryOptions | false
   }): Promise<void> {
     return this.runOperation(
-      () => {
-        assertDatabaseOpen(this.db)
-        throwIfAborted(options?.signal)
-        this.db.exec(`DROP TABLE IF EXISTS ${this.tableSql}`)
+      () =>
+        Promise.resolve(
+          transactionManager(this.db).sync(() => {
+            assertDatabaseOpen(this.db)
+            throwIfAborted(options?.signal)
+            this.db.exec(`DROP TABLE IF EXISTS ${this.tableSql}`)
 
-        // Emit drop event after successful operation
-        this.emitEvent("drop", () => ({
-          name: this.name,
-        }))
+            // Emit drop event after successful operation
+            this.emitEvent("drop", () => ({
+              name: this.name,
+            }))
 
-        // Clean up event resources after emitting drop event
-        this.cleanupEvents()
+            // Clean up event resources after emitting drop event
+            transactionManager(this.db).event(() => this.cleanupEvents())
 
-        return Promise.resolve()
-      },
+            return
+          })
+        ),
       this.buildRetryOptions(options?.retry, options?.signal)
     )
   }
