@@ -1,11 +1,11 @@
 ---
 id: TASK-263
 title: 'Correctness: preserve $exists boolean semantics in cached query templates'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T18:02:00Z'
-updated_date: '2026-11-09T20:36:00Z'
+updated_date: '2026-11-09T20:37:00Z'
 labels:
   - api
 milestone: m-1
@@ -45,4 +45,6 @@ During query safety review, a real translator with caching enabled produced IS N
 - Regression-first evidence: all nine new cases failed before implementation (eight real-SQLite malformed JSON failures and one incompatible-cache SQL assertion). All now pass. Matrix covers indexed/unindexed fields, cache on/off, both true/false orders, nested and missing-parent paths, explicit null/string/missing values, repeated calls, mixed operator orders and metadata.
 - Explicitly enabled caching in the existing repeated-path binding-order and malformed-value cache fixtures; both pass. Updated exact translator SQL assertions for bound original-body presence inspection, preserving assertion strength.
 - Breaking change: none; corrected documented presence semantics. Updated the semantics guide and CHANGELOG. Host verification PASS: 891 pass, 2 existing skips, 0 fail; TS 7.0.2 typecheck, lint, build, type tests, consumer TS 6/7 CRUD, source TS 5.9.3/6.0.3. Local CI pending committed SHA.
+
+- Verified with scripts/ci-local.sh (ad55c9cc11ac65a62a6bd234ef932b26cf5572b3, PASS); GitHub Actions unavailable (billing lock). macOS/Linux Bun 1.4.4 (also latest), TS 5.9.3/6.0.3/7.0.2 and advisory 7.1.0-beta all pass.
 <!-- SECTION:NOTES:END -->
