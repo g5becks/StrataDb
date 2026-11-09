@@ -4,13 +4,14 @@ title: 'Release prep: v0.6.0 (verify, changelog, local tag; do not publish)'
 status: To Do
 assignee: []
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T17:47:00Z'
+updated_date: '2026-11-09T18:02:00Z'
 labels:
   - build-release
 milestone: m-1
 dependencies:
   - TASK-241
   - TASK-262
+  - TASK-263
 documentation:
   - stratadb-audit.md
 priority: medium
