@@ -1,11 +1,11 @@
 ---
 id: TASK-248
 title: 'DX: detect schema mismatch on cached collections; unify creation paths'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-10T01:05:00Z'
+updated_date: '2026-11-10T01:09:00Z'
 labels:
   - api
 milestone: m-2
@@ -32,7 +32,7 @@ type: enhancement
 <!-- AC:BEGIN -->
 - [x] #1 Calling db.collection(name, otherSchema) after db.collection(name, schema) throws SchemaValidationError (test)
 - [x] #2 Builder-created and schema-created collections receive identical cache and retry defaults (test)
-- [ ] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #4 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
 
@@ -52,4 +52,6 @@ type: enhancement
 - Regression-first suite initially had 11 failures and 2 passing schema-style controls; final 15 cases pass, including actual retry recovery and cache enablement in both styles. Updated internal constructor fixtures for the shared factory and strengthened the real database builder test with actual schema assertions. Existing close/dispose guarantees pass unchanged.
 - Breaking change: mismatched cached schemas reject; fluent collections are cached, inherit retry defaults and default visible timestamps. Keep shared validator references and use timestamps(false) explicitly when needed. Later lookup options do not reconfigure an existing collection. Documented in CHANGELOG/schema guide.
 - Host gate PASS: 977 pass, 1 existing projection skip, 0 fail; TS 7.0.2 typecheck; lint; build; type tests; consumer TS 6/7 CRUD; source TS 5.9.3/6.0.3. Local CI pending committed SHA.
+
+- Verified with scripts/ci-local.sh (d2934707347d43226c62ffd7cf036fc4e1407042, PASS); GitHub Actions unavailable (billing lock). All macOS/Linux Bun and required/advisory TypeScript jobs pass.
 <!-- SECTION:NOTES:END -->
