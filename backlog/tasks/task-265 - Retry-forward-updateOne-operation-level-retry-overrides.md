@@ -1,11 +1,11 @@
 ---
 id: TASK-265
 title: 'Retry: forward updateOne operation-level retry overrides'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-10T01:16:00Z'
-updated_date: '2026-11-10T13:26:00Z'
+updated_date: '2026-11-10T13:28:00Z'
 labels:
   - api
 milestone: m-2
@@ -25,7 +25,7 @@ A real in-memory repro during TASK-249 used a database retry policy with retries
 <!-- AC:BEGIN -->
 - [x] #1 retry:false on updateOne suppresses an enabled database/collection retry policy (real regression)
 - [x] #2 An explicit updateOne retry policy and custom predicate override inherited defaults, with promise-only failures preserved
-- [ ] #3 Full host quality gate and local CI pass; retry documentation reflects the verified override behavior
+- [x] #3 Full host quality gate and local CI pass; retry documentation reflects the verified override behavior
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -45,4 +45,6 @@ A real in-memory repro during TASK-249 used a database retry policy with retries
 - Verification: full host gate PASS,1055 tests/no failures/skips, source TS5.9.3/6.0.3/7.0.2, lint, build, type assertions and packed consumer TS6/7+CRUD. Committed local CI pending.
 - Decisions: forward only the missing option; reuse existing retry merging and failure classification.
 - Follow-ups: none.
+
+Verified with scripts/ci-local.sh (713b6f9d11435ba23078106968ddf572617b5c40, PASS); GitHub Actions unavailable (billing lock). macOS/Linux Bun pinned/latest1.4.4, TS5.9.3/6.0.3/7.0.2 and advisory7.1-beta all PASS.
 <!-- SECTION:NOTES:END -->
