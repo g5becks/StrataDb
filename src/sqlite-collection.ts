@@ -13,6 +13,11 @@ import type {
   UpdateResult,
 } from "./collection-types.js"
 import type { Document } from "./core-types.js"
+import {
+  buildCursorPredicate,
+  cursorOrder,
+  reverseSort,
+} from "./cursor-pagination.js"
 import { assertDatabaseOpen, isDatabaseClosed } from "./database-state.js"
 import { mergeDocumentUpdate } from "./deep-merge.js"
 import { buildCompleteDocument } from "./document-builder.js"
@@ -732,9 +737,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    * @returns Object with SQL clause and parameters, or undefined if no cursor
    *
    * @remarks
-   * Uses the cursor document's sort field value and _id to determine position.
-   * For forward pagination (after), gets items where (sortValue, _id) > cursor.
-   * For backward pagination (before), gets items where (sortValue, _id) < cursor.
+   * Compares all sort keys and the stable ID tie-breaker, with explicit NULL
+   * ordering. Missing boundary rows reject. The caller reverses query order
+   * for nearest-previous-page selection and restores result order afterward.
    *
    * @internal
    */
@@ -742,49 +747,13 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     cursor: CursorSpec,
     sort: SortSpec<T>
   ): { sql: string; params: SQLQueryBindings[] } | undefined {
-    const cursorId = cursor.after ?? cursor.before
-    if (!cursorId) {
-      return
-    }
-
-    // Get the first sort field and direction
-    const sortEntries = Object.entries(sort)
-    const firstEntry = sortEntries[0]
-    if (!firstEntry) {
-      return
-    }
-
-    const [sortField, sortDir] = firstEntry
-    const isAsc = sortDir === 1
-    const isAfter = cursor.after !== undefined
-
-    // Determine comparison operator based on sort direction and cursor type
-    // after + asc = > | after + desc = < | before + asc = < | before + desc = >
-    const operator = isAfter === isAsc ? ">" : "<"
-
-    // Get column reference for sort field
-    const fieldParams: SQLQueryBindings[] = []
-    const sortColumn = resolveField(sortField, this.schema.fields, fieldParams)
-    const cursorStatement = positional(
-      `SELECT ${sortColumn} as sortVal FROM ${this.tableSql} WHERE _id = ${bind(cursorId, fieldParams)}`,
-      fieldParams
-    )
-    const cursorRow = this.sql
-      .prepare<{ sortVal: SQLQueryBindings }, SQLQueryBindings[]>(
-        cursorStatement.sql
-      )
-      .get(...cursorStatement.params)
-
-    if (!cursorRow) {
-      return // Cursor document not found, skip cursor filtering
-    }
-
-    // Build compound comparison: (sortCol, _id) > (cursorSortVal, cursorId)
-    // This ensures stable pagination even with duplicate sort values
-    const params: SQLQueryBindings[] = []
-    const column = resolveField(sortField, this.schema.fields, params)
-    const sql = `((${column} ${operator} ${bind(cursorRow.sortVal, params)}) OR (${column} = ${bind(cursorRow.sortVal, params)} AND _id ${operator} ${bind(cursorId, params)}))`
-    return positional(sql, params)
+    return buildCursorPredicate({
+      sql: this.sql,
+      collection: this.name,
+      schema: this.schema,
+      cursor,
+      sort,
+    })
   }
 
   /**
@@ -971,6 +940,8 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         const { sql: whereClause, params } = this.translator.translate(filter)
 
+        const cursorPlan = cursorOrder(options?.sort, options?.cursor)
+
         let sql = `SELECT _id, json(body) as body, createdAt, updatedAt FROM ${this.tableSql}`
 
         // Build WHERE clause combining filter and search
@@ -991,10 +962,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         }
 
         // Add cursor clause if provided (requires sort)
-        if (options?.cursor && options?.sort) {
+        if (options?.cursor && cursorPlan.sort) {
           const cursorResult = this.buildCursorClause(
             options.cursor,
-            options.sort
+            cursorPlan.sort
           )
           if (cursorResult) {
             whereParts.push(cursorResult.sql)
@@ -1006,9 +977,16 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           sql += ` WHERE ${whereParts.join(" AND ")}`
         }
 
-        const translatedOptions = this.translator.translateOptions(
-          options ?? {}
-        )
+        const translatedOptions = this.translator.translateOptions({
+          ...options,
+          ...(cursorPlan.sort
+            ? {
+                sort: cursorPlan.reverse
+                  ? reverseSort(cursorPlan.sort)
+                  : cursorPlan.sort,
+              }
+            : {}),
+        })
         if (translatedOptions.sql) {
           sql += ` ${translatedOptions.sql}`
           allParams.push(...translatedOptions.params)
@@ -1020,7 +998,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         assertDatabaseOpen(this.db)
         throwIfAborted(options?.signal)
 
-        let results = rows.map((row) => this.hydrate(row))
+        let results = (cursorPlan.reverse ? rows.reverse() : rows).map((row) =>
+          this.hydrate(row)
+        )
 
         // Apply projection (select/omit/projection)
         const projection = this.normalizeProjection(options)

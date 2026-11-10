@@ -347,7 +347,11 @@ export type TextSearchSpec<T> = {
  *
  * **Cursor value format:**
  * The cursor is simply the `_id` of the last/first document from the previous page.
- * The sort field value is extracted from the database for proper comparison.
+ * All sort values are read from the boundary row and compared lexicographically.
+ * Sorted finds append ascending `_id` unless explicitly supplied. NULL/missing
+ * values sort first ascending and last descending. `before` returns the nearest
+ * previous page in the requested order. Unknown/malformed cursors or a cursor
+ * without a nonempty sort reject with QueryError.
  *
  * @example
  * ```typescript

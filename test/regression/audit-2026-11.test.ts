@@ -284,7 +284,7 @@ test("A14 [TASK-239] skip without limit returns remaining rows", async () => {
   ).toEqual(["alice", "bob", "carol"])
 })
 
-test.failing("A15 [TASK-246] unknown cursor raises QueryError", async () => {
+test("A15 [TASK-246] unknown cursor raises QueryError", async () => {
   await expect(
     Promise.resolve().then(() =>
       users.find(

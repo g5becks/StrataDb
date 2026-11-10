@@ -405,7 +405,7 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const options: QueryOptions<User> = { sort: { name: 1 } }
     const result = userTranslator.translateOptions(options)
 
-    expect(result.sql).toBe('ORDER BY "_name" ASC')
+    expect(result.sql).toBe('ORDER BY "_name" ASC NULLS FIRST')
     expect(result.params).toEqual([])
   })
 
@@ -416,7 +416,7 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const result = userTranslator.translateOptions(options)
 
     expect(result.sql).toBe(
-      'ORDER BY "_age" DESC, "_name" ASC, jsonb_extract(body, ?) ASC'
+      'ORDER BY "_age" DESC NULLS LAST, "_name" ASC NULLS FIRST, jsonb_extract(body, ?) ASC NULLS FIRST'
     )
     expect(result.params).toEqual(["$.status"])
   })
@@ -428,7 +428,7 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const result = userTranslator.translateOptions(options)
 
     expect(result.sql).toBe(
-      "ORDER BY jsonb_extract(body, ?) ASC, jsonb_extract(body, ?) DESC"
+      "ORDER BY jsonb_extract(body, ?) ASC NULLS FIRST, jsonb_extract(body, ?) DESC NULLS LAST"
     )
     expect(result.params).toEqual(["$.status", "$.active"])
   })
@@ -466,7 +466,7 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const result = userTranslator.translateOptions(options)
 
     expect(result.sql).toBe(
-      'ORDER BY "_age" DESC, "_name" ASC LIMIT ? OFFSET ?'
+      'ORDER BY "_age" DESC NULLS LAST, "_name" ASC NULLS FIRST LIMIT ? OFFSET ?'
     )
     expect(result.params).toEqual([10, 20])
   })

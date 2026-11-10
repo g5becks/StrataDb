@@ -378,7 +378,15 @@ const backToPage1 = await collection.find(
 :::
 
 ::: warning
-Cursor pagination requires a `sort` option. If no sort is provided, the cursor is ignored.
+Cursor pagination requires a nonempty `sort` and exactly one nonempty `after` or
+`before` ID. Malformed or unknown cursors reject with `QueryError`.
+
+All sort keys participate in the comparison, including dotted paths. Every
+sorted find appends ascending `_id` unless it is explicitly part of the sort,
+giving the first page and later pages the same stable order. NULL and missing
+values sort first ascending and last descending. `before` selects the nearest
+previous page and returns it in the requested order. The boundary row may be
+outside the current filter, but it must still exist in the collection.
 :::
 
 ## Nested Fields

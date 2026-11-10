@@ -1184,7 +1184,9 @@ export class SQLiteQueryTranslator<T extends Document>
       }
       const fieldSql = this.resolveFieldName(fieldName as keyof T, params)
       const dir = direction === 1 ? "ASC" : "DESC"
-      sortFields.push(`${fieldSql} ${dir}`)
+      sortFields.push(
+        `${fieldSql} ${dir} NULLS ${direction === 1 ? "FIRST" : "LAST"}`
+      )
     }
 
     return sortFields.length > 0 ? `ORDER BY ${sortFields.join(", ")}` : ""
