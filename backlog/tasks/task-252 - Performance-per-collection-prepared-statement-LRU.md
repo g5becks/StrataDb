@@ -1,11 +1,11 @@
 ---
 id: TASK-252
 title: 'Performance: per-collection prepared-statement LRU'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-10T02:22:00Z'
+updated_date: '2026-11-10T02:26:00Z'
 labels:
   - performance
 milestone: m-2
@@ -35,7 +35,7 @@ Every operation calls `db.prepare()` (13 sites, 0 cached). Measured on findOne b
 - [x] #1 findOne-by-indexed-field benchmark is >= 3x faster than v0.6.0 on the same machine (record both numbers in the PR/notes)
 - [x] #2 Statements are finalized on close(), drop() and DDL; using a collection after close() still yields the closed-database error
 - [x] #3 The translator SQL cache is removed or kept with benchmark justification in notes
-- [ ] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #5 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
 
@@ -60,4 +60,13 @@ Every operation calls `db.prepare()` (13 sites, 0 cached). Measured on findOne b
 - Added option-fallback and retained-wrapper coverage after the six regression-first failures. All eight focused cache cases pass, alongside the existing abort, retry, security, transaction and property suites. Simple findOne uses direct get and a trusted constant LIMIT 1; sorting/search/projection/cursor options preserve the full find path.
 - Breaking change: none. Host gate PASS: 1029 pass, 1 existing projection skip, 0 fail; TS 7.0.2 typecheck; lint; build; type tests; consumer TS 6/7 CRUD; source TS 5.9.3/6.0.3. Benchmarks exceed the 3x requirement in both translator-cache settings; committed-SHA measurement and local CI follow.
 - Follow-up TASK-267 records pre-existing CRUD benchmark lifecycle/unawaited-setup defects found during harness review. TASK-257 now depends on it, preserving TASK-252, so the tracking workflow will run the complete repaired harness; the new fixed comparison harness is independent of those groups.
+
+- Clean committed-SHA benchmark confirmation: f97828aba30b374d354e6adc0600c309db6193b7, dirty=false, same protocol/Bun/SQLite/platform as baseline 09deee50a78edc1d729f91880b5cd7f9921612f5. Raw trials and metadata retained at /Users/takinprofit/Dev/StrataDb-release/benchmarks/TASK-252/before.json and /Users/takinprofit/Dev/StrataDb-release/benchmarks/TASK-252/after.json; attempted variants retained beside them.
+
+| Translator cache | v0.6.0 us/op | After us/op | Speedup |
+| --- | --- | --- | --- |
+| off | 7.399683 | 1.366114 | 5.42x |
+| on | 7.126107 | 1.123969 | 6.34x |
+
+- Verified with scripts/ci-local.sh (f97828aba30b374d354e6adc0600c309db6193b7, PASS); GitHub Actions unavailable (billing lock). All macOS/Linux Bun and required/advisory TypeScript jobs pass.
 <!-- SECTION:NOTES:END -->
