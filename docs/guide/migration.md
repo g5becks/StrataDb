@@ -2,6 +2,52 @@
 
 This guide helps you migrate from other databases to StrataDB.
 
+## From StrataDB 0.7 to 0.8
+
+### Convert documents to explicit JSON values
+
+Version 0.8 rejects values that JSON.stringify previously changed silently.
+Before writing, convert Map/Set and class data to plain objects or arrays;
+replace non-finite numbers with an explicit application value. BigInt,
+functions, symbols, undefined array elements (including holes) and circular
+references reject with a `ValidationError` naming the offending path and type.
+Object properties containing `undefined` are still omitted. Other classes can
+provide `toJSON()` whose output must satisfy the same JSON rules. Documents
+nested beyond 256 levels reject.
+
+Date is always rejected. Convert it explicitly and update the document type:
+
+```typescript
+// Before: Date read back as string despite the declared Date type.
+type Before = Document<{ observedAt: Date }>
+
+// After: the declared type agrees with the stored and returned value.
+type Reading = Document<{ observedAt: string }>
+const readings = db.collection('readings', createSchema<Reading>().build())
+await readings.insertOne({ observedAt: new Date().toISOString() })
+// Alternatively use observedAt: number and new Date().getTime().
+```
+
+These rules apply to inserts, replacements, deep-merge updates and atomic
+update operands. Invalid batches fail serialization before writing any rows.
+Existing JSON data requires no storage migration; inspect application inputs
+that previously depended on implicit conversions.
+
+### Review broader case-insensitive filters
+
+`$ilike` and search with `caseSensitive: false` now use NFC normalization followed
+by JavaScript locale-independent lowercase. For example, `%émile%` now matches
+`Émile`, `ÉMILE`, `émile` and canonically equivalent decomposed text. Greek and
+Cyrillic case pairs also match. Review affected filters before bulk updates or
+deletes. Use `$like` or search with `caseSensitive: true` for exact-case matching.
+
+This policy does not remove accents or implement full Unicode case folding:
+`ß` matches `ẞ`, not `ss`; Turkish `İ` lowercases to `i` plus combining dot, and
+plain `i` and dotless `ı` remain distinct. ASCII behavior, wildcard escaping and
+case-sensitive operations are preserved. Unicode matching uses a per-row
+JavaScript UDF and costs more than the previous ASCII-only SQLite function;
+see [query semantics](./mongodb-differences.md#unicode-text-matching).
+
 ## From MongoDB
 
 If you're currently using MongoDB, StrataDB provides a familiar API with additional type safety benefits.
