@@ -52,6 +52,7 @@
     "lint": "ultracite check",
     "lint:fix": "ultracite fix",
     "prepare": "lefthook install",
+    "release:prepare": "bun scripts/release.ts",
     "test": "bun test",
     "test:consumer": "bun run build && bun scripts/smoke-consumer.ts",
     "test:coverage": "bun test --coverage",

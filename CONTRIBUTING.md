@@ -97,6 +97,35 @@ before consulting the registry. An already published version is a successful
 skip. Registry errors other than a missing version fail the job. Publishing
 remains unavailable while Actions is locked, even after publisher setup.
 
+## Scripted local release preparation
+
+On a clean `release/vX.Y.Z` branch with nonempty CHANGELOG `[Unreleased]`, run:
+
+```bash
+bun run release:prepare X.Y.Z --dry-run
+bun run release:prepare X.Y.Z
+```
+
+Use a stable three-part version greater than package.json, with no existing tag.
+The dry run performs preflight and prints its plan without writing files. The
+real run rolls the changelog into a UTC-dated section, leaves `[Unreleased]`
+empty, bumps package.json, commits with hooks, and creates an annotated tag.
+It requires `scripts/ci-local.sh` to succeed and report `RESULT: PASS`, then
+creates a detached worktree at `../StrataDb-release/vX.Y.Z` (override with
+`--out /absolute/path` outside the source repo; the path must not exist).
+
+The worktree retains the frozen install/build, tarball, `SHA512SUMS`,
+`CI_LOCAL.log` and `RELEASE_NOTES.md`. The script validates archive entries and
+runs CRUD from an isolated tarball consumer. It prints maintainer publication
+commands; pushing refs, merging the release PR and publication are separate
+steps. Failures stop preparation; inspect the error and retained commit/tag
+before retrying. Existing tags and artifact directories are never overwritten.
+
+We use a local script while GitHub Actions is unavailable. Changesets and
+release-please add automation centered on Actions, and a single maintainer
+does not need per-change changeset files. The script can be invoked by a
+future workflow when Actions is available again.
+
 ## Manual publication by the maintainer
 
 The release engineer prepares a verified tag worktree, tarball, SHA-512 digest,

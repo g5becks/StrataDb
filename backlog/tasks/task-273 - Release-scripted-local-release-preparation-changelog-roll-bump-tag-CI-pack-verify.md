@@ -3,9 +3,11 @@ id: TASK-273
 title: >-
   Release: scripted local release preparation (changelog roll, bump, tag, CI,
   pack, verify)
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-11-10T16:03:00Z'
+updated_date: '2026-11-10T16:14:00Z'
 labels:
   - build-release
 milestone: m-3
@@ -49,3 +51,11 @@ Document the script in CONTRIBUTING.md, next to the manual procedure and the tru
 - [ ] #4 Tested against a temporary clone, including the CHANGELOG roll and version-bump edge cases
 - [ ] #5 CONTRIBUTING.md documents the script; the decision versus changesets/release-please is recorded in notes
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Add temporary-clone regressions for dry-run, preflight failures, changelog/version edge cases, real artifacts and failed CI.
+2. Implement a Bun release command with clean release-branch preflight, stable version bump/changelog roll, hooked commit, annotated tag, strict local CI, worktree pack/digest/archive checks and isolated CRUD.
+3. Document the local workflow and Actions-related tooling decision; run quality gates, clone integration and ci-local, then record verified evidence.
+<!-- SECTION:PLAN:END -->
