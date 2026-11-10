@@ -50,20 +50,22 @@ describe("SQLiteQueryTranslator - $ilike Operator", () => {
    * Tests for case-insensitive LIKE pattern matching.
    */
 
-  it("should translate $ilike to LIKE ? COLLATE NOCASE for indexed field", () => {
+  it("should translate $ilike to Unicode-folded LIKE for indexed field", () => {
     const filter: QueryFilter<User> = { name: { $ilike: "%alice%" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(lower(\"_name\") LIKE lower(?) ESCAPE '\\')")
+    expect(result.sql).toBe(
+      "(strata_casefold(\"_name\") LIKE strata_casefold(?) ESCAPE '\\')"
+    )
     expect(result.params).toEqual(["%alice%"])
   })
 
-  it("should translate $ilike to LIKE ? COLLATE NOCASE for non-indexed field", () => {
+  it("should translate $ilike to Unicode-folded LIKE for non-indexed field", () => {
     const filter: QueryFilter<User> = { description: { $ilike: "%important%" } }
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "(lower(jsonb_extract(body, ?)) LIKE lower(?) ESCAPE '\\')"
+      "(strata_casefold(jsonb_extract(body, ?)) LIKE strata_casefold(?) ESCAPE '\\')"
     )
     expect(result.params).toEqual(["$.description", "%important%"])
   })
@@ -72,7 +74,9 @@ describe("SQLiteQueryTranslator - $ilike Operator", () => {
     const filter: QueryFilter<User> = { email: { $ilike: "%@GMAIL.COM" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(lower(\"_email\") LIKE lower(?) ESCAPE '\\')")
+    expect(result.sql).toBe(
+      "(strata_casefold(\"_email\") LIKE strata_casefold(?) ESCAPE '\\')"
+    )
     expect(result.params).toEqual(["%@GMAIL.COM"])
   })
 
@@ -80,7 +84,9 @@ describe("SQLiteQueryTranslator - $ilike Operator", () => {
     const filter: QueryFilter<User> = { name: { $ilike: "A_ice" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(lower(\"_name\") LIKE lower(?) ESCAPE '\\')")
+    expect(result.sql).toBe(
+      "(strata_casefold(\"_name\") LIKE strata_casefold(?) ESCAPE '\\')"
+    )
     expect(result.params).toEqual(["A_ice"])
   })
 
@@ -88,7 +94,9 @@ describe("SQLiteQueryTranslator - $ilike Operator", () => {
     const filter: QueryFilter<User> = { name: { $ilike: "Alice" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(lower(\"_name\") LIKE lower(?) ESCAPE '\\')")
+    expect(result.sql).toBe(
+      "(strata_casefold(\"_name\") LIKE strata_casefold(?) ESCAPE '\\')"
+    )
     expect(result.params).toEqual(["Alice"])
   })
 })
@@ -161,7 +169,7 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      '(lower("_name") LIKE lower(?) ESCAPE \'\\\' AND substr("_name", 1, length(?)) = ?)'
+      '(strata_casefold("_name") LIKE strata_casefold(?) ESCAPE \'\\\' AND substr("_name", 1, length(?)) = ?)'
     )
     expect(result.params).toEqual(["%smith%", "Dr.", "Dr."])
   })
@@ -185,7 +193,7 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "((lower(\"_name\") LIKE lower(?) ESCAPE '\\') AND jsonb_extract(body, ?) = ?)"
+      "((strata_casefold(\"_name\") LIKE strata_casefold(?) ESCAPE '\\') AND jsonb_extract(body, ?) = ?)"
     )
     expect(result.params).toEqual(["%alice%", "$.status", "active"])
   })
@@ -219,7 +227,7 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "(lower(\"_name\") LIKE lower(?) ESCAPE '\\') AND (jsonb_extract(body, ?) IN (?, ?))"
+      "(strata_casefold(\"_name\") LIKE strata_casefold(?) ESCAPE '\\') AND (jsonb_extract(body, ?) IN (?, ?))"
     )
     expect(result.params).toEqual(["%test%", "$.status", "active", "pending"])
   })
@@ -231,7 +239,7 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "((lower(\"_name\") LIKE lower(?) ESCAPE '\\') OR (lower(\"_email\") LIKE lower(?) ESCAPE '\\'))"
+      "((strata_casefold(\"_name\") LIKE strata_casefold(?) ESCAPE '\\') OR (strata_casefold(\"_email\") LIKE strata_casefold(?) ESCAPE '\\'))"
     )
     expect(result.params).toEqual(["%alice%", "%alice%"])
   })
@@ -258,7 +266,7 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "NOT COALESCE(((lower(\"_name\") LIKE lower(?) ESCAPE '\\')), 0)"
+      "NOT COALESCE(((strata_casefold(\"_name\") LIKE strata_casefold(?) ESCAPE '\\')), 0)"
     )
     expect(result.params).toEqual(["%test%"])
   })
@@ -288,7 +296,9 @@ describe("SQLiteQueryTranslator - String Operators Edge Cases", () => {
     const filter: QueryFilter<User> = { name: { $ilike: "100%%" } }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe("(lower(\"_name\") LIKE lower(?) ESCAPE '\\')")
+    expect(result.sql).toBe(
+      "(strata_casefold(\"_name\") LIKE strata_casefold(?) ESCAPE '\\')"
+    )
     expect(result.params).toEqual(["100%%"])
   })
 
@@ -310,7 +320,7 @@ describe("SQLiteQueryTranslator - String Operators Edge Cases", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      '(lower("_name") LIKE lower(?) ESCAPE \'\\\') AND (instr("_email", ?) > 0) AND (jsonb_extract(body, ?) GLOB ?)'
+      '(strata_casefold("_name") LIKE strata_casefold(?) ESCAPE \'\\\') AND (instr("_email", ?) > 0) AND (jsonb_extract(body, ?) GLOB ?)'
     )
     expect(result.params).toEqual([
       "%alice%",

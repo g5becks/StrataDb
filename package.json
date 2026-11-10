@@ -1,6 +1,6 @@
 {
   "name": "stratadb",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Type-safe embedded document database for Bun with MongoDB-like queries",
   "keywords": [
     "bun",
@@ -52,6 +52,7 @@
     "lint": "ultracite check",
     "lint:fix": "ultracite fix",
     "prepare": "lefthook install",
+    "release:prepare": "bun scripts/release.ts",
     "test": "bun test",
     "test:consumer": "bun run build && bun scripts/smoke-consumer.ts",
     "test:coverage": "bun test --coverage",

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-10
+
+### Breaking changes
+
+- `$ilike` and case-insensitive text search now normalize strings to NFC and apply locale-independent Unicode lowercase, broadening matches for accents, Greek and Cyrillic (including canonically equivalent strings). ASCII and literal escaping stay the same. Review affected filters before bulk writes; use `$like` or `caseSensitive: true` when exact case is required. This is not full case folding: ß does not equal ss, and Turkish dotted/dotless i remain distinct as defined by JavaScript lowercase.
+
+- Writes now reject non-JSON values with a path-aware `ValidationError`, preventing silent data loss from Map/Set, non-finite numbers, functions, symbols, undefined array elements and unsupported classes. Circular references and BigInt have specific diagnostics. Convert values to plain JSON before writing; object `undefined` properties remain omitted. Date is rejected: migrate to `date.toISOString()` with a `string` field or `date.getTime()` with a `number` field. Classes with `toJSON()` remain supported when their output is valid JSON. Nesting beyond 256 levels rejects.
+
+### Added
+
+- `bun run release:prepare <version>` prepares a hooked release commit, annotated tag, local CI verification, retained worktree, checked tarball, SHA-512 and release notes. `--dry-run` validates without writes. Publication remains a maintainer step.
+
 ## [0.7.0] - 2026-11-10
 
 ### Breaking changes

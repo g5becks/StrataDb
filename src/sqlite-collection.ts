@@ -14,7 +14,6 @@ import { assertDatabaseOpen } from "./database-state.js"
 import { mergeDocumentUpdate } from "./deep-merge.js"
 import { buildCompleteDocument } from "./document-builder.js"
 import { ValidationError } from "./errors.js"
-import { serializeJSON } from "./json-serialization.js"
 import type { QueryFilter } from "./query-types.js"
 import type { RetryOptions } from "./retry-types.js"
 import { transactionManager } from "./transaction-manager.js"
@@ -59,10 +58,11 @@ export class SQLiteCollection<T extends Document>
             const ordered = options?.ordered ?? true
             // Reject serialization errors before the per-document catch path
             // can swallow them or earlier documents can be written.
-            serializeJSON(docs)
+            const bodies = docs.map((doc) => this.serializeDocument(doc as T))
             const now = Date.now()
             const insertedDocs = this.insertBatchRows(
               docs,
+              bodies,
               now,
               ordered,
               options?.signal
@@ -259,6 +259,7 @@ export class SQLiteCollection<T extends Document>
 
   private insertBatchRows(
     docs: readonly BatchDocument<T>[],
+    bodies: readonly string[],
     now: number,
     ordered: boolean,
     signal?: AbortSignal
@@ -289,7 +290,7 @@ export class SQLiteCollection<T extends Document>
       try {
         const fullDoc = this.batchDocument(doc, now, i)
         const docId = fullDoc._id
-        const body = this.serializeDocument(fullDoc)
+        const body = bodies[i] ?? this.serializeDocument(fullDoc)
         stmt.run(docId, body, now, now)
 
         insertedDocs.push(this.visibleDocument(fullDoc))

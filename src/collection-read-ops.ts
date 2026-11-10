@@ -72,7 +72,7 @@ export class CollectionReadOps<T extends Document> extends CollectionCore<T> {
       clauses.push(
         search.caseSensitive
           ? `instr(${column}, ${bind(search.text, params)}) > 0`
-          : `lower(${column}) LIKE lower(${bind(pattern, params)}) ESCAPE '\\'`
+          : `strata_casefold(${column}) LIKE strata_casefold(${bind(pattern, params)}) ESCAPE '\\'`
       )
     }
 
