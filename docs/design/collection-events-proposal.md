@@ -1,3 +1,9 @@
+# Historical collection events proposal
+
+This is the original implementation proposal, retained for design history.
+For current payloads, commit buffering, listener isolation and raw hook caveats,
+read [Collection Events](../guide/events.md) and [the current architecture](../DESIGN.md).
+
 # StrataDB Collection Events - Design Document
 
 ## Executive Summary

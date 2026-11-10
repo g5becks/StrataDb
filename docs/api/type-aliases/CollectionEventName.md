@@ -6,7 +6,7 @@
 type CollectionEventName = keyof CollectionEventMap<Document>;
 ```
 
-Defined in: [src/collection-events.ts:402](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-events.ts#L402)
+Defined in: [src/collection-events.ts:402](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L402)
 
 Type-safe event names for collections.
 

@@ -9,7 +9,7 @@ type QueryFilter<T> = Simplify<
   | { [P in DocumentPath<T> as P extends string ? P : never]?: P extends string ? PathValue<T, P> | FieldOperator<PathValue<T, P>> : never }>;
 ```
 
-Defined in: [src/query-types.ts:565](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-types.ts#L565)
+Defined in: [src/query-types.ts:567](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-types.ts#L567)
 
 Complete query filter combining field filters and logical operators.
 

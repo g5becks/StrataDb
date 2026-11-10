@@ -98,6 +98,8 @@ const adults = await users.find({ age: { $gte: 18 } });
 - [QueryOptionsWithOmit](type-aliases/QueryOptionsWithOmit.md)
 - [QueryOptionsWithoutProjection](type-aliases/QueryOptionsWithoutProjection.md)
 - [QueryOptionsWithSelect](type-aliases/QueryOptionsWithSelect.md)
+- [RawChangeEvent](type-aliases/RawChangeEvent.md)
+- [RawChangeObserver](type-aliases/RawChangeObserver.md)
 - [ReplaceEvent](type-aliases/ReplaceEvent.md)
 - [RetryContext](type-aliases/RetryContext.md)
 - [RetryOptions](type-aliases/RetryOptions.md)

@@ -254,6 +254,14 @@
         "link": "/api/type-aliases/QueryOptionsWithSelect.md"
       },
       {
+        "text": "RawChangeEvent",
+        "link": "/api/type-aliases/RawChangeEvent.md"
+      },
+      {
+        "text": "RawChangeObserver",
+        "link": "/api/type-aliases/RawChangeObserver.md"
+      },
+      {
         "text": "ReplaceEvent",
         "link": "/api/type-aliases/ReplaceEvent.md"
       },

@@ -6,7 +6,7 @@
 type TextSearchSpec<T> = object;
 ```
 
-Defined in: [src/query-options-types.ts:311](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L311)
+Defined in: [src/query-options-types.ts:92](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-options-types.ts#L92)
 
 Text search configuration for literal multi-field substring searching.
 
@@ -94,7 +94,7 @@ The document type being searched
 readonly caseSensitive?: boolean;
 ```
 
-Defined in: [src/query-options-types.ts:322](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L322)
+Defined in: [src/query-options-types.ts:103](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-options-types.ts#L103)
 
 Whether to perform case-sensitive matching. Default: false (case-insensitive)
 
@@ -106,7 +106,7 @@ Whether to perform case-sensitive matching. Default: false (case-insensitive)
 readonly fields: readonly (keyof T | string)[];
 ```
 
-Defined in: [src/query-options-types.ts:319](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L319)
+Defined in: [src/query-options-types.ts:100](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-options-types.ts#L100)
 
 Fields to search. Use field names for top-level, dot notation for nested.
 All fields are searched with OR logic (match any).
@@ -119,6 +119,6 @@ All fields are searched with OR logic (match any).
 readonly text: string;
 ```
 
-Defined in: [src/query-options-types.ts:313](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L313)
+Defined in: [src/query-options-types.ts:94](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-options-types.ts#L94)
 
 Literal substring text; percent, underscore and backslash stay literal

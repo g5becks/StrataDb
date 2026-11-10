@@ -1,3 +1,71 @@
+# StrataDB engineering guidance
+
+StrataDB is an embedded document database for Bun, built on `bun:sqlite`.
+Use Bun >=1.4.4. The audit (`stratadb-audit.md`) and Backlog task acceptance
+criteria define pending work; [docs/DESIGN.md](docs/DESIGN.md) describes the
+current architecture. Historical proposals under `docs/design/` are not API specifications.
+
+## Current API and behavior
+
+- Import `Strata`, `createSchema` and document/query types from `stratadb`.
+  Documents use `_id`; metadata is stored separately from JSONB `body`.
+- Both `db.collection(name, schema)` and the fluent builder share collection
+  identity, schema validation, cache configuration and database defaults.
+  Checked field/index names accept document paths; explicit `Unchecked` methods
+  retain runtime validation for dynamic names. Additive indexed fields evolve
+  atomically; removed/type-changed columns are retained and reported.
+- Public operations return promises; validation and SQLite failures reject.
+  SQLite errors are mapped by numeric errno, retaining cause and context.
+  Retries are opt-in and default to transient SQLite errors when enabled.
+  p-retry callbacks follow consume/failure/retry order and expose retryDelay.
+- Plain updates deep-merge; atomic `$set`, `$unset`, `$inc`, `$push` and `$pull`
+  use disjoint validated mutable paths. Never mix forms or change metadata.
+  Single-row read/write operations are atomic. Circular JSON rejects with ValidationError.
+- Unknown/malformed operators reject. Null/missing and negation follow the
+  semantics guide. LIKE-family operators escape literals; `$like` is case-sensitive,
+  `$ilike` folds ASCII. `$regex` takes a Unicode JavaScript pattern string, is
+  case-sensitive and non-indexable; RegExp operands and `$options` are unsupported.
+  `$elemMatch` binds every condition to one element. Runtime `$index` takes
+  `{ index, condition }` with a nonnegative integer.
+- Sorted reads append `_id` as a stable tie-breaker. Cursors compare every sort
+  key, reject unknown boundary IDs and return nearest previous pages for `before`.
+  Inclusion projections run in SQL; exclusion stays in JavaScript. Timestamps
+  must be explicitly selected and are hidden by `timestamps(false)`.
+- Nested transactions use savepoints, root `execute()` operations serialize,
+  and collection events buffer until commit. Rollback discards buffered events.
+  Listener errors cannot fail committed writes. Delete/many events carry actual IDs.
+- `readonly: true` opens an existing file without DDL and rejects writes.
+  Opt-in `onRawChange` is a separate connection-local row observer: it is not
+  commit-aware, may report later rollbacks and has SQLite hook omissions and
+  reentrancy limits. Read the events guide before modifying it.
+
+## Implementation and verification
+
+Use the Backlog CLI through `bunx backlog`, including `--plain` for reads.
+Never edit `backlog/` metadata directly. Record a plan, verified criteria,
+implementation decisions and evidence; honor the session's authorization.
+
+Collection code is split into shared core, DDL, read, write and batch modules;
+query caching/operators/options and contract types have separate modules.
+Keep source modules below about600 lines. Property order is meaningful for
+sorts and projections: do not apply automatic object-key sorting.
+
+Run `bun run typecheck`, `bun run lint`, `bun test`, `bun run build`,
+`bun run test:types` and `bun run test:consumer`, plus source checks with
+TypeScript5.9.3 and6.0.3. Add a regression before fixing behavior; use real
+SQLite and real Promise.all interleavings for concurrency. Never weaken tests.
+
+GitHub Actions is unavailable during the billing lock. Use
+`bash scripts/ci-local.sh <ref>` and require `RESULT: PASS`. Workflow edits also
+require `bunx --bun actionlint`; mirror `ci.yml` changes in `ci-local.sh` in the
+same commit. Never claim a GitHub run happened when only local CI ran.
+
+Builds retain `dist/index.mjs` and `dist/index.d.mts`. TypeDoc uses a separate
+TypeScript6 workspace; TypeScript7.1-beta is advisory. Follow CONTRIBUTING.md
+for trusted publishing setup and manual release preparation. Publishing and
+interactive authentication belong to the maintainer; agents must never run
+npm publish/login/adduser or open authentication URLs.
+
 
 <!-- BACKLOG.MD GUIDELINES START -->
 # Instructions for the usage of Backlog.md CLI Tool

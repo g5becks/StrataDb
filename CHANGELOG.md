@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Tooling
 
+- Consolidated the current architecture in `docs/DESIGN.md`, archived historical proposals under `docs/design/`, removed duplicate root designs and refreshed AGENTS/Claude/Copilot guidance for current APIs and release verification.
+
 - Split collection state/DDL/read/write logic, query caching/operators and public contracts into focused source modules. All source files remain below 600 lines. Event registration uses a typed facade, and collection complexity suppressions were removed without changing behavior.
 
 - Updated Biome to 2.6.6, Ultracite to 8.1.1, commitlint to 21.2.4, validator test libraries and remaining development tools. Kept TypeScript 7.0.2 for development and TypeScript 6.0.3 for TypeDoc; 7.1 remains advisory beta. Lint configuration preserves meaningful object order, public type/method styles and sequential database operations.

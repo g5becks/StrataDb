@@ -2,7 +2,7 @@
 
 # Class: Strata
 
-Defined in: [src/stratadb.ts:74](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/stratadb.ts#L74)
+Defined in: [src/stratadb.ts:76](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/stratadb.ts#L76)
 
 Main StrataDB database class.
 
@@ -52,7 +52,7 @@ const users = db.collection('users', userSchema);
 new Strata(options): Strata;
 ```
 
-Defined in: [src/stratadb.ts:90](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/stratadb.ts#L90)
+Defined in: [src/stratadb.ts:93](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/stratadb.ts#L93)
 
 Creates a new StrataDB instance.
 
@@ -76,7 +76,7 @@ Database configuration options
 readonly sqliteDb: Database;
 ```
 
-Defined in: [src/stratadb.ts:75](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/stratadb.ts#L75)
+Defined in: [src/stratadb.ts:77](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/stratadb.ts#L77)
 
 Direct access to the underlying SQLite database.
 Use for advanced operations not covered by StrataDB API.
@@ -93,7 +93,7 @@ Use for advanced operations not covered by StrataDB API.
 [dispose](): void;
 ```
 
-Defined in: [src/stratadb.ts:267](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/stratadb.ts#L267)
+Defined in: [src/stratadb.ts:276](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/stratadb.ts#L276)
 
 Disposes the database (closes connection).
 
@@ -113,7 +113,7 @@ Disposes the database (closes connection).
 close(): void;
 ```
 
-Defined in: [src/stratadb.ts:252](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/stratadb.ts#L252)
+Defined in: [src/stratadb.ts:260](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/stratadb.ts#L260)
 
 Closes the database connection.
 
@@ -141,7 +141,7 @@ collection<T>(
 ): Collection<T>;
 ```
 
-Defined in: [src/stratadb.ts:148](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/stratadb.ts#L148)
+Defined in: [src/stratadb.ts:156](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/stratadb.ts#L156)
 
 Gets or creates a collection with a pre-built schema.
 
@@ -179,7 +179,7 @@ Gets or creates a collection with a pre-built schema.
 collection<T>(name): CollectionBuilder<T>;
 ```
 
-Defined in: [src/stratadb.ts:157](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/stratadb.ts#L157)
+Defined in: [src/stratadb.ts:165](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/stratadb.ts#L165)
 
 Creates a collection builder for fluent schema definition.
 
@@ -211,7 +211,7 @@ Creates a collection builder for fluent schema definition.
 execute<R>(fn, options?): Promise<R>;
 ```
 
-Defined in: [src/stratadb.ts:235](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/stratadb.ts#L235)
+Defined in: [src/stratadb.ts:243](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/stratadb.ts#L243)
 
 Executes a function within a transaction.
 
@@ -253,7 +253,7 @@ Result of the function
 generateId(): string;
 ```
 
-Defined in: [src/stratadb.ts:141](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/stratadb.ts#L141)
+Defined in: [src/stratadb.ts:149](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/stratadb.ts#L149)
 
 Generates a new unique ID using the configured ID generator.
 
@@ -275,7 +275,7 @@ A new unique identifier string
 transaction(): Transaction;
 ```
 
-Defined in: [src/stratadb.ts:225](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/stratadb.ts#L225)
+Defined in: [src/stratadb.ts:233](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/stratadb.ts#L233)
 
 Creates a transaction handle; nested handles use savepoints.
 

@@ -6,7 +6,7 @@
 type FindOneAndReplaceEvent<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:289](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-events.ts#L289)
+Defined in: [src/collection-events.ts:289](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L289)
 
 Event payload for findOneAndReplace operations.
 
@@ -45,7 +45,7 @@ The document type extending Document
 readonly document: T | null;
 ```
 
-Defined in: [src/collection-events.ts:293](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-events.ts#L293)
+Defined in: [src/collection-events.ts:293](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L293)
 
 The document (before or after based on options), or null if not found
 
@@ -57,7 +57,7 @@ The document (before or after based on options), or null if not found
 readonly filter: string | QueryFilter<T>;
 ```
 
-Defined in: [src/collection-events.ts:291](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-events.ts#L291)
+Defined in: [src/collection-events.ts:291](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L291)
 
 The filter used to find the document
 
@@ -69,6 +69,6 @@ The filter used to find the document
 readonly upserted: boolean;
 ```
 
-Defined in: [src/collection-events.ts:295](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-events.ts#L295)
+Defined in: [src/collection-events.ts:295](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L295)
 
 Whether this was an upsert (document was created)

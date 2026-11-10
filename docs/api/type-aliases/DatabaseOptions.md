@@ -6,7 +6,7 @@
 type DatabaseOptions = object;
 ```
 
-Defined in: [src/database-types.ts:22](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/database-types.ts#L22)
+Defined in: [src/database-types.ts:23](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/database-types.ts#L23)
 
 Options for creating a StrataDB instance.
 
@@ -29,7 +29,7 @@ const db = new StrataDB(options);
 readonly database: string | SQLiteDatabase;
 ```
 
-Defined in: [src/database-types.ts:33](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/database-types.ts#L33)
+Defined in: [src/database-types.ts:38](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/database-types.ts#L38)
 
 SQLite database path or ':memory:' for in-memory database.
 Can also be an existing bun:sqlite Database instance.
@@ -42,7 +42,7 @@ Can also be an existing bun:sqlite Database instance.
 readonly enableCache?: boolean;
 ```
 
-Defined in: [src/database-types.ts:86](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/database-types.ts#L86)
+Defined in: [src/database-types.ts:91](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/database-types.ts#L91)
 
 Enable query caching for all collections.
 
@@ -97,7 +97,7 @@ const db = new StrataDB({ database: ':memory:' });
 readonly idGenerator?: () => string;
 ```
 
-Defined in: [src/database-types.ts:41](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/database-types.ts#L41)
+Defined in: [src/database-types.ts:46](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/database-types.ts#L46)
 
 Custom ID generator function. Defaults to crypto.randomUUID().
 
@@ -113,7 +113,7 @@ Custom ID generator function. Defaults to crypto.randomUUID().
 readonly onClose?: () => void;
 ```
 
-Defined in: [src/database-types.ts:46](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/database-types.ts#L46)
+Defined in: [src/database-types.ts:51](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/database-types.ts#L51)
 
 Callback invoked when database is closed.
 
@@ -123,13 +123,26 @@ Callback invoked when database is closed.
 
 ***
 
+### onRawChange?
+
+```ts
+readonly onRawChange?: RawChangeObserver;
+```
+
+Defined in: [src/database-types.ts:27](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/database-types.ts#L27)
+
+Opt-in SQLite row notifications, including raw SQL and uncommitted changes.
+Requires exclusive hook ownership; callbacks must defer database reads.
+
+***
+
 ### onSchemaDrift?
 
 ```ts
 readonly onSchemaDrift?: SchemaDriftHandler;
 ```
 
-Defined in: [src/database-types.ts:28](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/database-types.ts#L28)
+Defined in: [src/database-types.ts:33](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/database-types.ts#L33)
 
 Report removed/type-changed generated columns; "error" rejects drift.
 Defaults to console.warn. Columns and their data are retained.
@@ -142,7 +155,7 @@ Defaults to console.warn. Columns and their data are retained.
 readonly readonly?: boolean;
 ```
 
-Defined in: [src/database-types.ts:36](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/database-types.ts#L36)
+Defined in: [src/database-types.ts:41](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/database-types.ts#L41)
 
 Open an existing database for reads only; collection setup never runs DDL.
 
@@ -154,7 +167,7 @@ Open an existing database for reads only; collection setup never runs DDL.
 readonly retry?: RetryOptions;
 ```
 
-Defined in: [src/database-types.ts:107](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/database-types.ts#L107)
+Defined in: [src/database-types.ts:112](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/database-types.ts#L112)
 
 Default retry configuration for all database operations.
 
@@ -190,6 +203,6 @@ const db = new StrataDB({
 readonly statementCacheSize?: number;
 ```
 
-Defined in: [src/database-types.ts:24](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/database-types.ts#L24)
+Defined in: [src/database-types.ts:29](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/database-types.ts#L29)
 
 Prepared statements per collection (positive integer, default 64).

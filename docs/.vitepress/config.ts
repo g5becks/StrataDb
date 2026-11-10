@@ -38,6 +38,7 @@ export default defineConfigWithTheme<ThemeConfig>({
         {
           text: "Advanced",
           items: [
+            { text: "Architecture", link: "/DESIGN" },
             { text: "Transactions", link: "/guide/transactions" },
             { text: "Validation", link: "/guide/validation" },
             { text: "Indexes", link: "/guide/indexes" },

@@ -6,7 +6,7 @@
 type FieldDefinitionOptions = object;
 ```
 
-Defined in: [src/schema-builder-types.ts:6](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L6)
+Defined in: [src/schema-builder-types.ts:6](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-builder-types.ts#L6)
 
 Field configuration used by explicit dynamic-name escape hatches.
 
@@ -18,7 +18,7 @@ Field configuration used by explicit dynamic-name escape hatches.
 readonly default?: unknown;
 ```
 
-Defined in: [src/schema-builder-types.ts:12](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L12)
+Defined in: [src/schema-builder-types.ts:12](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-builder-types.ts#L12)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/schema-builder-types.ts:12](https://github.com/g5becks/StrataDb
 readonly indexed?: boolean;
 ```
 
-Defined in: [src/schema-builder-types.ts:10](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L10)
+Defined in: [src/schema-builder-types.ts:10](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-builder-types.ts#L10)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/schema-builder-types.ts:10](https://github.com/g5becks/StrataDb
 readonly nullable?: boolean;
 ```
 
-Defined in: [src/schema-builder-types.ts:9](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L9)
+Defined in: [src/schema-builder-types.ts:9](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-builder-types.ts#L9)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/schema-builder-types.ts:9](https://github.com/g5becks/StrataDb/
 readonly path?: JsonPath;
 ```
 
-Defined in: [src/schema-builder-types.ts:7](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L7)
+Defined in: [src/schema-builder-types.ts:7](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-builder-types.ts#L7)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [src/schema-builder-types.ts:7](https://github.com/g5becks/StrataDb/
 readonly type: string;
 ```
 
-Defined in: [src/schema-builder-types.ts:8](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L8)
+Defined in: [src/schema-builder-types.ts:8](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-builder-types.ts#L8)
 
 ***
 
@@ -68,4 +68,4 @@ Defined in: [src/schema-builder-types.ts:8](https://github.com/g5becks/StrataDb/
 readonly unique?: boolean;
 ```
 
-Defined in: [src/schema-builder-types.ts:11](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L11)
+Defined in: [src/schema-builder-types.ts:11](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-builder-types.ts#L11)

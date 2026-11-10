@@ -6,7 +6,7 @@
 type SchemaDrift = object;
 ```
 
-Defined in: [src/schema-evolution.ts:14](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-evolution.ts#L14)
+Defined in: [src/schema-evolution.ts:14](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-evolution.ts#L14)
 
 A stored generated column removed from or changed by the requested schema.
 
@@ -18,7 +18,7 @@ A stored generated column removed from or changed by the requested schema.
 readonly collection: string;
 ```
 
-Defined in: [src/schema-evolution.ts:15](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-evolution.ts#L15)
+Defined in: [src/schema-evolution.ts:15](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-evolution.ts#L15)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/schema-evolution.ts:15](https://github.com/g5becks/StrataDb/blo
 readonly column: string;
 ```
 
-Defined in: [src/schema-evolution.ts:16](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-evolution.ts#L16)
+Defined in: [src/schema-evolution.ts:16](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-evolution.ts#L16)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/schema-evolution.ts:16](https://github.com/g5becks/StrataDb/blo
 readonly expectedType?: string;
 ```
 
-Defined in: [src/schema-evolution.ts:19](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-evolution.ts#L19)
+Defined in: [src/schema-evolution.ts:19](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-evolution.ts#L19)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/schema-evolution.ts:19](https://github.com/g5becks/StrataDb/blo
 readonly kind: "removed" | "type-changed";
 ```
 
-Defined in: [src/schema-evolution.ts:17](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-evolution.ts#L17)
+Defined in: [src/schema-evolution.ts:17](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-evolution.ts#L17)
 
 ***
 
@@ -58,4 +58,4 @@ Defined in: [src/schema-evolution.ts:17](https://github.com/g5becks/StrataDb/blo
 readonly storedType: string;
 ```
 
-Defined in: [src/schema-evolution.ts:18](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-evolution.ts#L18)
+Defined in: [src/schema-evolution.ts:18](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-evolution.ts#L18)
