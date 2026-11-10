@@ -6,7 +6,7 @@
 type SQLiteType = "TEXT" | "INTEGER" | "REAL" | "BOOLEAN" | "NUMERIC" | "BLOB";
 ```
 
-Defined in: [src/schema-types.ts:20](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/schema-types.ts#L20)
+Defined in: [src/schema-types.ts:20](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/schema-types.ts#L20)
 
 SQLite column data types for generated columns.
 

@@ -11,7 +11,7 @@ hidden with `timestamps(false)`. Exclusion projections still filter in JavaScrip
 
 `bun bench/projection.bench.ts` measures 50 fields of 512 bytes each, selecting two,
 with 5,000 warmup reads and five trials of 50,000 reads. On Bun 1.4.4/macOS arm64,
-the median fell from 9.99 to 8.38 µs/read (16% lower latency). Wide selections use
+the median fell from 9.99 to 8.46 µs/read (15% lower latency). Wide selections use
 ordered JSON aggregation to avoid SQLite function-argument limits.
 
 ## Prepared statements

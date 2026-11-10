@@ -2,7 +2,7 @@
 
 # Class: TransactionError
 
-Defined in: [src/errors.ts:417](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L417)
+Defined in: [src/errors.ts:417](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L417)
 
 Base class for transaction-related errors.
 
@@ -36,7 +36,7 @@ try {
 new TransactionError(message): TransactionError;
 ```
 
-Defined in: [src/errors.ts:57](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L57)
+Defined in: [src/errors.ts:57](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L57)
 
 #### Parameters
 
@@ -60,7 +60,7 @@ Defined in: [src/errors.ts:57](https://github.com/g5becks/StrataDb/blob/510ba881
 readonly category: "transaction";
 ```
 
-Defined in: [src/errors.ts:418](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L418)
+Defined in: [src/errors.ts:418](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L418)
 
 Error category for grouping related error types
 
@@ -76,7 +76,7 @@ Error category for grouping related error types
 readonly cause?: unknown;
 ```
 
-Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L46)
+Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L46)
 
 The cause of the error.
 
@@ -92,7 +92,7 @@ The cause of the error.
 readonly code: "TRANSACTION_ERROR" = "TRANSACTION_ERROR";
 ```
 
-Defined in: [src/errors.ts:419](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L419)
+Defined in: [src/errors.ts:419](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L419)
 
 Unique error code for programmatic identification
 
@@ -108,7 +108,7 @@ Unique error code for programmatic identification
 readonly context?: SQLiteErrorContext;
 ```
 
-Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L45)
+Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L45)
 
 #### Inherited from
 
@@ -122,7 +122,7 @@ Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/510ba881
 readonly errno?: number;
 ```
 
-Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L43)
+Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L43)
 
 #### Inherited from
 
@@ -164,7 +164,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 readonly sqliteCodeName?: string;
 ```
 
-Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L44)
+Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L44)
 
 #### Inherited from
 

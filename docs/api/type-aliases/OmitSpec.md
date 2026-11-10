@@ -6,7 +6,7 @@
 type OmitSpec<T> = readonly (keyof T)[];
 ```
 
-Defined in: [src/query-projection-types.ts:236](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/query-projection-types.ts#L236)
+Defined in: [src/query-projection-types.ts:236](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-projection-types.ts#L236)
 
 Array-based field exclusion for query results.
 

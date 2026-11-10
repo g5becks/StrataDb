@@ -6,7 +6,7 @@
 type DocumentPath<T> = Paths<T>;
 ```
 
-Defined in: [src/path-types.ts:46](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/path-types.ts#L46)
+Defined in: [src/path-types.ts:46](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/path-types.ts#L46)
 
 Extracts all valid property paths from a document type.
 

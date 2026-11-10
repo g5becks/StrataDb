@@ -2,7 +2,7 @@
 
 # Class: QueryError
 
-Defined in: [src/errors.ts:159](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L159)
+Defined in: [src/errors.ts:159](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L159)
 
 Base class for query-related errors.
 
@@ -36,7 +36,7 @@ try {
 new QueryError(message, query?): QueryError;
 ```
 
-Defined in: [src/errors.ts:166](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L166)
+Defined in: [src/errors.ts:166](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L166)
 
 #### Parameters
 
@@ -64,7 +64,7 @@ Defined in: [src/errors.ts:166](https://github.com/g5becks/StrataDb/blob/510ba88
 readonly category: "query";
 ```
 
-Defined in: [src/errors.ts:160](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L160)
+Defined in: [src/errors.ts:160](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L160)
 
 Error category for grouping related error types
 
@@ -80,7 +80,7 @@ Error category for grouping related error types
 readonly cause?: unknown;
 ```
 
-Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L46)
+Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L46)
 
 The cause of the error.
 
@@ -96,7 +96,7 @@ The cause of the error.
 readonly code: "QUERY_ERROR" = "QUERY_ERROR";
 ```
 
-Defined in: [src/errors.ts:161](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L161)
+Defined in: [src/errors.ts:161](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L161)
 
 Unique error code for programmatic identification
 
@@ -112,7 +112,7 @@ Unique error code for programmatic identification
 readonly context?: SQLiteErrorContext;
 ```
 
-Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L45)
+Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L45)
 
 #### Inherited from
 
@@ -126,7 +126,7 @@ Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/510ba881
 readonly errno?: number;
 ```
 
-Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L43)
+Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L43)
 
 #### Inherited from
 
@@ -168,7 +168,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 readonly query?: string;
 ```
 
-Defined in: [src/errors.ts:164](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L164)
+Defined in: [src/errors.ts:164](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L164)
 
 The query that caused the error (if available)
 
@@ -180,7 +180,7 @@ The query that caused the error (if available)
 readonly sqliteCodeName?: string;
 ```
 
-Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L44)
+Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L44)
 
 #### Inherited from
 

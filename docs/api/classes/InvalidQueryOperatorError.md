@@ -2,7 +2,7 @@
 
 # Class: InvalidQueryOperatorError
 
-Defined in: [src/errors.ts:190](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L190)
+Defined in: [src/errors.ts:190](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L190)
 
 Error thrown when an invalid query operator is used.
 
@@ -35,7 +35,7 @@ try {
 new InvalidQueryOperatorError(message, query?): InvalidQueryOperatorError;
 ```
 
-Defined in: [src/errors.ts:197](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L197)
+Defined in: [src/errors.ts:197](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L197)
 
 #### Parameters
 
@@ -63,7 +63,7 @@ Defined in: [src/errors.ts:197](https://github.com/g5becks/StrataDb/blob/510ba88
 readonly category: "query";
 ```
 
-Defined in: [src/errors.ts:191](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L191)
+Defined in: [src/errors.ts:191](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L191)
 
 Error category for grouping related error types
 
@@ -79,7 +79,7 @@ Error category for grouping related error types
 readonly cause?: unknown;
 ```
 
-Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L46)
+Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L46)
 
 The cause of the error.
 
@@ -95,7 +95,7 @@ The cause of the error.
 readonly code: "INVALID_QUERY_OPERATOR" = "INVALID_QUERY_OPERATOR";
 ```
 
-Defined in: [src/errors.ts:192](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L192)
+Defined in: [src/errors.ts:192](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L192)
 
 Unique error code for programmatic identification
 
@@ -111,7 +111,7 @@ Unique error code for programmatic identification
 readonly context?: SQLiteErrorContext;
 ```
 
-Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L45)
+Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L45)
 
 #### Inherited from
 
@@ -125,7 +125,7 @@ Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/510ba881
 readonly errno?: number;
 ```
 
-Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L43)
+Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L43)
 
 #### Inherited from
 
@@ -167,7 +167,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 readonly query?: string;
 ```
 
-Defined in: [src/errors.ts:195](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L195)
+Defined in: [src/errors.ts:195](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L195)
 
 The query that caused the error (if available)
 
@@ -179,7 +179,7 @@ The query that caused the error (if available)
 readonly sqliteCodeName?: string;
 ```
 
-Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L44)
+Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L44)
 
 #### Inherited from
 

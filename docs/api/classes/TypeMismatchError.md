@@ -2,7 +2,7 @@
 
 # ~~Class: TypeMismatchError~~
 
-Defined in: [src/errors.ts:223](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L223)
+Defined in: [src/errors.ts:223](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L223)
 
 ## Deprecated
 
@@ -20,7 +20,7 @@ Reserved for compatibility; validation uses ValidationError or QueryError.
 new TypeMismatchError(message, options?): TypeMismatchError;
 ```
 
-Defined in: [src/errors.ts:239](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L239)
+Defined in: [src/errors.ts:239](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L239)
 
 #### Parameters
 
@@ -62,7 +62,7 @@ Defined in: [src/errors.ts:239](https://github.com/g5becks/StrataDb/blob/510ba88
 readonly actualType?: string;
 ```
 
-Defined in: [src/errors.ts:237](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L237)
+Defined in: [src/errors.ts:237](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L237)
 
 The actual type provided
 
@@ -74,7 +74,7 @@ The actual type provided
 readonly category: "query";
 ```
 
-Defined in: [src/errors.ts:224](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L224)
+Defined in: [src/errors.ts:224](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L224)
 
 Error category for grouping related error types
 
@@ -90,7 +90,7 @@ Error category for grouping related error types
 readonly cause?: unknown;
 ```
 
-Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L46)
+Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L46)
 
 The cause of the error.
 
@@ -106,7 +106,7 @@ The cause of the error.
 readonly code: "TYPE_MISMATCH" = "TYPE_MISMATCH";
 ```
 
-Defined in: [src/errors.ts:225](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L225)
+Defined in: [src/errors.ts:225](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L225)
 
 Unique error code for programmatic identification
 
@@ -122,7 +122,7 @@ Unique error code for programmatic identification
 readonly context?: SQLiteErrorContext;
 ```
 
-Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L45)
+Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L45)
 
 #### Inherited from
 
@@ -136,7 +136,7 @@ Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/510ba881
 readonly errno?: number;
 ```
 
-Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L43)
+Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L43)
 
 #### Inherited from
 
@@ -150,7 +150,7 @@ Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/510ba881
 readonly expectedType?: string;
 ```
 
-Defined in: [src/errors.ts:234](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L234)
+Defined in: [src/errors.ts:234](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L234)
 
 The expected type for the field
 
@@ -162,7 +162,7 @@ The expected type for the field
 readonly field?: string;
 ```
 
-Defined in: [src/errors.ts:231](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L231)
+Defined in: [src/errors.ts:231](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L231)
 
 The field with type mismatch
 
@@ -202,7 +202,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 readonly query?: string;
 ```
 
-Defined in: [src/errors.ts:228](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L228)
+Defined in: [src/errors.ts:228](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L228)
 
 The query that caused the error (if available)
 
@@ -214,7 +214,7 @@ The query that caused the error (if available)
 readonly sqliteCodeName?: string;
 ```
 
-Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/errors.ts#L44)
+Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L44)
 
 #### Inherited from
 

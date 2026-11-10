@@ -7,25 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- Repaired CRUD benchmark fixture lifetime and awaited setup/results while retaining every case. All benchmark runners now propagate errors instead of reporting a successful run with failed cases.
-
-- `updateOne` now forwards operation-level retry overrides. `retry: false` suppresses inherited retries, and an explicit policy/predicate overrides defaults while retaining promise rejections and atomic failure behavior.
-
-### Performance
-
-- Inclusion projections (`select` and inclusion `projection`) construct only the requested JSON in SQLite. Literal property names, missing fields, JSON types and timestamp visibility are preserved; exclusion projections retain their JavaScript path. A 50-field/two-field benchmark improved from 9.99 to 8.38 µs/read (16% lower latency) on Bun 1.4.4, macOS arm64.
-
-### Tooling
-
-- Added a SHA-pinned weekly/manual benchmark workflow with environment metadata, strict query/CRUD/batch results and fixed-protocol JSON artifacts. CONTRIBUTING explains local reproduction and how to compare results while Actions is unavailable.
-
-- Consolidated the current architecture in `docs/DESIGN.md`, archived historical proposals under `docs/design/`, removed duplicate root designs and refreshed AGENTS/Claude/Copilot guidance for current APIs and release verification.
-
-- Split collection state/DDL/read/write logic, query caching/operators and public contracts into focused source modules. All source files remain below 600 lines. Event registration uses a typed facade, and collection complexity suppressions were removed without changing behavior.
-
-- Updated Biome to 2.6.6, Ultracite to 8.1.1, commitlint to 21.2.4, validator test libraries and remaining development tools. Kept TypeScript 7.0.2 for development and TypeScript 6.0.3 for TypeDoc; 7.1 remains advisory beta. Lint configuration preserves meaningful object order, public type/method styles and sequential database operations.
+## [0.7.0] - 2026-11-10
 
 ### Breaking changes
 
@@ -70,6 +52,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Delete events identify the resolved row, with optional deleted-document snapshots through `deleteOne(filter, { includeDocument: true })`. Batch events include IDs from actual SQLite RETURNING rows; updates ignored by a trigger are excluded from IDs and modified counts. ID order follows SQLite RETURNING and is not guaranteed. Commit buffering and rollback suppression are preserved.
 
 - Reopening a collection adds newly declared indexed fields as virtual generated columns and creates their indexes atomically. Existing rows become queryable through the new fields; affected indexes left by earlier failed evolution attempts are rebuilt. Bun's query cache is cleared after DDL. Removed or type-changed stored generated columns are retained and reported through `onSchemaDrift` (default console warning); set it to `"error"` to require an explicit migration.
+
+### Fixed
+
+- Repaired CRUD benchmark fixture lifetime and awaited setup/results while retaining every case. All benchmark runners now propagate errors instead of reporting a successful run with failed cases.
+
+- `updateOne` now forwards operation-level retry overrides. `retry: false` suppresses inherited retries, and an explicit policy/predicate overrides defaults while retaining promise rejections and atomic failure behavior.
+
+### Performance
+
+- Inclusion projections (`select` and inclusion `projection`) construct only the requested JSON in SQLite. Literal property names, missing fields, JSON types and timestamp visibility are preserved; exclusion projections retain their JavaScript path. A 50-field/two-field benchmark improved from 9.99 to 8.46 µs/read (15% lower latency) on Bun 1.4.4, macOS arm64.
+
+### Tooling
+
+- Added a SHA-pinned weekly/manual benchmark workflow with environment metadata, strict query/CRUD/batch results and fixed-protocol JSON artifacts. CONTRIBUTING explains local reproduction and how to compare results while Actions is unavailable.
+
+- Consolidated the current architecture in `docs/DESIGN.md`, archived historical proposals under `docs/design/`, removed duplicate root designs and refreshed AGENTS/Claude/Copilot guidance for current APIs and release verification.
+
+- Split collection state/DDL/read/write logic, query caching/operators and public contracts into focused source modules. All source files remain below 600 lines. Event registration uses a typed facade, and collection complexity suppressions were removed without changing behavior.
+
+- Updated Biome to 2.6.6, Ultracite to 8.1.1, commitlint to 21.2.4, validator test libraries and remaining development tools. Kept TypeScript 7.0.2 for development and TypeScript 6.0.3 for TypeDoc; 7.1 remains advisory beta. Lint configuration preserves meaningful object order, public type/method styles and sequential database operations.
 
 ## [0.6.0] - 2026-11-09
 

@@ -6,7 +6,7 @@
 type LogicalOperator<T> = object;
 ```
 
-Defined in: [src/query-types.ts:450](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/query-types.ts#L450)
+Defined in: [src/query-types.ts:450](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-types.ts#L450)
 
 Logical operators for complex query composition.
 
@@ -89,7 +89,7 @@ The document type being queried
 readonly $and?: readonly QueryFilter<T>[];
 ```
 
-Defined in: [src/query-types.ts:452](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/query-types.ts#L452)
+Defined in: [src/query-types.ts:452](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-types.ts#L452)
 
 All conditions in the array must match (logical AND)
 
@@ -101,7 +101,7 @@ All conditions in the array must match (logical AND)
 readonly $nor?: readonly QueryFilter<T>[];
 ```
 
-Defined in: [src/query-types.ts:458](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/query-types.ts#L458)
+Defined in: [src/query-types.ts:458](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-types.ts#L458)
 
 None of the conditions in the array must match (logical NOR)
 
@@ -113,7 +113,7 @@ None of the conditions in the array must match (logical NOR)
 readonly $not?: QueryFilter<T>;
 ```
 
-Defined in: [src/query-types.ts:461](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/query-types.ts#L461)
+Defined in: [src/query-types.ts:461](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-types.ts#L461)
 
 Negates the given condition (logical NOT)
 
@@ -125,6 +125,6 @@ Negates the given condition (logical NOT)
 readonly $or?: readonly QueryFilter<T>[];
 ```
 
-Defined in: [src/query-types.ts:455](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/query-types.ts#L455)
+Defined in: [src/query-types.ts:455](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-types.ts#L455)
 
 At least one condition in the array must match (logical OR)

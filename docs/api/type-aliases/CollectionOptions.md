@@ -6,7 +6,7 @@
 type CollectionOptions = object;
 ```
 
-Defined in: [src/database-types.ts:127](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/database-types.ts#L127)
+Defined in: [src/database-types.ts:127](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/database-types.ts#L127)
 
 Options for creating a collection.
 
@@ -29,7 +29,7 @@ const users = db.collection('users', userSchema, { enableCache: false });
 readonly enableCache?: boolean;
 ```
 
-Defined in: [src/database-types.ts:162](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/database-types.ts#L162)
+Defined in: [src/database-types.ts:162](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/database-types.ts#L162)
 
 Enable query caching for this collection.
 
@@ -78,7 +78,7 @@ const logs = db.collection('logs', logSchema, { enableCache: false });
 readonly retry?: RetryOptions | false;
 ```
 
-Defined in: [src/database-types.ts:186](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/database-types.ts#L186)
+Defined in: [src/database-types.ts:186](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/database-types.ts#L186)
 
 Retry configuration for this collection.
 
@@ -117,6 +117,6 @@ const logs = db.collection('logs', logSchema, { retry: false });
 readonly statementCacheSize?: number;
 ```
 
-Defined in: [src/database-types.ts:129](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/database-types.ts#L129)
+Defined in: [src/database-types.ts:129](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/database-types.ts#L129)
 
 Override the database prepared-statement LRU capacity (default 64).

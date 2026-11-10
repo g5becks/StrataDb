@@ -6,7 +6,7 @@
 type TypeScriptToSQLite<T> = T extends string ? "TEXT" | "BLOB" : T extends number ? "INTEGER" | "REAL" | "NUMERIC" : T extends boolean ? "BOOLEAN" | "INTEGER" : T extends Date ? "INTEGER" | "TEXT" | "REAL" : T extends Uint8Array | ArrayBuffer ? "BLOB" : T extends unknown[] ? "TEXT" | "BLOB" : T extends object ? "TEXT" | "BLOB" : SQLiteType;
 ```
 
-Defined in: [src/schema-types.ts:53](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/schema-types.ts#L53)
+Defined in: [src/schema-types.ts:53](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/schema-types.ts#L53)
 
 Maps TypeScript types to their corresponding SQLite types.
 

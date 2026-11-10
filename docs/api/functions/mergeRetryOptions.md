@@ -10,7 +10,7 @@ function mergeRetryOptions(
 ): RetryOptions | undefined;
 ```
 
-Defined in: [src/retry-utils.ts:155](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/retry-utils.ts#L155)
+Defined in: [src/retry-utils.ts:155](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/retry-utils.ts#L155)
 
 Merges retry options from database, collection, and operation levels.
 Operation-level options take precedence over collection-level, which take precedence over database-level.
