@@ -20,6 +20,8 @@ import type { SchemaDefinition } from "./schema-types.js"
  * ```
  */
 export type DatabaseOptions = {
+  /** Prepared statements per collection (positive integer, default 64). */
+  readonly statementCacheSize?: number
   /** Report removed/type-changed generated columns; "error" rejects drift.
    * Defaults to console.warn. Columns and their data are retained.
    */
@@ -118,6 +120,8 @@ export type DatabaseOptions = {
  * ```
  */
 export type CollectionOptions = {
+  /** Override the database prepared-statement LRU capacity (default 64). */
+  readonly statementCacheSize?: number
   /**
    * Enable query caching for this collection.
    *

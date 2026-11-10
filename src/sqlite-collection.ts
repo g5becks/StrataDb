@@ -50,6 +50,7 @@ import {
   resolveDDLField,
   resolveField,
 } from "./field-resolver.js"
+import { generateId } from "./id-generator.js"
 import type {
   CursorSpec,
   ProjectionSpec,
@@ -83,6 +84,14 @@ type StoredRow = {
   body: string
   createdAt: number
   updatedAt: number
+}
+
+type CollectionConfiguration = {
+  idGenerator?: () => string
+  enableCache?: boolean
+  retryOptions?: RetryOptions | undefined
+  statementCacheSize?: number
+  onDrop?: () => void
 }
 type MutationResult<T> = {
   before: T | null
@@ -139,7 +148,7 @@ type MutationResult<T> = {
  *   .build();
  *
  * const db = new Database('myapp.db');
- * const users = new SQLiteCollection(db, 'users', schema, () => Bun.randomUUIDv7());
+ * const users = new SQLiteCollection(db, 'users', schema, { idGenerator: () => Bun.randomUUIDv7() });
  *
  * // Table is created automatically with:
  * // - _id, body, createdAt, updatedAt columns
@@ -171,6 +180,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
   /** Merged retry options for this collection */
   private readonly retryOptions: RetryOptions | undefined
+  private readonly onDrop: (() => void) | undefined
 
   /** Lazily initialized event emitter for collection events */
   private _emitter: CollectionEventEmitter<T> | null = null
@@ -307,9 +317,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     sort?: SortSpec<T>
   ): T | null {
     const translated = this.translator.translate(this.normalizeFilter(filter))
-    const options = this.translator.translateOptions(
-      sort ? { sort, limit: 1 } : { limit: 1 }
-    )
+    const options = sort
+      ? this.translator.translateOptions({ sort, limit: 1 })
+      : { sql: "LIMIT 1", params: [] }
     const row = this.sql
       .prepare<StoredRow, SQLQueryBindings[]>(
         `SELECT _id, json(body) AS body, createdAt, updatedAt FROM ${this.tableSql} WHERE ${translated.sql} ${options.sql}`
@@ -481,59 +491,57 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    * @param db - SQLite database instance
    * @param name - Collection name (table name)
    * @param schema - Schema definition for the document type
-   * @param idGenerator - Function to generate unique document IDs
-   * @param enableCache - Whether to enable query caching (default: false)
-   * @param databaseRetryOptions - Database-level retry configuration
-   * @param collectionRetryOptions - Collection-level retry configuration
+   * @param config - Cache capacity, translator caching, merged retries and lifecycle callback
    *
    * @remarks
    * The constructor automatically creates the table and indexes if they don't exist.
    */
-  // biome-ignore lint/nursery/useMaxParams: required parameters for collection initialization
   constructor(
     db: SQLiteDatabase,
     name: string,
     schema: SchemaDefinition<T>,
-    idGenerator: () => string,
-    enableCache = false,
-    databaseRetryOptions?: RetryOptions,
-    collectionRetryOptions?: RetryOptions | false
+    config: CollectionConfiguration = {}
   ) {
     assertDatabaseOpen(db)
     this.db = db
-    this.sql = new SQLiteBoundary(db, name)
+    this.sql = new SQLiteBoundary(db, name, config.statementCacheSize ?? 64)
     this.name = name
     this.schema = schema
-    this.idGenerator = idGenerator
-    this.translator = new SQLiteQueryTranslator(schema, { enableCache })
-    this.retryOptions = mergeRetryOptions(
-      databaseRetryOptions,
-      collectionRetryOptions
-    )
+    this.idGenerator = config.idGenerator ?? generateId
+    this.translator = new SQLiteQueryTranslator(schema, {
+      enableCache: config.enableCache ?? false,
+    })
+    this.retryOptions = config.retryOptions
+    this.onDrop = config.onDrop
 
     // Initialize table and indexes
-    transactionManager(this.db).assertSynchronousAccess()
-    if (isDatabaseReadonly(this.db)) {
-      for (const field of this.schema.fields) {
-        fieldPath(String(field.name))
+    try {
+      transactionManager(this.db).assertSynchronousAccess()
+      if (isDatabaseReadonly(this.db)) {
+        for (const field of this.schema.fields) {
+          fieldPath(String(field.name))
+        }
+        evolveGeneratedColumns({
+          database: this.db,
+          sql: this.sql,
+          collection: this.name,
+          schema: this.schema,
+          readonly: true,
+        })
+        return
       }
-      evolveGeneratedColumns({
-        database: this.db,
-        sql: this.sql,
-        collection: this.name,
-        schema: this.schema,
-        readonly: true,
-      })
-      return
+      sqliteCall(
+        () => this.db.transaction(() => this.createTable()).immediate(),
+        {
+          collection: this.name,
+          operation: "schema",
+        }
+      )
+      this.db.clearQueryCache()
+    } catch (error) {
+      this.sql.dispose()
+      throw error
     }
-    sqliteCall(
-      () => this.db.transaction(() => this.createTable()).immediate(),
-      {
-        collection: this.name,
-        operation: "schema",
-      }
-    )
-    this.db.clearQueryCache()
   }
 
   /**
@@ -1131,6 +1139,22 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     options?: Omit<QueryOptions<T>, "limit" | "skip">
   ): Promise<T | null> {
     const normalizedFilter = this.normalizeFilter(filter)
+    if (
+      !options ||
+      Object.keys(options).every((key) => key === "signal" || key === "retry")
+    ) {
+      return await this.runOperation(
+        () => {
+          throwIfAborted(options?.signal)
+          const document = this.readOneSync(normalizedFilter)
+          return Promise.resolve(
+            document ? this.visibleDocument(document) : null
+          )
+        },
+        this.buildRetryOptions(options?.retry, options?.signal),
+        "findOne"
+      )
+    }
     const results = await this.find(normalizedFilter, { ...options, limit: 1 })
     return results[0] ?? null
   }
@@ -2100,6 +2124,11 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
             assertDatabaseOpen(this.db)
             throwIfAborted(options?.signal)
             this.sql.exec(`DROP TABLE IF EXISTS ${this.tableSql}`)
+
+            transactionManager(this.db).event(() => {
+              this.sql.dispose()
+              this.onDrop?.()
+            })
 
             // Emit drop event after successful operation
             this.emitEvent("drop", () => ({

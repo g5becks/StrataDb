@@ -7,6 +7,7 @@
  * - Document deserialization from JSONB
  *
  * Run with: bun bench/crud-operations.bench.ts
+ * Fixed 50k indexed-read comparison: bun bench/statement-cache.bench.ts [source-root]
  */
 
 import { bench, group, run } from "mitata"

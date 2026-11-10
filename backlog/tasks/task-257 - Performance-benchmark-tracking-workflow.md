@@ -4,12 +4,14 @@ title: 'Performance: benchmark tracking workflow'
 status: To Do
 assignee: []
 created_date: '2026-11-09T04:01:00Z'
+updated_date: '2026-11-10T02:13:00Z'
 labels:
   - performance
   - build-release
 milestone: m-2
 dependencies:
   - TASK-252
+  - TASK-267
 documentation:
   - stratadb-audit.md
 priority: low

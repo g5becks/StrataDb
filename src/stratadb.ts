@@ -21,11 +21,16 @@ import { ConnectionError, SchemaValidationError } from "./errors.js"
 import { quoteIdent } from "./field-resolver.js"
 import { generateId } from "./id-generator.js"
 import type { RetryOptions } from "./retry-types.js"
+import { mergeRetryOptions } from "./retry-utils.js"
 import { configureSchemaDrift } from "./schema-evolution.js"
 import { schemaSignature } from "./schema-signature.js"
 import type { SchemaDefinition } from "./schema-types.js"
 import { sqliteCall } from "./sqlite-boundary.js"
 import { SQLiteCollection } from "./sqlite-collection.js"
+import {
+  disposeStatementCaches,
+  validateStatementCacheSize,
+} from "./statement-cache.js"
 import {
   type TransactionFrame,
   transactionManager,
@@ -73,6 +78,7 @@ export class Strata implements StrataDBInterface {
   private readonly onCloseCallback: (() => void) | undefined
   private readonly enableCacheDefault: boolean
   private readonly retryOptionsDefault: RetryOptions | undefined
+  private readonly statementCacheSizeDefault: number
   private readonly collections = new Map<string, Collection<Document>>()
   private readonly schemaSignatures = new Map<string, string>()
 
@@ -82,6 +88,9 @@ export class Strata implements StrataDBInterface {
    * @param options - Database configuration options
    */
   constructor(options: DatabaseOptions) {
+    this.statementCacheSizeDefault = validateStatementCacheSize(
+      options.statementCacheSize ?? 64
+    )
     // Initialize database connection
     if (typeof options.database === "string") {
       this.sqliteDb = sqliteCall(
@@ -181,15 +190,17 @@ export class Strata implements StrataDBInterface {
     // Determine cache setting: collection option > database default
     const enableCache = options?.enableCache ?? this.enableCacheDefault
 
-    const collection = new SQLiteCollection<T>(
-      this.sqliteDb,
-      name,
-      schema,
-      this.idGeneratorFn,
+    const collection = new SQLiteCollection<T>(this.sqliteDb, name, schema, {
+      idGenerator: this.idGeneratorFn,
       enableCache,
-      this.retryOptionsDefault,
-      options?.retry
-    )
+      retryOptions: mergeRetryOptions(this.retryOptionsDefault, options?.retry),
+      statementCacheSize:
+        options?.statementCacheSize ?? this.statementCacheSizeDefault,
+      onDrop: () => {
+        this.collections.delete(name)
+        this.schemaSignatures.delete(name)
+      },
+    })
     this.collections.set(name, collection as Collection<Document>)
     this.schemaSignatures.set(name, signature)
 
@@ -245,6 +256,7 @@ export class Strata implements StrataDBInterface {
     }
 
     this.onCloseCallback?.()
+    disposeStatementCaches(this.sqliteDb)
     sqliteCall(() => this.sqliteDb.close(), { operation: "close" })
     markDatabaseClosed(this.sqliteDb)
   }

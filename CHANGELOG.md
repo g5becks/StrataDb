@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Each collection keeps a configurable prepared-statement LRU (64 entries by default) via database/collection `statementCacheSize`. Statements are finalized on eviction, DDL, drop and close; rolled-back drops preserve collection identity. Simple `findOne` calls use a direct single-row path while complex options retain the general query path. Reproducible 50k-read benchmarks show more than 5× lower latency than v0.6.0 on the recorded host; optional translator caching remains separately configurable.
+
 - A 500-case seeded fast-check differential suite compares SQLite against an independent query evaluator, repeating and varying literals across indexed/unindexed and cached/uncached collections. A SHA-pinned nightly workflow prints a random replay seed; local replay instructions and minimized regressions are retained.
 
 - `new Strata({ database: path, readonly: true })` opens an existing file with Bun's read-only flag alone. Collection setup validates stored columns without DDL; missing tables/indexed columns require a writable migration. All write APIs reject with nonretryable-by-default `DatabaseError` (`sqliteCode: 8`), while reads and read transactions remain available. The policy is connection-scoped for supplied Bun connections.
