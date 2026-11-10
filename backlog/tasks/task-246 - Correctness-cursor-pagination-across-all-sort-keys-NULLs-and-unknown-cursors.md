@@ -1,11 +1,11 @@
 ---
 id: TASK-246
 title: 'Correctness: cursor pagination across all sort keys, NULLs and unknown cursors'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-10T00:54:00Z'
+updated_date: '2026-11-10T00:56:00Z'
 labels:
   - api
 milestone: m-2
@@ -35,7 +35,7 @@ An unknown cursor id silently returns the first page. Only the first sort key is
 <!-- AC:BEGIN -->
 - [x] #1 Regression case A15 passes (unknown cursor is an error)
 - [x] #2 A property test over random datasets and multi-key sorts proves pagination returns every row exactly once
-- [ ] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #4 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
 
@@ -55,4 +55,6 @@ An unknown cursor id silently returns the first page. Only the first sort key is
 - Added fast-check 4.10.2 (also available for TASK-251) and committed bun.lock after bun install. The regression-first property failed before the fix with a shrunk duplicate/null counterexample; invalid cursor checks also failed. Final seeded property (20261109, 250 runs) independently sorts generated records and walks every row exactly once forward/backward across duplicate/null/missing values, nested paths, random multi-key directions, explicit ID sorts, indexed/unindexed schemas and random page sizes.
 - Breaking change: invalid cursors no longer return the first page; missing-sort cursors no longer disappear; tied sort order is deterministic, and before returns the nearest previous page. CHANGELOG, query guide and CursorSpec comments document migration and semantics.
 - Host gate PASS: 961 pass, 1 existing projection skip (TASK-253), 0 fail; TS 7.0.2 typecheck; lint; build; type tests; consumer TS 6/7 CRUD; source TS 5.9.3/6.0.3. Local CI pending committed SHA.
+
+- Verified with scripts/ci-local.sh (fef095f425f3d7a69336d80399dc93401dc6b985, PASS); GitHub Actions unavailable (billing lock). All macOS/Linux Bun and required/advisory TypeScript jobs pass.
 <!-- SECTION:NOTES:END -->
