@@ -6,7 +6,7 @@
 type CollectionWriteContract<T> = object;
 ```
 
-Defined in: [src/collection-contract-write.ts:6](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-write.ts#L6)
+Defined in: [src/collection-contract-write.ts:6](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-write.ts#L6)
 
 Write members of [Collection](Collection.md).
 
@@ -24,7 +24,7 @@ Write members of [Collection](Collection.md).
 deleteOne(filter, options?): Promise<boolean>;
 ```
 
-Defined in: [src/collection-contract-write.ts:201](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-write.ts#L201)
+Defined in: [src/collection-contract-write.ts:201](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-write.ts#L201)
 
 Delete a single document by ID or filter.
 
@@ -96,7 +96,7 @@ const deleted = await users.deleteOne(filter, { signal: controller.signal });
 findOneAndDelete(filter, options?): Promise<T | null>;
 ```
 
-Defined in: [src/collection-contract-write.ts:252](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-write.ts#L252)
+Defined in: [src/collection-contract-write.ts:252](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-write.ts#L252)
 
 Find and delete a single document atomically.
 
@@ -177,7 +177,7 @@ findOneAndReplace(
 ): Promise<T | null>;
 ```
 
-Defined in: [src/collection-contract-write.ts:377](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-write.ts#L377)
+Defined in: [src/collection-contract-write.ts:377](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-write.ts#L377)
 
 Find and replace a single document atomically.
 
@@ -281,7 +281,7 @@ findOneAndUpdate(
 ): Promise<T | null>;
 ```
 
-Defined in: [src/collection-contract-write.ts:315](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-write.ts#L315)
+Defined in: [src/collection-contract-write.ts:315](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-write.ts#L315)
 
 Find and update a single document atomically.
 
@@ -385,7 +385,7 @@ const updated = await users.findOneAndUpdate(filter, update, { signal: controlle
 insertOne(doc, options?): Promise<T>;
 ```
 
-Defined in: [src/collection-contract-write.ts:50](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-write.ts#L50)
+Defined in: [src/collection-contract-write.ts:50](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-write.ts#L50)
 
 Insert a single document into the collection.
 
@@ -467,7 +467,7 @@ replaceOne(
 ): Promise<T | null>;
 ```
 
-Defined in: [src/collection-contract-write.ts:159](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-write.ts#L159)
+Defined in: [src/collection-contract-write.ts:159](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-write.ts#L159)
 
 Replace a single document by ID or filter.
 
@@ -561,7 +561,7 @@ updateOne(
 ): Promise<T | null>;
 ```
 
-Defined in: [src/collection-contract-write.ts:98](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-write.ts#L98)
+Defined in: [src/collection-contract-write.ts:98](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-write.ts#L98)
 
 Update a single document matching the query filter or ID.
 

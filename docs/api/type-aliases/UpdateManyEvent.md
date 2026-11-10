@@ -6,7 +6,7 @@
 type UpdateManyEvent<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:113](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L113)
+Defined in: [src/collection-events.ts:113](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L113)
 
 Event payload for batch update operations.
 
@@ -41,7 +41,7 @@ The document type extending Document
 readonly filter: QueryFilter<T>;
 ```
 
-Defined in: [src/collection-events.ts:117](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L117)
+Defined in: [src/collection-events.ts:117](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L117)
 
 The filter used to find documents
 
@@ -53,7 +53,7 @@ The filter used to find documents
 readonly ids: readonly string[];
 ```
 
-Defined in: [src/collection-events.ts:115](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L115)
+Defined in: [src/collection-events.ts:115](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L115)
 
 IDs of rows actually updated, in SQLite RETURNING order.
 
@@ -65,7 +65,7 @@ IDs of rows actually updated, in SQLite RETURNING order.
 readonly matchedCount: number;
 ```
 
-Defined in: [src/collection-events.ts:121](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L121)
+Defined in: [src/collection-events.ts:121](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L121)
 
 Number of documents that matched the filter
 
@@ -77,7 +77,7 @@ Number of documents that matched the filter
 readonly modifiedCount: number;
 ```
 
-Defined in: [src/collection-events.ts:123](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L123)
+Defined in: [src/collection-events.ts:123](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L123)
 
 Number of documents that were modified
 
@@ -89,6 +89,6 @@ Number of documents that were modified
 readonly update: DocumentUpdate<T>;
 ```
 
-Defined in: [src/collection-events.ts:119](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L119)
+Defined in: [src/collection-events.ts:119](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L119)
 
 The update that was applied

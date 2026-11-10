@@ -6,7 +6,7 @@
 type RetryOptions = object;
 ```
 
-Defined in: [src/retry-types.ts:17](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/retry-types.ts#L17)
+Defined in: [src/retry-types.ts:17](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/retry-types.ts#L17)
 
 Configuration options for automatic retry with exponential backoff.
 
@@ -30,7 +30,7 @@ const options: RetryOptions = {
 factor?: number;
 ```
 
-Defined in: [src/retry-types.ts:28](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/retry-types.ts#L28)
+Defined in: [src/retry-types.ts:28](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/retry-types.ts#L28)
 
 Exponential backoff factor. Each retry delay is multiplied by this value.
 
@@ -48,7 +48,7 @@ Exponential backoff factor. Each retry delay is multiplied by this value.
 maxRetryTime?: number;
 ```
 
-Defined in: [src/retry-types.ts:52](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/retry-types.ts#L52)
+Defined in: [src/retry-types.ts:52](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/retry-types.ts#L52)
 
 Maximum total time in milliseconds for all retry attempts.
 
@@ -66,7 +66,7 @@ Infinity
 maxTimeout?: number;
 ```
 
-Defined in: [src/retry-types.ts:40](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/retry-types.ts#L40)
+Defined in: [src/retry-types.ts:40](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/retry-types.ts#L40)
 
 Maximum delay in milliseconds between retries.
 
@@ -84,7 +84,7 @@ Maximum delay in milliseconds between retries.
 minTimeout?: number;
 ```
 
-Defined in: [src/retry-types.ts:34](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/retry-types.ts#L34)
+Defined in: [src/retry-types.ts:34](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/retry-types.ts#L34)
 
 Minimum delay in milliseconds before the first retry.
 
@@ -102,7 +102,7 @@ Minimum delay in milliseconds before the first retry.
 onFailedAttempt?: (context) => void | Promise<void>;
 ```
 
-Defined in: [src/retry-types.ts:62](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/retry-types.ts#L62)
+Defined in: [src/retry-types.ts:62](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/retry-types.ts#L62)
 
 Callback invoked when a retry attempt fails.
 Receives context with error details and retry state.
@@ -129,7 +129,7 @@ Retry context containing error and attempt information
 randomize?: boolean;
 ```
 
-Defined in: [src/retry-types.ts:46](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/retry-types.ts#L46)
+Defined in: [src/retry-types.ts:46](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/retry-types.ts#L46)
 
 Randomize timeout by multiplying with a factor between 1 and 2.
 
@@ -147,7 +147,7 @@ true
 retries?: number;
 ```
 
-Defined in: [src/retry-types.ts:22](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/retry-types.ts#L22)
+Defined in: [src/retry-types.ts:22](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/retry-types.ts#L22)
 
 Maximum number of retry attempts.
 
@@ -165,7 +165,7 @@ Maximum number of retry attempts.
 shouldConsumeRetry?: (context) => boolean | Promise<boolean>;
 ```
 
-Defined in: [src/retry-types.ts:84](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/retry-types.ts#L84)
+Defined in: [src/retry-types.ts:84](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/retry-types.ts#L84)
 
 Callback to determine if a failure should consume a retry from the budget.
 Return false to not count this failure against the retry limit.
@@ -192,7 +192,7 @@ Whether this failure should consume a retry
 shouldRetry?: (context) => boolean | Promise<boolean>;
 ```
 
-Defined in: [src/retry-types.ts:73](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/retry-types.ts#L73)
+Defined in: [src/retry-types.ts:73](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/retry-types.ts#L73)
 
 Callback to determine if a retry should occur.
 Return true to retry, false to abort with the error.

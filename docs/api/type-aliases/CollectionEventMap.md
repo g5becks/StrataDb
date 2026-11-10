@@ -6,7 +6,7 @@
 type CollectionEventMap<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:373](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L373)
+Defined in: [src/collection-events.ts:373](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L373)
 
 Map of event names to their payload types for a collection.
 
@@ -52,7 +52,7 @@ The document type extending Document
 delete: [DeleteEvent<T>];
 ```
 
-Defined in: [src/collection-events.ts:379](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L379)
+Defined in: [src/collection-events.ts:379](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L379)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/collection-events.ts:379](https://github.com/g5becks/StrataDb/b
 deleteMany: [DeleteManyEvent<T>];
 ```
 
-Defined in: [src/collection-events.ts:380](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L380)
+Defined in: [src/collection-events.ts:380](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L380)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [src/collection-events.ts:380](https://github.com/g5becks/StrataDb/b
 drop: [DropEvent];
 ```
 
-Defined in: [src/collection-events.ts:384](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L384)
+Defined in: [src/collection-events.ts:384](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L384)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [src/collection-events.ts:384](https://github.com/g5becks/StrataDb/b
 error: [ErrorEvent];
 ```
 
-Defined in: [src/collection-events.ts:385](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L385)
+Defined in: [src/collection-events.ts:385](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L385)
 
 ***
 
@@ -92,7 +92,7 @@ Defined in: [src/collection-events.ts:385](https://github.com/g5becks/StrataDb/b
 findOneAndDelete: [FindOneAndDeleteEvent<T>];
 ```
 
-Defined in: [src/collection-events.ts:381](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L381)
+Defined in: [src/collection-events.ts:381](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L381)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [src/collection-events.ts:381](https://github.com/g5becks/StrataDb/b
 findOneAndReplace: [FindOneAndReplaceEvent<T>];
 ```
 
-Defined in: [src/collection-events.ts:383](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L383)
+Defined in: [src/collection-events.ts:383](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L383)
 
 ***
 
@@ -112,7 +112,7 @@ Defined in: [src/collection-events.ts:383](https://github.com/g5becks/StrataDb/b
 findOneAndUpdate: [FindOneAndUpdateEvent<T>];
 ```
 
-Defined in: [src/collection-events.ts:382](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L382)
+Defined in: [src/collection-events.ts:382](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L382)
 
 ***
 
@@ -122,7 +122,7 @@ Defined in: [src/collection-events.ts:382](https://github.com/g5becks/StrataDb/b
 insert: [InsertEvent<T>];
 ```
 
-Defined in: [src/collection-events.ts:374](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L374)
+Defined in: [src/collection-events.ts:374](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L374)
 
 ***
 
@@ -132,7 +132,7 @@ Defined in: [src/collection-events.ts:374](https://github.com/g5becks/StrataDb/b
 insertMany: [InsertManyEvent<T>];
 ```
 
-Defined in: [src/collection-events.ts:375](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L375)
+Defined in: [src/collection-events.ts:375](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L375)
 
 ***
 
@@ -142,7 +142,7 @@ Defined in: [src/collection-events.ts:375](https://github.com/g5becks/StrataDb/b
 replace: [ReplaceEvent<T>];
 ```
 
-Defined in: [src/collection-events.ts:378](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L378)
+Defined in: [src/collection-events.ts:378](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L378)
 
 ***
 
@@ -152,7 +152,7 @@ Defined in: [src/collection-events.ts:378](https://github.com/g5becks/StrataDb/b
 update: [UpdateEvent<T>];
 ```
 
-Defined in: [src/collection-events.ts:376](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L376)
+Defined in: [src/collection-events.ts:376](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L376)
 
 ***
 
@@ -162,4 +162,4 @@ Defined in: [src/collection-events.ts:376](https://github.com/g5becks/StrataDb/b
 updateMany: [UpdateManyEvent<T>];
 ```
 
-Defined in: [src/collection-events.ts:377](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-events.ts#L377)
+Defined in: [src/collection-events.ts:377](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-events.ts#L377)

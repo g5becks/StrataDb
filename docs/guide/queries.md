@@ -2,6 +2,19 @@
 
 StrataDB provides type-safe MongoDB-style query operators.
 
+## Typed array conditions
+
+```typescript
+await users.find({ tags: { $index: { index: 0, condition: 'admin' } } })
+await users.find({ scores: { $elemMatch: { $gte: 80, $lt: 100 } } })
+await users.find({ tags: { $elemMatch: { $startsWith: 'team-' } } })
+```
+
+`$index` requires an object with a nonnegative zero-based `index` and a typed
+scalar or operator `condition`; numeric shorthand is unsupported. `$elemMatch`
+accepts operators matching the array element type, or typed object-field queries
+for object elements. These declarations now follow the existing validated runtime.
+
 ## Regular expressions
 
 ```typescript
@@ -80,7 +93,7 @@ await users.find({ tags: { $all: ['typescript', 'react'] } })
 await users.find({ tags: { $size: 3 } })
 
 // Element at index matches value
-await users.find({ scores: { $index: 0 } })  // first element
+await users.find({ scores: { $index: { index: 0, condition: { $gte: 90 } } } })
 
 // At least one element matches filter
 await users.find({

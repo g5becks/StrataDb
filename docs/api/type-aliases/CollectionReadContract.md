@@ -6,7 +6,7 @@
 type CollectionReadContract<T> = object;
 ```
 
-Defined in: [src/collection-contract-read.ts:11](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L11)
+Defined in: [src/collection-contract-read.ts:11](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L11)
 
 Read members of [Collection](Collection.md).
 
@@ -24,7 +24,7 @@ Read members of [Collection](Collection.md).
 readonly name: string;
 ```
 
-Defined in: [src/collection-contract-read.ts:15](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L15)
+Defined in: [src/collection-contract-read.ts:15](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L15)
 
 Collection name (table name in SQLite).
 
@@ -36,7 +36,7 @@ Collection name (table name in SQLite).
 readonly schema: SchemaDefinition<T>;
 ```
 
-Defined in: [src/collection-contract-read.ts:20](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L20)
+Defined in: [src/collection-contract-read.ts:20](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L20)
 
 Schema definition for this collection.
 
@@ -48,7 +48,7 @@ Schema definition for this collection.
 count(filter, options?): Promise<number>;
 ```
 
-Defined in: [src/collection-contract-read.ts:198](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L198)
+Defined in: [src/collection-contract-read.ts:198](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L198)
 
 Count documents matching the query filter.
 
@@ -115,7 +115,7 @@ distinct<K>(
 ): Promise<T[K][]>;
 ```
 
-Defined in: [src/collection-contract-read.ts:320](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L320)
+Defined in: [src/collection-contract-read.ts:320](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L320)
 
 Find distinct values for a specified field across the collection.
 
@@ -191,7 +191,7 @@ const ages = await users.distinct('age', {}, { signal: controller.signal });
 estimatedDocumentCount(options?): Promise<number>;
 ```
 
-Defined in: [src/collection-contract-read.ts:353](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L353)
+Defined in: [src/collection-contract-read.ts:353](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L353)
 
 Get an estimated count of documents in the collection.
 
@@ -248,7 +248,7 @@ const estimate = await users.estimatedDocumentCount({ signal: controller.signal 
 find<K>(filter, options): Promise<readonly Pick<T, K | keyof T & "_id">[]>;
 ```
 
-Defined in: [src/collection-contract-read.ts:97](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L97)
+Defined in: [src/collection-contract-read.ts:97](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L97)
 
 Find all documents matching the query filter.
 
@@ -323,7 +323,7 @@ const results = await users.find({
 find<K>(filter, options): Promise<readonly Omit<T, K>[]>;
 ```
 
-Defined in: [src/collection-contract-read.ts:103](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L103)
+Defined in: [src/collection-contract-read.ts:103](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L103)
 
 ##### Type Parameters
 
@@ -351,7 +351,7 @@ Defined in: [src/collection-contract-read.ts:103](https://github.com/g5becks/Str
 find(filter, options?): Promise<readonly T[]>;
 ```
 
-Defined in: [src/collection-contract-read.ts:109](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L109)
+Defined in: [src/collection-contract-read.ts:109](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L109)
 
 ##### Parameters
 
@@ -375,7 +375,7 @@ Defined in: [src/collection-contract-read.ts:109](https://github.com/g5becks/Str
 findById(id, options?): Promise<T | null>;
 ```
 
-Defined in: [src/collection-contract-read.ts:47](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L47)
+Defined in: [src/collection-contract-read.ts:47](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L47)
 
 Find a single document by its ID.
 
@@ -433,7 +433,7 @@ const user = await users.findById(id, { signal: controller.signal });
 findOne<K>(filter, options): Promise<Pick<T, keyof T & "_id" | K> | null>;
 ```
 
-Defined in: [src/collection-contract-read.ts:151](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L151)
+Defined in: [src/collection-contract-read.ts:151](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L151)
 
 Find the first document matching the query filter or ID.
 
@@ -503,7 +503,7 @@ if (exists) {
 findOne<K>(filter, options): Promise<Omit<T, K> | null>;
 ```
 
-Defined in: [src/collection-contract-read.ts:157](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L157)
+Defined in: [src/collection-contract-read.ts:157](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L157)
 
 ##### Type Parameters
 
@@ -531,7 +531,7 @@ Defined in: [src/collection-contract-read.ts:157](https://github.com/g5becks/Str
 findOne(filter, options?): Promise<T | null>;
 ```
 
-Defined in: [src/collection-contract-read.ts:163](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L163)
+Defined in: [src/collection-contract-read.ts:163](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L163)
 
 ##### Parameters
 
@@ -561,7 +561,7 @@ search<K>(
 ): Promise<readonly Pick<T, keyof T & "_id" | K>[]>;
 ```
 
-Defined in: [src/collection-contract-read.ts:257](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L257)
+Defined in: [src/collection-contract-read.ts:257](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L257)
 
 Search for documents across multiple fields.
 
@@ -654,7 +654,7 @@ search<K>(
 ): Promise<readonly Omit<T, K>[]>;
 ```
 
-Defined in: [src/collection-contract-read.ts:267](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L267)
+Defined in: [src/collection-contract-read.ts:267](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L267)
 
 ##### Type Parameters
 
@@ -690,7 +690,7 @@ search(
 ): Promise<readonly T[]>;
 ```
 
-Defined in: [src/collection-contract-read.ts:277](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-read.ts#L277)
+Defined in: [src/collection-contract-read.ts:277](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-contract-read.ts#L277)
 
 ##### Parameters
 

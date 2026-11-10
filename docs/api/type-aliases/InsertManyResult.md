@@ -6,7 +6,7 @@
 type InsertManyResult<T> = object;
 ```
 
-Defined in: [src/collection-types.ts:46](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-types.ts#L46)
+Defined in: [src/collection-types.ts:46](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-types.ts#L46)
 
 Result of inserting multiple documents into a collection.
 
@@ -43,7 +43,7 @@ The document type
 readonly documents: readonly T[];
 ```
 
-Defined in: [src/collection-types.ts:48](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-types.ts#L48)
+Defined in: [src/collection-types.ts:48](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-types.ts#L48)
 
 Array of inserted documents with their generated IDs
 
@@ -55,6 +55,6 @@ Array of inserted documents with their generated IDs
 readonly insertedCount: number;
 ```
 
-Defined in: [src/collection-types.ts:51](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-types.ts#L51)
+Defined in: [src/collection-types.ts:51](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-types.ts#L51)
 
 Number of documents successfully inserted

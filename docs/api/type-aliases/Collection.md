@@ -6,7 +6,7 @@
 type Collection<T> = CollectionReadContract<T> & CollectionWriteContract<T> & CollectionBatchContract<T> & CollectionEventsContract<T> & CollectionAdminContract<T>;
 ```
 
-Defined in: [src/collection-types.ts:189](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-types.ts#L189)
+Defined in: [src/collection-types.ts:189](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/collection-types.ts#L189)
 
 MongoDB-like collection interface for type-safe document operations.
 

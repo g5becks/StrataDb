@@ -6,7 +6,7 @@
 type QueryOptionsWithSelect<T, K> = QueryOptionsBase<T> & object;
 ```
 
-Defined in: [src/query-options-types.ts:295](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/query-options-types.ts#L295)
+Defined in: [src/query-options-types.ts:295](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/query-options-types.ts#L295)
 
 Query options with `select` for type-safe field inclusion.
 

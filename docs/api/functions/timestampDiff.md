@@ -6,7 +6,7 @@
 function timestampDiff(timestamp1, timestamp2): number;
 ```
 
-Defined in: [src/timestamps.ts:205](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/timestamps.ts#L205)
+Defined in: [src/timestamps.ts:205](https://github.com/g5becks/StrataDb/blob/510ba8813d6cab229e0da41a7c5724a99e5d3566/src/timestamps.ts#L205)
 
 Calculate the difference between two timestamps in milliseconds.
 
