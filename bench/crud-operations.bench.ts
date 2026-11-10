@@ -2,7 +2,7 @@
  * CRUD Operations Benchmarks
  *
  * Measures end-to-end performance of document operations including:
- * - Document serialization (fast-safe-stringify)
+ * - Document serialization (JSON.stringify)
  * - Query execution against SQLite
  * - Document deserialization from JSONB
  *
@@ -51,6 +51,14 @@ function createTestDb() {
   return new Strata({ database: ":memory:" })
 }
 
+// Shared fixtures stay live until all timed callbacks have completed.
+const sharedDatabases: Strata[] = []
+function createSharedDb(): Strata {
+  const db = createTestDb()
+  sharedDatabases.push(db)
+  return db
+}
+
 // Sample user data generator
 let emailCounter = 0
 function generateUser(): Omit<User, "_id"> {
@@ -83,12 +91,12 @@ async function seedDatabase(db: Strata, count: number): Promise<string[]> {
 // ============================================================================
 
 // Small dataset (100 docs)
-const smallDb = createTestDb()
+const smallDb = createSharedDb()
 const smallIds = await seedDatabase(smallDb, 100)
 const smallUsers = smallDb.collection("users", userSchema)
 
 // Medium dataset (1000 docs)
-const mediumDb = createTestDb()
+const mediumDb = createSharedDb()
 await seedDatabase(mediumDb, 1000)
 const mediumUsers = mediumDb.collection("users", userSchema)
 
@@ -304,8 +312,8 @@ group("Complex Queries - Medium Dataset (1000 docs)", () => {
 // Uniform Filter Support Benchmarks
 // =============================================================================
 
-group("Uniform Filter Support - String ID vs Query Filter", () => {
-  const db = createTestDb()
+await group("Uniform Filter Support - String ID vs Query Filter", async () => {
+  const db = createSharedDb()
   const users = db.collection("users", userSchema)
 
   // Seed data
@@ -324,7 +332,7 @@ group("Uniform Filter Support - String ID vs Query Filter", () => {
       updatedAt: Date.now() + i,
     })
   }
-  users.insertMany(seededUsers)
+  await users.insertMany(seededUsers)
 
   const testId = seededUsers[500]._id
 
@@ -353,7 +361,7 @@ group("Uniform Filter Support - String ID vs Query Filter", () => {
   })
 
   bench("deleteOne - string ID (reseeded)", async () => {
-    const testUser = users.insertOne({
+    const testUser = await users.insertOne({
       name: "Delete Test",
       email: `delete-${Date.now()}@example.com`,
       age: 30,
@@ -367,7 +375,7 @@ group("Uniform Filter Support - String ID vs Query Filter", () => {
   })
 
   bench("deleteOne - query filter { _id } (reseeded)", async () => {
-    const testUser = users.insertOne({
+    const testUser = await users.insertOne({
       name: "Delete Test",
       email: `delete-${Date.now()}@example.com`,
       age: 30,
@@ -379,21 +387,19 @@ group("Uniform Filter Support - String ID vs Query Filter", () => {
     })
     await users.deleteOne({ _id: testUser._id })
   })
-
-  db.close()
 })
 
 // =============================================================================
 // Atomic Find-and-Modify Operations Benchmarks
 // =============================================================================
 
-group("Atomic Operations", () => {
-  const db = createTestDb()
+await group("Atomic Operations", async () => {
+  const db = createSharedDb()
   const users = db.collection("users", userSchema)
 
   // Seed data
   for (let i = 0; i < 1000; i += 1) {
-    users.insertOne({
+    await users.insertOne({
       name: `User ${i}`,
       email: `user${i}@example.com`,
       age: 20 + (i % 50),
@@ -438,7 +444,7 @@ group("Atomic Operations", () => {
   })
 
   bench("findOneAndDelete", async () => {
-    const testUser = users.insertOne({
+    const testUser = await users.insertOne({
       name: "Temp User",
       email: `temp-${Date.now()}@example.com`,
       age: 30,
@@ -450,21 +456,19 @@ group("Atomic Operations", () => {
     })
     await users.findOneAndDelete(testUser._id)
   })
-
-  db.close()
 })
 
 // =============================================================================
 // Utility Methods Benchmarks
 // =============================================================================
 
-group("Utility Methods", () => {
-  const db = createTestDb()
+await group("Utility Methods", async () => {
+  const db = createSharedDb()
   const users = db.collection("users", userSchema)
 
   // Seed data
   for (let i = 0; i < 1000; i += 1) {
-    users.insertOne({
+    await users.insertOne({
       name: `User ${i % 100}`, // Duplicate names
       email: `user${i}@example.com`,
       age: 20 + (i % 50), // Multiple duplicates
@@ -495,18 +499,12 @@ group("Utility Methods", () => {
   bench("count - exact count for comparison", async () => {
     await users.count({})
   })
-
-  db.close()
 })
 
-await run({
-  avg: true,
-  json: false,
-  colors: true,
-  min_max: true,
-  percentiles: true,
-})
-
-// Cleanup
-smallDb.close()
-mediumDb.close()
+try {
+  await run({ throw: true, format: "mitata", colors: false })
+} finally {
+  for (const database of sharedDatabases) {
+    database.close()
+  }
+}

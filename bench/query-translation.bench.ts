@@ -331,10 +331,4 @@ group("Hot Path - Repeated Same Structure", () => {
   })
 })
 
-await run({
-  avg: true,
-  json: false,
-  colors: true,
-  min_max: true,
-  percentiles: true,
-})
+await run({ throw: true, format: "mitata", colors: false })

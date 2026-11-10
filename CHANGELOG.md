@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Repaired CRUD benchmark fixture lifetime and awaited setup/results while retaining every case. All benchmark runners now propagate errors instead of reporting a successful run with failed cases.
+
 - `updateOne` now forwards operation-level retry overrides. `retry: false` suppresses inherited retries, and an explicit policy/predicate overrides defaults while retaining promise rejections and atomic failure behavior.
 
 ### Performance
