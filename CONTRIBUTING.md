@@ -26,6 +26,29 @@ Docker, pinned and latest Bun, and TypeScript 5.9/6.0/7.0 with 7.1-beta advisory
 Docker/Colima must already be running. Preserve its result table and SHA in the
 release PR. Update this script whenever the CI workflow's checks change.
 
+## Differential query testing
+
+`bun test` includes 500 fast-check cases with fixed seed `20261110`. The suite
+compares real SQLite queries with an independent evaluator across indexed and
+unindexed fields, cache on/off, nested/logical filters and scalar/array operators.
+Each generated filter is repeated and its literals varied to exercise cache hits.
+
+The nightly/on-demand `query-properties.yml` workflow selects and prints a random
+seed. While Actions is locked, exercise that path locally with:
+
+```bash
+STRATADB_PROPERTY_RANDOM=1 bun test test/property/query-differential.test.ts
+```
+
+The output prints a replay command. To reproduce a failure, copy its seed:
+
+```bash
+STRATADB_PROPERTY_SEED=<seed> bun test test/property/query-differential.test.ts
+```
+
+Keep minimized counterexamples as ordinary focused regressions. Fix production
+queries rather than changing the independent semantics or narrowing generators.
+
 ## One-time npm trusted-publisher setup
 
 An npm package maintainer configures this on npmjs.com in **stratadb → Settings

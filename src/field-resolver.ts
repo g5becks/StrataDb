@@ -123,6 +123,15 @@ export function arrayElement(
   return `json_extract(${fieldSql}, ${bind(`$[${index}]`, params)})`
 }
 
+export function arrayElementPresence(
+  fieldSql: string,
+  index: unknown,
+  params: SQLiteBindValue[]
+): string {
+  assertNonNegativeInt(index, "$index.index")
+  return `json_type(${fieldSql}, ${bind(`$[${index}]`, params)})`
+}
+
 // Internal numbered bindings allow a field expression to occur several times
 // (ranges, array operators). Expand in SQL order at the public SQL boundary so
 // callers can safely concatenate fragments and use ordinary positional binds.

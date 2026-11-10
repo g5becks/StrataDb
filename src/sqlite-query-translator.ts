@@ -2,6 +2,7 @@ import type { Document } from "./core-types.js"
 import { InvalidQueryOperatorError, QueryError } from "./errors.js"
 import {
   arrayElement,
+  arrayElementPresence,
   assertNonNegativeInt,
   bind,
   fieldPath,
@@ -397,7 +398,7 @@ export class SQLiteQueryTranslator<T extends Document>
           if (Array.isArray(opValue)) {
             // Array values like $in: [1, 2, 3]
             for (let i = 0; i < opValue.length; i++) {
-              if (op === "$nin" && opValue[i] === null) {
+              if ((op === "$nin" || op === "$in") && opValue[i] === null) {
                 continue
               }
               paths.push(JSON.stringify([...currentPath, op, String(i)]))
@@ -563,7 +564,7 @@ export class SQLiteQueryTranslator<T extends Document>
     if (key === "$or") {
       const filters = value as readonly QueryFilter<T>[]
       if (filters.length === 0) {
-        return "1=1" // Empty $or matches everything
+        return "0=1" // No branch can match an empty OR.
       }
       const orConditions = filters.map((f) =>
         this.translateFilter(f, params, root)
@@ -631,7 +632,7 @@ export class SQLiteQueryTranslator<T extends Document>
         fieldSql,
         value as Record<string, unknown>,
         params,
-        "$exists" in value || "$elemMatch" in value
+        "$exists" in value || "$elemMatch" in value || "$index" in value
           ? resolvePresence(String(fieldName), params, root)
           : undefined
       )
@@ -751,7 +752,12 @@ export class SQLiteQueryTranslator<T extends Document>
         )
 
       case "$index":
-        return this.translateIndexOperator(fieldSql, value, params)
+        return this.translateIndexOperator(
+          fieldSql,
+          value,
+          params,
+          context.presenceSql
+        )
 
       case "$exists":
         return this.translateExistsOperator(
@@ -809,10 +815,17 @@ export class SQLiteQueryTranslator<T extends Document>
       return "0=1"
     }
 
-    const placeholders = valuesArray
+    const nonNullValues = valuesArray.filter((value) => value !== null)
+    if (!nonNullValues.length) {
+      return `${fieldSql} IS NULL`
+    }
+    const placeholders = nonNullValues
       .map((value) => bind(this.toBindValue(value), params))
       .join(", ")
-    return `${fieldSql} IN (${placeholders})`
+    const membership = `${fieldSql} IN (${placeholders})`
+    return valuesArray.includes(null)
+      ? `(${fieldSql} IS NULL OR ${membership})`
+      : membership
   }
 
   /**
@@ -904,7 +917,7 @@ export class SQLiteQueryTranslator<T extends Document>
     for (const v of valuesArray) {
       // Check if value exists in the array using json_each
       conditions.push(
-        `EXISTS (SELECT 1 FROM json_each(${fieldSql}) WHERE json_each.value = ${bind(this.toBindValue(v), params)})`
+        `EXISTS (SELECT 1 FROM json_each(${fieldSql}) WHERE ${v === null ? "json_each.type = 'null'" : `json_each.value = ${bind(this.toBindValue(v), params)}`})`
       )
     }
 
@@ -1002,52 +1015,28 @@ export class SQLiteQueryTranslator<T extends Document>
   private translateIndexOperator(
     fieldSql: string,
     indexFilter: unknown,
-    params: SQLiteBindValue[]
+    params: SQLiteBindValue[],
+    fieldTypeSql?: string
   ): string {
     const filter = indexFilter as { index: number; condition: unknown }
-    const index = filter.index
-    const condition = filter.condition
-
-    // Extract the element at the specified index
-    // For generated columns: json_extract(_field, '$[index]')
-    // For non-indexed: json_extract(jsonb_extract(body, '$.field'), '$[index]')
-    const elementSql = arrayElement(fieldSql, index, params)
-    if (condition === null) {
-      return `${elementSql} IS NULL`
+    const array = `CASE WHEN ${fieldTypeSql ?? `json_type(${fieldSql})`} = 'array' THEN ${fieldSql} END`
+    const element = arrayElement(array, filter.index, params)
+    const presence = arrayElementPresence(array, filter.index, params)
+    let condition: string
+    if (this.isOperatorObject(filter.condition)) {
+      condition = this.translateFieldOperators(
+        element,
+        filter.condition as Record<string, unknown>,
+        params,
+        presence
+      )
+    } else {
+      condition =
+        filter.condition === null
+          ? `${element} IS NULL`
+          : `${element} = ${bind(this.toBindValue(filter.condition), params)}`
     }
-
-    // Handle the condition on that element
-    if (
-      condition === null ||
-      typeof condition !== "object" ||
-      (Object.getPrototypeOf(condition) !== Object.prototype &&
-        Object.getPrototypeOf(condition) !== null)
-    ) {
-      return `${elementSql} = ${bind(this.toBindValue(condition), params)}`
-    }
-
-    // Handle operator conditions
-    if (typeof condition === "object" && condition !== null) {
-      const operators = condition as Record<string, unknown>
-      const conditions: string[] = []
-
-      for (const [op, value] of Object.entries(operators)) {
-        const cond = this.translateSingleOperator({
-          fieldSql: elementSql,
-          op,
-          value,
-          operators,
-          params,
-        })
-        if (cond) {
-          conditions.push(cond)
-        }
-      }
-
-      return conditions.length > 0 ? `(${conditions.join(" AND ")})` : "1=1"
-    }
-
-    return "1=1"
+    return `(${presence} IS NOT NULL AND ${condition})`
   }
 
   /**

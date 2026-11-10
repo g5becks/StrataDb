@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- Differential testing corrected query edge cases: empty `$or` matches nothing; `$in` lists containing null include null/missing scalar fields; `$all` can require actual null array elements; `$index` requires an existing array element and distinguishes present null from a missing index. Review bulk-write filters using these forms.
+
 - Update APIs and event payloads use `DocumentUpdate<T>`, a union of plain deep merges and atomic operator forms, with immutable ID/timestamp metadata. Consumers inspecting `event.update` should narrow the operator form before reading plain fields. Mixed forms, overlapping paths and malformed operators reject with `QueryError`.
 
 - Cached collection lookups reject schema mismatches with `SchemaValidationError`, including different validator function identities. Fluent collections now share cache identity and inherit database retries and the default enabled timestamps. Use the same schema/validator when reusing a name; opt out of timestamps explicitly with `.timestamps(false)` if required.
@@ -22,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Successful `update` event documents are now typed as non-null, and delete events discriminate `_id: string` on success from `_id: null` on a miss. Batch update/delete payloads require `ids`. Update manually constructed event fixtures accordingly. `deleteOne` now emits a miss event consistently for both ID and object filters.
 
 ### Added
+
+- A 500-case seeded fast-check differential suite compares SQLite against an independent query evaluator, repeating and varying literals across indexed/unindexed and cached/uncached collections. A SHA-pinned nightly workflow prints a random replay seed; local replay instructions and minimized regressions are retained.
 
 - `new Strata({ database: path, readonly: true })` opens an existing file with Bun's read-only flag alone. Collection setup validates stored columns without DDL; missing tables/indexed columns require a writable migration. All write APIs reject with nonretryable-by-default `DatabaseError` (`sqliteCode: 8`), while reads and read transactions remain available. The policy is connection-scoped for supplied Bun connections.
 
