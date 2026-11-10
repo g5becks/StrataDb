@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `updateOne` now forwards operation-level retry overrides. `retry: false` suppresses inherited retries, and an explicit policy/predicate overrides defaults while retaining promise rejections and atomic failure behavior.
+
 ### Performance
 
 - Inclusion projections (`select` and inclusion `projection`) construct only the requested JSON in SQLite. Literal property names, missing fields, JSON types and timestamp visibility are preserved; exclusion projections retain their JavaScript path. A 50-field/two-field benchmark improved from 9.99 to 8.38 µs/read (16% lower latency) on Bun 1.4.4, macOS arm64.

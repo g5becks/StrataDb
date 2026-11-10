@@ -74,7 +74,11 @@ export class CollectionWriteOps<
   updateOne(
     filter: string | QueryFilter<T>,
     update: DocumentUpdate<T>,
-    options?: { upsert?: boolean; signal?: AbortSignal }
+    options?: {
+      upsert?: boolean
+      signal?: AbortSignal
+      retry?: RetryOptions | false
+    }
   ): Promise<T | null> {
     return this.runOperation(
       () => {
@@ -98,7 +102,7 @@ export class CollectionWriteOps<
         }
         return Promise.resolve(result.after)
       },
-      this.buildRetryOptions(undefined, options?.signal),
+      this.buildRetryOptions(options?.retry, options?.signal),
       "updateOne"
     )
   }
