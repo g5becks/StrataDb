@@ -6,7 +6,7 @@
 type CollectionEventsContract<T> = object;
 ```
 
-Defined in: [src/collection-contract-events.ts:8](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-events.ts#L8)
+Defined in: [src/collection-contract-events.ts:8](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-events.ts#L8)
 
 Events members of [Collection](Collection.md).
 
@@ -24,7 +24,7 @@ Events members of [Collection](Collection.md).
 listenerCount(event): number;
 ```
 
-Defined in: [src/collection-contract-events.ts:195](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-events.ts#L195)
+Defined in: [src/collection-contract-events.ts:195](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-events.ts#L195)
 
 Get the number of listeners for an event.
 
@@ -75,7 +75,7 @@ console.log(users.listenerCount('insert')) // 1
 listeners<E>(event): ((...args) => void)[];
 ```
 
-Defined in: [src/collection-contract-events.ts:227](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-events.ts#L227)
+Defined in: [src/collection-contract-events.ts:227](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-events.ts#L227)
 
 Get all listeners for an event.
 
@@ -134,7 +134,7 @@ const hasListener = users.listeners('delete').includes(myListener)
 off<E>(event, listener): Collection<T>;
 ```
 
-Defined in: [src/collection-contract-events.ts:131](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-events.ts#L131)
+Defined in: [src/collection-contract-events.ts:131](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-events.ts#L131)
 
 Remove an event listener.
 
@@ -205,7 +205,7 @@ users.off('insert', (event) => console.log(event)) // Does nothing
 on<E>(event, listener): Collection<T>;
 ```
 
-Defined in: [src/collection-contract-events.ts:59](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-events.ts#L59)
+Defined in: [src/collection-contract-events.ts:59](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-events.ts#L59)
 
 Register an event listener for collection events.
 
@@ -287,7 +287,7 @@ users
 once<E>(event, listener): Collection<T>;
 ```
 
-Defined in: [src/collection-contract-events.ts:89](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-events.ts#L89)
+Defined in: [src/collection-contract-events.ts:89](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-events.ts#L89)
 
 Register a one-time event listener.
 
@@ -346,7 +346,7 @@ users.once('insert', async (event) => {
 removeAllListeners(event?): Collection<T>;
 ```
 
-Defined in: [src/collection-contract-events.ts:164](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-events.ts#L164)
+Defined in: [src/collection-contract-events.ts:164](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-events.ts#L164)
 
 Remove all listeners for an event, or all events if no event specified.
 

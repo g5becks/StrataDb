@@ -6,7 +6,7 @@
 type SQLiteErrorContext = object;
 ```
 
-Defined in: [src/errors.ts:2](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L2)
+Defined in: [src/errors.ts:2](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/errors.ts#L2)
 
 SQL text, collection and operation associated with a mapped SQLite error.
 
@@ -18,7 +18,7 @@ SQL text, collection and operation associated with a mapped SQLite error.
 readonly collection?: string;
 ```
 
-Defined in: [src/errors.ts:4](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L4)
+Defined in: [src/errors.ts:4](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/errors.ts#L4)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/errors.ts:4](https://github.com/g5becks/StrataDb/blob/231fa60d0
 readonly operation?: string;
 ```
 
-Defined in: [src/errors.ts:5](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L5)
+Defined in: [src/errors.ts:5](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/errors.ts#L5)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [src/errors.ts:5](https://github.com/g5becks/StrataDb/blob/231fa60d0
 readonly sql?: string;
 ```
 
-Defined in: [src/errors.ts:3](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L3)
+Defined in: [src/errors.ts:3](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/errors.ts#L3)

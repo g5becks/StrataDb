@@ -6,7 +6,7 @@
 type QueryOptionsWithOmit<T, K> = QueryOptionsBase<T> & object;
 ```
 
-Defined in: [src/query-options-types.ts:326](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-options-types.ts#L326)
+Defined in: [src/query-options-types.ts:326](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/query-options-types.ts#L326)
 
 Query options with `omit` for type-safe field exclusion.
 

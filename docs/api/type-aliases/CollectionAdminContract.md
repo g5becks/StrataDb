@@ -6,7 +6,7 @@
 type CollectionAdminContract<T> = object;
 ```
 
-Defined in: [src/collection-contract-admin.ts:4](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-admin.ts#L4)
+Defined in: [src/collection-contract-admin.ts:4](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-admin.ts#L4)
 
 Admin members of [Collection](Collection.md).
 
@@ -24,7 +24,7 @@ Admin members of [Collection](Collection.md).
 drop(options?): Promise<void>;
 ```
 
-Defined in: [src/collection-contract-admin.ts:32](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-admin.ts#L32)
+Defined in: [src/collection-contract-admin.ts:32](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-admin.ts#L32)
 
 Drop the collection (delete the table).
 
@@ -78,7 +78,7 @@ await collection.drop({ signal: controller.signal });
 validate(doc, options?): Promise<T>;
 ```
 
-Defined in: [src/collection-contract-admin.ts:73](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-admin.ts#L73)
+Defined in: [src/collection-contract-admin.ts:73](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-admin.ts#L73)
 
 Validate a document against the schema (async).
 
@@ -146,7 +146,7 @@ await users.validate(doc, { signal: controller.signal });
 validateSync(doc): T;
 ```
 
-Defined in: [src/collection-contract-admin.ts:101](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-admin.ts#L101)
+Defined in: [src/collection-contract-admin.ts:101](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-admin.ts#L101)
 
 Validate a document against the schema (sync).
 

@@ -6,7 +6,7 @@
 type IdGenerator = () => string;
 ```
 
-Defined in: [src/id-generator.ts:111](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/id-generator.ts#L111)
+Defined in: [src/id-generator.ts:111](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/id-generator.ts#L111)
 
 Type definition for custom ID generator functions.
 

@@ -6,7 +6,7 @@
 type CollectionBatchContract<T> = object;
 ```
 
-Defined in: [src/collection-contract-batch.ts:10](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-batch.ts#L10)
+Defined in: [src/collection-contract-batch.ts:10](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-batch.ts#L10)
 
 Batch members of [Collection](Collection.md).
 
@@ -24,7 +24,7 @@ Batch members of [Collection](Collection.md).
 deleteMany(filter, options?): Promise<DeleteResult>;
 ```
 
-Defined in: [src/collection-contract-batch.ts:119](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-batch.ts#L119)
+Defined in: [src/collection-contract-batch.ts:119](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-batch.ts#L119)
 
 Delete multiple documents matching the query filter.
 
@@ -84,7 +84,7 @@ const result = await users.deleteMany(filter, { signal: controller.signal });
 insertMany(docs, options?): Promise<InsertManyResult<T>>;
 ```
 
-Defined in: [src/collection-contract-batch.ts:44](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-batch.ts#L44)
+Defined in: [src/collection-contract-batch.ts:44](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-batch.ts#L44)
 
 Insert multiple documents into the collection.
 
@@ -160,7 +160,7 @@ updateMany(
 ): Promise<UpdateResult>;
 ```
 
-Defined in: [src/collection-contract-batch.ts:85](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-contract-batch.ts#L85)
+Defined in: [src/collection-contract-batch.ts:85](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/collection-contract-batch.ts#L85)
 
 Update multiple documents matching the query filter.
 

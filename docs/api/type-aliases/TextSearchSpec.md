@@ -6,7 +6,7 @@
 type TextSearchSpec<T> = object;
 ```
 
-Defined in: [src/query-options-types.ts:92](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-options-types.ts#L92)
+Defined in: [src/query-options-types.ts:92](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/query-options-types.ts#L92)
 
 Text search configuration for literal multi-field substring searching.
 
@@ -94,7 +94,7 @@ The document type being searched
 readonly caseSensitive?: boolean;
 ```
 
-Defined in: [src/query-options-types.ts:103](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-options-types.ts#L103)
+Defined in: [src/query-options-types.ts:103](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/query-options-types.ts#L103)
 
 Whether to perform case-sensitive matching. Default: false (case-insensitive)
 
@@ -106,7 +106,7 @@ Whether to perform case-sensitive matching. Default: false (case-insensitive)
 readonly fields: readonly (keyof T | string)[];
 ```
 
-Defined in: [src/query-options-types.ts:100](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-options-types.ts#L100)
+Defined in: [src/query-options-types.ts:100](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/query-options-types.ts#L100)
 
 Fields to search. Use field names for top-level, dot notation for nested.
 All fields are searched with OR logic (match any).
@@ -119,6 +119,6 @@ All fields are searched with OR logic (match any).
 readonly text: string;
 ```
 
-Defined in: [src/query-options-types.ts:94](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-options-types.ts#L94)
+Defined in: [src/query-options-types.ts:94](https://github.com/g5becks/StrataDb/blob/fb2fd55294542cd2ce060c745e0811f89c794ed6/src/query-options-types.ts#L94)
 
 Literal substring text; percent, underscore and backslash stay literal
