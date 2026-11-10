@@ -1,11 +1,11 @@
 ---
 id: TASK-244
 title: 'Feature: rich event payloads (ids on delete/many events, narrowed types)'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-09T20:52:00Z'
+updated_date: '2026-11-10T00:43:00Z'
 labels:
   - api
 milestone: m-2
@@ -34,7 +34,7 @@ DeleteEvent has only `{ filter, deleted }`, with no `_id`. deleteMany/updateMany
 <!-- AC:BEGIN -->
 - [x] #1 Regression case A17 passes: DeleteEvent includes _id; deleteMany and updateMany events include ids
 - [x] #2 Type tests prove UpdateEvent.document is non-null for successful non-upsert updates
-- [ ] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #4 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
 
@@ -54,4 +54,6 @@ DeleteEvent has only `{ filter, deleted }`, with no `_id`. deleteMany/updateMany
 - Regression-first: all four new rich-payload runtime cases failed before implementation; all now pass, including rollback suppression and delayed commit delivery. Both A17 audit regressions are now ordinary tests. Added expect-type assertions for successful non-upsert document and success/miss delete ID narrowing.
 - Breaking change: event fixtures must include the new required ID fields; successful update documents can no longer be constructed as null. Object-filter delete misses now emit a consistent miss event. CHANGELOG and event guide document the migration and optional snapshots.
 - Host gate PASS: 901 pass, 2 existing skips, 0 fail; TS 7.0.2 typecheck; lint; build; type tests; consumer TS 6/7 CRUD; source TS 5.9.3/6.0.3. Local CI pending committed SHA.
+
+- Verified with scripts/ci-local.sh (893f36483d3a2c1e14bb22bc2a54edac2d52370b, PASS); GitHub Actions unavailable (billing lock). macOS/Linux Bun and required/advisory TypeScript matrix all pass.
 <!-- SECTION:NOTES:END -->
