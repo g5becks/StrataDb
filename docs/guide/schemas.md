@@ -1,5 +1,21 @@
 # Schemas
 
+Field names and compound-index fields are checked against the document type,
+including optional dotted paths such as `profile.city`. Misspellings fail during
+TypeScript compilation. For schemas assembled from runtime metadata, use the
+explicit escapes on either `createSchema<T>()` or `db.collection<T>(name)`:
+
+```typescript
+const dynamicName: string = 'extra'
+const schema = createSchema<User>()
+  .fieldUnchecked(dynamicName, { type: 'TEXT', indexed: true })
+  .compoundIndexUnchecked('dynamic-index', [dynamicName])
+  .build()
+```
+
+Unchecked names still require safe identifier segments at runtime; the escape
+only bypasses document-name type checking.
+
 ## Adding indexed fields to an existing collection
 
 Close and reopen the database with the updated schema. StrataDB adds missing

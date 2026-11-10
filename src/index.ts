@@ -93,7 +93,12 @@ export {
 // ID generation
 export { generateId, type IdGenerator } from "./id-generator.js"
 // Path types for advanced schema definitions
-export type { DocumentPath, JsonPath, PathValue } from "./path-types.js"
+export type {
+  DocumentPath,
+  JsonPath,
+  PathValue,
+  SchemaFieldName,
+} from "./path-types.js"
 export type {
   CursorSpec,
   OmitSpec,
@@ -129,7 +134,10 @@ export {
   withRetry,
 } from "./retry-utils.js"
 export { createSchema } from "./schema-builder.js"
-export type { SchemaBuilder } from "./schema-builder-types.js"
+export type {
+  FieldDefinitionOptions,
+  SchemaBuilder,
+} from "./schema-builder-types.js"
 // Error types
 export type { SchemaDrift, SchemaDriftHandler } from "./schema-evolution.js"
 // Schema types and builder

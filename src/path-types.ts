@@ -45,6 +45,9 @@ export type JsonPath = `$.${string}`
  */
 export type DocumentPath<T> = Paths<T>
 
+/** String field names accepted by checked schema declarations. */
+export type SchemaFieldName<T> = Extract<keyof T | DocumentPath<T>, string>
+
 /**
  * Gets the type at a specific document path.
  *

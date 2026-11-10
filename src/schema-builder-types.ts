@@ -1,5 +1,16 @@
 import type { Document } from "./core-types.js"
-import type { JsonPath } from "./path-types.js"
+import type { JsonPath, SchemaFieldName } from "./path-types.js"
+
+/** Field configuration used by explicit dynamic-name escape hatches. */
+export type FieldDefinitionOptions = {
+  readonly path?: JsonPath
+  readonly type: string
+  readonly nullable?: boolean
+  readonly indexed?: boolean
+  readonly unique?: boolean
+  readonly default?: unknown
+}
+
 import type { SchemaDefinition } from "./schema-types.js"
 
 /**
@@ -82,7 +93,7 @@ export type SchemaBuilder<T extends Document> = {
    * })
    * ```
    */
-  field<K extends keyof T | string>(
+  field<K extends SchemaFieldName<T>>(
     name: K,
     options: {
       /** JSON path (defaults to $.{name} if omitted, or auto-generated from dot notation) */
@@ -98,6 +109,12 @@ export type SchemaBuilder<T extends Document> = {
       /** Default value when not provided */
       readonly default?: unknown
     }
+  ): SchemaBuilder<T>
+
+  /** Declare a dynamic field name; runtime identifier validation still applies. */
+  fieldUnchecked(
+    name: string,
+    options: FieldDefinitionOptions
   ): SchemaBuilder<T>
 
   /**
@@ -134,7 +151,14 @@ export type SchemaBuilder<T extends Document> = {
    */
   compoundIndex(
     name: string,
-    fields: readonly (keyof T | string)[],
+    fields: readonly SchemaFieldName<T>[],
+    options?: { readonly unique?: boolean }
+  ): SchemaBuilder<T>
+
+  /** Declare dynamic compound-index fields with runtime identifier validation. */
+  compoundIndexUnchecked(
+    name: string,
+    fields: readonly string[],
     options?: { readonly unique?: boolean }
   ): SchemaBuilder<T>
 
