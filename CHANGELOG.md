@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `new Strata({ database: path, readonly: true })` opens an existing file with Bun's read-only flag alone. Collection setup validates stored columns without DDL; missing tables/indexed columns require a writable migration. All write APIs reject with nonretryable-by-default `DatabaseError` (`sqliteCode: 8`), while reads and read transactions remain available. The policy is connection-scoped for supplied Bun connections.
+
 - Atomic `$set`, `$unset`, `$inc`, `$push` and `$pull` updates for single, find-and-update, batch and upsert APIs. Operator writes use one JSONB UPDATE per operation, preserving validation, transaction/event buffering and metadata. `$push` appends one value; `$pull` removes every structurally equal JSON value (object key order ignored, array order and JSON types preserved). Missing numeric/array fields initialize for increment/push; null or incompatible targets reject. Dotted scalar equality filters now seed nested upsert documents correctly.
 
 - Cursor predicates compare all sort keys lexicographically, including nested fields and NULL/missing values (NULLS FIRST ascending, NULLS LAST descending). Seeded fast-check pagination walks verify forward/backward completeness against an independent reference comparator.

@@ -1,5 +1,29 @@
 # Collections
 
+## Read-only databases
+
+```typescript
+const db = new Strata({ database: 'reference.db', readonly: true })
+const users = db.collection('users', userSchema)
+const results = await users.find({ active: true })
+```
+
+The file must already exist. Bun receives `readonly: true` without `create`.
+Collection creation runs no DDL: required storage and declared indexed columns
+must already exist, or setup throws `SchemaValidationError`. Open writable with
+the desired schema first when migration is needed. Existing schema drift follows
+the configured `onSchemaDrift` policy.
+
+Reads, `execute()` read callbacks and manual read transactions work normally.
+Every document write and `drop()` rejects with `DatabaseError`, the message
+`database is read-only`, and SQLite code 8. Default retries stop after one attempt;
+custom retry predicates remain authoritative. No write events are emitted.
+
+For an existing Bun `Database`, also pass `readonly: true` to Strata. The library
+policy is shared by wrappers of that connection; use a separate connection for
+writable work. Opening the supplied connection physically read-only remains the
+caller's responsibility. Direct `sqliteDb` access retains Bun's native behavior.
+
 Collections store and query documents. Each collection maps to a SQLite table.
 
 ## Creating Collections

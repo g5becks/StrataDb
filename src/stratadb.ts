@@ -6,7 +6,11 @@ import {
 } from "./collection-builder.js"
 import type { Collection } from "./collection-types.js"
 import type { Document } from "./core-types.js"
-import { assertDatabaseOpen, markDatabaseClosed } from "./database-state.js"
+import {
+  assertDatabaseOpen,
+  markDatabaseClosed,
+  markDatabaseReadonly,
+} from "./database-state.js"
 import type {
   CollectionOptions,
   DatabaseOptions,
@@ -81,7 +85,11 @@ export class Strata implements StrataDBInterface {
     // Initialize database connection
     if (typeof options.database === "string") {
       this.sqliteDb = sqliteCall(
-        () => new SQLiteDatabase(options.database as string),
+        () =>
+          new SQLiteDatabase(
+            options.database as string,
+            options.readonly ? { readonly: true } : {}
+          ),
         { operation: "open" }
       )
     } else {
@@ -89,6 +97,9 @@ export class Strata implements StrataDBInterface {
     }
 
     assertDatabaseOpen(this.sqliteDb)
+    if (options.readonly) {
+      markDatabaseReadonly(this.sqliteDb)
+    }
     const version = sqliteCall(
       () =>
         this.sqliteDb

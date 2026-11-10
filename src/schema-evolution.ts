@@ -73,12 +73,40 @@ function dropStaleIndexes<T extends Document>(
   }
 }
 
-/** Called inside the collection's atomic DDL transaction. */
+function assertReadonlyColumns(
+  columns: readonly string[],
+  expected: readonly string[]
+): void {
+  const stored = new Set(columns)
+  if (
+    !["_id", "body", "createdAt", "updatedAt"].every((column) =>
+      stored.has(column)
+    )
+  ) {
+    throw new SchemaValidationError(
+      "Read-only collection is missing its table or required storage columns"
+    )
+  }
+  if (
+    !expected.every(
+      (column) =>
+        stored.has(column) ||
+        ["__id", "_createdAt", "_updatedAt"].includes(column)
+    )
+  ) {
+    throw new SchemaValidationError(
+      "Read-only collection is missing indexed columns; reopen writable to migrate"
+    )
+  }
+}
+
+/** Validate stored columns; writable callers migrate inside an atomic DDL transaction. */
 export function evolveGeneratedColumns<T extends Document>(context: {
   database: Database
   sql: SQLiteBoundary
   collection: string
   schema: SchemaDefinition<T>
+  readonly?: boolean
 }): void {
   const { database, sql, collection, schema } = context
   const columns = sql
@@ -93,6 +121,12 @@ export function evolveGeneratedColumns<T extends Document>(context: {
       field,
     ])
   )
+  if (context.readonly) {
+    assertReadonlyColumns(
+      columns.map((column) => column.name),
+      [...expected.keys()]
+    )
+  }
   for (const column of columns.filter((entry) => entry.hidden >= 2)) {
     const field = expected.get(column.name)
     const expectedType = field ? storedType(field.type) : undefined
@@ -107,6 +141,22 @@ export function evolveGeneratedColumns<T extends Document>(context: {
       reportDrift(database, change)
     }
   }
+  if (context.readonly) {
+    return
+  }
+  addMissingColumns({ sql, collection, schema }, columns, expected)
+}
+
+function addMissingColumns<T extends Document>(
+  context: {
+    sql: SQLiteBoundary
+    collection: string
+    schema: SchemaDefinition<T>
+  },
+  columns: readonly { name: string }[],
+  expected: Map<string, SchemaDefinition<T>["fields"][number]>
+): void {
+  const { sql, collection, schema } = context
   const existing = new Set(columns.map((column) => column.name))
   const missingFields = new Set(
     [...expected]

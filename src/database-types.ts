@@ -30,6 +30,9 @@ export type DatabaseOptions = {
    */
   readonly database: string | SQLiteDatabase
 
+  /** Open an existing database for reads only; collection setup never runs DDL. */
+  readonly readonly?: boolean
+
   /**
    * Custom ID generator function. Defaults to crypto.randomUUID().
    */

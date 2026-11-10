@@ -25,7 +25,12 @@ import {
   cursorOrder,
   reverseSort,
 } from "./cursor-pagination.js"
-import { assertDatabaseOpen, isDatabaseClosed } from "./database-state.js"
+import {
+  assertDatabaseOpen,
+  assertOperationAllowed,
+  isDatabaseClosed,
+  isDatabaseReadonly,
+} from "./database-state.js"
 import { mergeDocumentUpdate } from "./deep-merge.js"
 import { buildCompleteDocument } from "./document-builder.js"
 import {
@@ -247,6 +252,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       withRetry(async () => {
         try {
           assertDatabaseOpen(this.db)
+          assertOperationAllowed(this.db, operationName)
           return await transactionManager(this.db).run(operation)
         } catch (error) {
           throw wrapSqliteError(error, {
@@ -507,6 +513,19 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
     // Initialize table and indexes
     transactionManager(this.db).assertSynchronousAccess()
+    if (isDatabaseReadonly(this.db)) {
+      for (const field of this.schema.fields) {
+        fieldPath(String(field.name))
+      }
+      evolveGeneratedColumns({
+        database: this.db,
+        sql: this.sql,
+        collection: this.name,
+        schema: this.schema,
+        readonly: true,
+      })
+      return
+    }
     sqliteCall(
       () => this.db.transaction(() => this.createTable()).immediate(),
       {
