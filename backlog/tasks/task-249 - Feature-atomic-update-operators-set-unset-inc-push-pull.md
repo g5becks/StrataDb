@@ -1,11 +1,11 @@
 ---
 id: TASK-249
 title: 'Feature: atomic update operators ($set, $unset, $inc, $push, $pull)'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-10T01:20:00Z'
+updated_date: '2026-11-10T01:22:00Z'
 labels:
   - api
 milestone: m-2
@@ -34,7 +34,7 @@ updateOne only merges, so atomic counters and array appends need read-modify-wri
 - [x] #1 Each operator is translated to a single UPDATE statement (test asserts SQL shape or statement count)
 - [x] #2 100 concurrent $inc updates produce exactly +100
 - [x] #3 Mixing operators with plain fields in one update rejects with QueryError
-- [ ] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #5 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
 
@@ -56,4 +56,6 @@ updateOne only merges, so atomic counters and array appends need read-modify-wri
 - Breaking change: DocumentUpdate and update-event payloads are operator/merge unions with immutable metadata; consumers inspecting event.update should narrow its form. Documented migration, exact array semantics and storage invariants in CHANGELOG/document/event guides.
 - Host gate PASS: 986 pass, 1 existing projection skip, 0 fail; TS 7.0.2 typecheck; lint; build; type tests; consumer TS 6/7 CRUD; source TS 5.9.3/6.0.3. Local CI pending committed SHA.
 - Follow-up TASK-265 records the independently reproduced pre-existing updateOne retry:false forwarding defect (two attempts under inherited retries); TASK-260 now depends on it. No retry behavior was changed here.
+
+- Verified with scripts/ci-local.sh (59d8137d89837629383f1712d48adacebcda1a03, PASS); GitHub Actions unavailable (billing lock). All macOS/Linux Bun and required/advisory TypeScript jobs pass.
 <!-- SECTION:NOTES:END -->
