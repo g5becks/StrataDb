@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking changes
+
+- Writes now reject non-JSON values with a path-aware `ValidationError`, preventing silent data loss from Map/Set, non-finite numbers, functions, symbols, undefined array elements and unsupported classes. Circular references and BigInt have specific diagnostics. Convert values to plain JSON before writing; object `undefined` properties remain omitted. Date is rejected: migrate to `date.toISOString()` with a `string` field or `date.getTime()` with a `number` field. Classes with `toJSON()` remain supported when their output is valid JSON. Nesting beyond 256 levels rejects.
+
 ## [0.7.0] - 2026-11-10
 
 ### Breaking changes

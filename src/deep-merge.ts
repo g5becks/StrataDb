@@ -1,4 +1,5 @@
 import { deepmergeCustom } from "deepmerge-ts"
+import { serializeJSON } from "./json-serialization.js"
 
 /**
  * Custom deep merge function optimized for document updates.
@@ -149,5 +150,6 @@ export function mergeDocumentUpdate<
   // deepmerge-ts returns a complex inferred type that represents the merge result
   // For our use case (merging document body with metadata), the runtime result IS type T
   // TypeScript cannot prove this statically due to the complexity of deep merge inference
+  serializeJSON(metadata)
   return deepMerge(existingBody, metadata) as T
 }

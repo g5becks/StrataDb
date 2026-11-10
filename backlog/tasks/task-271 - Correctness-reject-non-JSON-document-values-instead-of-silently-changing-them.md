@@ -1,9 +1,11 @@
 ---
 id: TASK-271
 title: 'Correctness: reject non-JSON document values instead of silently changing them'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-11-10T16:03:00Z'
+updated_date: '2026-11-10T16:06:00Z'
 labels:
   - correctness
   - breaking
@@ -47,3 +49,11 @@ BigInt storage. It stays unsupported, but with a clear error.
 - [ ] #5 bench:batch insertMany throughput regresses by no more than 10%; numbers recorded in notes
 - [ ] #6 Quality gate and scripts/ci-local.sh pass
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Add regressions for every unsupported value across insertOne, insertMany, replaceOne and updates; capture batch baseline.
+2. Implement path-aware guarded JSON validation, rejecting Date and retaining undefined object omission; document migration.
+3. Measure batch throughput, run required quality gates and local CI, and record verified criteria.
+<!-- SECTION:PLAN:END -->

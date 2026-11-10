@@ -101,6 +101,8 @@ Compound indexes are created in SQLite. Use `{ unique: true }` to enforce a uniq
 
 Timestamps are enabled by default. `.timestamps(false)` omits `createdAt` and `updatedAt` from returned documents and event documents; timestamp columns remain internal. Updates preserve deep-merge behavior, replace arrays, and keep explicit null values.
 
+Documents must contain JSON values: finite numbers, strings, booleans, null, arrays and plain objects. Unsupported values reject with a path-aware `ValidationError`; `Date` must be converted to an ISO string or epoch number before writing (and typed as `string` or `number`). Object properties containing `undefined` are omitted; undefined array elements reject. Classes may supply `toJSON()` returning supported values. See [document semantics](docs/guide/mongodb-differences.md#document-values).
+
 `$like`, `$contains`, `$startsWith` and `$endsWith` match case exactly. The latter three accept literal text. `$like` and `$ilike` accept `%`/`_` wildcards with backslash escaping; `$ilike` folds ASCII case. Search text is literal, with optional `caseSensitive: true`. See [query semantics](docs/guide/mongodb-differences.md) and [Migrating to 0.6](docs/guide/migrating-to-0.6.md).
 
 ## Operation Cancellation

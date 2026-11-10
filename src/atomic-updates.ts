@@ -1,5 +1,6 @@
-import { QueryError, ValidationError } from "./errors.js"
+import { QueryError } from "./errors.js"
 import { bind, fieldPath } from "./field-resolver.js"
+import { serializeJSON } from "./json-serialization.js"
 import type { SQLiteBindValue } from "./query-translator-types.js"
 
 type Operator = "$set" | "$unset" | "$inc" | "$push" | "$pull"
@@ -23,40 +24,11 @@ function record(value: unknown): value is Record<string, unknown> {
   )
 }
 
-function jsonOperand(value: unknown): string {
+function jsonOperand(value: unknown, path: string): string {
   if (value === undefined) {
     throw new QueryError("Atomic update values cannot be undefined")
   }
-  try {
-    const json = JSON.stringify(value, (_key, item: unknown) => {
-      if (
-        ["function", "symbol", "bigint"].includes(typeof item) ||
-        (typeof item === "number" && !Number.isFinite(item))
-      ) {
-        throw new QueryError("Atomic update requires finite JSON values")
-      }
-      return item
-    })
-    // biome-ignore lint/suspicious/noUnnecessaryConditions: JSON.stringify can return undefined despite its library return type
-    if (json === undefined) {
-      throw new QueryError("Atomic update requires a JSON value")
-    }
-    return json
-  } catch (error) {
-    if (error instanceof QueryError) {
-      throw error
-    }
-    const wrapped = new ValidationError(
-      "Atomic update value is not serializable JSON",
-      undefined,
-      value
-    )
-    Object.defineProperty(wrapped, "cause", {
-      value: error,
-      configurable: true,
-    })
-    throw wrapped
-  }
+  return serializeJSON(value, path)
 }
 
 function operation(operator: string, path: string, value: unknown): Operation {
@@ -74,7 +46,7 @@ function operation(operator: string, path: string, value: unknown): Operation {
   if (operator === "$unset" && value !== true && value !== 1 && value !== "") {
     throw new QueryError("$unset requires true, 1 or an empty string")
   }
-  const json = jsonOperand(value)
+  const json = jsonOperand(value, path)
   return {
     operator: operator as Operator,
     path,

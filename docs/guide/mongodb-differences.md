@@ -2,6 +2,12 @@
 
 StrataDB provides a MongoDB-style API for developers familiar with MongoDB who want an embedded SQLite database. This guide defines its scalar semantics, shared operations, differences and migration considerations.
 
+## Document values
+
+Writes accept finite numbers, strings, booleans, null, arrays and plain objects (including null-prototype objects). Non-finite numbers, BigInt, Map, Set, functions, symbols, undefined array elements (including holes), circular references and class instances without `toJSON()` reject with `ValidationError` naming the path and type. Shared references without cycles are allowed. A depth guard rejects nesting beyond 256 levels. Object properties set to `undefined` are omitted.
+
+`Date` is rejected even though it has `toJSON()`: convert it explicitly with `date.toISOString()` or `date.getTime()`, and declare the stored property as `string` or `number`. No Date-to-string conversion is hidden behind a Date return type. Other classes with `toJSON()` must return supported JSON values; the returned value is validated before storage.
+
 ## Semantics vs MongoDB: null and missing scalar fields
 
 StrataDB matches explicit JSON `null` and missing fields with `{ nick: null }` or `{ nick: { $eq: null } }`. A document property set to `undefined` is omitted during serialization and therefore counts as missing. An `undefined` query operand is invalid and raises `QueryError`.
