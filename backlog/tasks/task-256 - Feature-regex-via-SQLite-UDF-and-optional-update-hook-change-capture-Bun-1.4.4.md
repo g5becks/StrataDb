@@ -3,11 +3,11 @@ id: TASK-256
 title: >-
   Feature: $regex via SQLite UDF and optional update-hook change capture (Bun
   1.4.4)
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-10T02:53:00Z'
+updated_date: '2026-11-10T02:57:00Z'
 labels:
   - api
   - performance
@@ -36,7 +36,7 @@ Bun 1.4.4 adds `db.function()`/`db.aggregate()` (UDFs) and row-level update hook
 <!-- AC:BEGIN -->
 - [x] #1 $regex filters work and invalid patterns reject with QueryError (tests)
 - [x] #2 Change-capture mode is opt-in, documented with its caveats, and tested for insert/update/delete via raw SQL
-- [ ] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #3 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #4 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
 
@@ -58,4 +58,6 @@ Bun 1.4.4 adds `db.function()`/`db.aggregate()` (UDFs) and row-level update hook
 - Verification: full host gate PASS, 1052 tests pass/no failures/skips; TS5.9.3/6.0.3/7.0.2, lint, build, type tests and packed consumer TS6/7+CRUD PASS.
 - Decisions: onRawChange is row metadata rather than fabricated document/delete snapshots. Events guide documents pre-commit/rollback notifications, WITHOUT ROWID, unfiltered DELETE, REPLACE removals, other connections, exclusive hooks, reentrant-use prohibition and native uncaught-exception behavior.
 - Follow-ups: none.
+
+Verified with scripts/ci-local.sh (3bb8bc30c8d340563f431c642df8d60443dc199c, PASS); GitHub Actions unavailable (billing lock). macOS/Linux Bun pinned/latest1.4.4, TS5.9.3/6.0.3/7.0.2 and advisory7.1-beta all PASS.
 <!-- SECTION:NOTES:END -->
