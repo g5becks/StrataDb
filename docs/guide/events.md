@@ -1,5 +1,38 @@
 # Collection Events
 
+## Raw connection changes
+
+```typescript
+const db = new Strata({
+  database: 'app.db',
+  onRawChange(change) {
+    console.log(change.operation, change.schema, change.table, change.rowid)
+  }
+})
+```
+
+`onRawChange` is opt-in and observes inserts, updates and deletes on this SQLite
+connection, including raw SQL and StrataDB writes. Its payload contains row
+metadata, not a document or StrataDB `_id`. It is separate from the collection
+events below, which remain buffered until commit.
+
+SQLite calls row hooks while the statement executes, before commit. Notifications
+can describe changes that later roll back. Hooks omit `WITHOUT ROWID` tables,
+unfiltered `DELETE` optimizations, rows removed by `INSERT OR REPLACE`, and writes
+from another connection or process. They are not a durable change log.
+
+The hook occupies the connection's single update-hook facility. Enabling capture
+when any caller hook is installed rejects with `SchemaValidationError`; disabling
+capture preserves caller hooks. Assigning native hooks afterward replaces capture.
+StrataDB removes only its own hooks when closing.
+
+Do not query the connection inside the observer: Bun rejects reentrant database
+use while the hook runs. Defer such work with `queueMicrotask` until the statement
+ends; a later read may see further changes and cannot recover a deleted row.
+Native hooks normally report thrown exceptions as uncaught exceptions. StrataDB
+catches synchronous throws and rejected observer promises and reports them through
+`console.error`, keeping them outside the write's result.
+
 StrataDB collections emit events when documents are created, updated, or deleted. This enables reactive patterns like audit logging, cache invalidation, and real-time notifications.
 
 ## Quick Start

@@ -20,6 +20,7 @@ import type {
 import { ConnectionError, SchemaValidationError } from "./errors.js"
 import { quoteIdent } from "./field-resolver.js"
 import { generateId } from "./id-generator.js"
+import { captureRawChanges } from "./raw-changes.js"
 import type { RetryOptions } from "./retry-types.js"
 import { mergeRetryOptions } from "./retry-utils.js"
 import { configureSchemaDrift } from "./schema-evolution.js"
@@ -27,6 +28,7 @@ import { schemaSignature } from "./schema-signature.js"
 import type { SchemaDefinition } from "./schema-types.js"
 import { sqliteCall } from "./sqlite-boundary.js"
 import { SQLiteCollection } from "./sqlite-collection.js"
+import { registerRegex } from "./sqlite-regex.js"
 import {
   disposeStatementCaches,
   validateStatementCacheSize,
@@ -79,6 +81,7 @@ export class Strata implements StrataDBInterface {
   private readonly enableCacheDefault: boolean
   private readonly retryOptionsDefault: RetryOptions | undefined
   private readonly statementCacheSizeDefault: number
+  private readonly releaseRawCapture: () => void
   private readonly collections = new Map<string, Collection<Document>>()
   private readonly schemaSignatures = new Map<string, string>()
 
@@ -131,6 +134,11 @@ export class Strata implements StrataDBInterface {
     this.enableCacheDefault = options.enableCache ?? false
     this.retryOptionsDefault = options.retry
     configureSchemaDrift(this.sqliteDb, options.onSchemaDrift)
+    registerRegex(this.sqliteDb)
+    this.releaseRawCapture = captureRawChanges(
+      this.sqliteDb,
+      options.onRawChange
+    )
   }
 
   /**
@@ -257,6 +265,7 @@ export class Strata implements StrataDBInterface {
 
     this.onCloseCallback?.()
     disposeStatementCaches(this.sqliteDb)
+    this.releaseRawCapture()
     sqliteCall(() => this.sqliteDb.close(), { operation: "close" })
     markDatabaseClosed(this.sqliteDb)
   }

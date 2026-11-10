@@ -35,6 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `$regex` accepts a JavaScript Unicode regex string through a deterministic SQLite UDF registered once per connection. Invalid patterns reject with `QueryError`, including cache hits and empty tables. Matching is case-sensitive, applies to strings only and cannot use an index.
+
+- Opt-in `onRawChange` observes SQLite row metadata for this connection, including raw SQL. It owns the connection's hooks exclusively, isolates observer exceptions and reports changes before commit (including later rollbacks). It does not replace commit-buffered collection events; see the events guide for hook limits.
+
 - Each collection keeps a configurable prepared-statement LRU (64 entries by default) via database/collection `statementCacheSize`. Statements are finalized on eviction, DDL, drop and close; rolled-back drops preserve collection identity. Simple `findOne` calls use a direct single-row path while complex options retain the general query path. Reproducible 50k-read benchmarks show more than 5× lower latency than v0.6.0 on the recorded host; optional translator caching remains separately configurable.
 
 - A 500-case seeded fast-check differential suite compares SQLite against an independent query evaluator, repeating and varying literals across indexed/unindexed and cached/uncached collections. A SHA-pinned nightly workflow prints a random replay seed; local replay instructions and minimized regressions are retained.

@@ -161,6 +161,8 @@ export type ComparisonOperator<T> = T extends number | Date
  * ```
  */
 export type StringOperator = {
+  /** JavaScript Unicode regex string, case-sensitive and non-indexable. */
+  readonly $regex?: string
   /** SQL-style LIKE pattern matching (case-sensitive) */
   readonly $like?: string
 

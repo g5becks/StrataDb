@@ -109,6 +109,21 @@ const stringFilter = fc.oneof(
   fc
     .tuple(
       fc.constantFrom("s", "inner.s"),
+      fc.constantFrom(
+        "",
+        "^a",
+        "[aA]",
+        "é$",
+        "\\p{L}+",
+        "^.$",
+        "[\\s\\S]*",
+        "a.b"
+      )
+    )
+    .map(([name, value]) => field(name, "$regex", value)),
+  fc
+    .tuple(
+      fc.constantFrom("s", "inner.s"),
       fc.constantFrom("$like", "$ilike"),
       pattern
     )

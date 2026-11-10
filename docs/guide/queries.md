@@ -2,6 +2,22 @@
 
 StrataDB provides type-safe MongoDB-style query operators.
 
+## Regular expressions
+
+```typescript
+await users.find({ name: { $regex: '^\\p{L}+$' } })
+```
+
+`$regex` accepts a pattern string using JavaScript Unicode (`u`) regex syntax.
+It performs a case-sensitive search unless anchors constrain it. RegExp objects
+and separate flags are unsupported. Null, missing and non-string values never
+match. Invalid patterns reject with `QueryError` before execution, including on
+empty collections or cached query shapes. Nested fields and `$elemMatch` also
+support the operator.
+
+The deterministic SQLite UDF is installed once per connection. Regex matching
+is non-indexable; combine it with selective indexed filters when appropriate.
+
 ## Comparison Operators
 
 ```typescript

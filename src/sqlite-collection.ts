@@ -77,6 +77,7 @@ import {
   wrapSqliteError,
 } from "./sqlite-boundary.js"
 import { SQLiteQueryTranslator } from "./sqlite-query-translator.js"
+import { registerRegex } from "./sqlite-regex.js"
 import { escapeLikeLiteral } from "./string-patterns.js"
 import { transactionManager } from "./transaction-manager.js"
 
@@ -504,6 +505,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     config: CollectionConfiguration = {}
   ) {
     assertDatabaseOpen(db)
+    registerRegex(db)
     this.db = db
     this.sql = new SQLiteBoundary(db, name, config.statementCacheSize ?? 64)
     this.name = name

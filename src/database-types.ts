@@ -2,6 +2,7 @@ import type { Database as SQLiteDatabase } from "bun:sqlite"
 import type { CollectionBuilder } from "./collection-builder.js"
 import type { Collection } from "./collection-types.js"
 import type { Document } from "./core-types.js"
+import type { RawChangeObserver } from "./raw-changes.js"
 import type { RetryOptions } from "./retry-types.js"
 import type { SchemaDriftHandler } from "./schema-evolution.js"
 import type { SchemaDefinition } from "./schema-types.js"
@@ -20,6 +21,10 @@ import type { SchemaDefinition } from "./schema-types.js"
  * ```
  */
 export type DatabaseOptions = {
+  /** Opt-in SQLite row notifications, including raw SQL and uncommitted changes.
+   * Requires exclusive hook ownership; callbacks must defer database reads.
+   */
+  readonly onRawChange?: RawChangeObserver
   /** Prepared statements per collection (positive integer, default 64). */
   readonly statementCacheSize?: number
   /** Report removed/type-changed generated columns; "error" rejects drift.

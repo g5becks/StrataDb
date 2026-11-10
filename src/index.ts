@@ -32,7 +32,6 @@
  * ```
  */
 
-// Abort utilities
 // biome-ignore lint/performance/noBarrelFile: library entry point requires re-exports
 export { createAbortPromise, throwIfAborted } from "./abort-utils.js"
 export type { CollectionBuilder } from "./collection-builder.js"
@@ -127,6 +126,8 @@ export type {
   QueryFilter,
   StringOperator,
 } from "./query-types.js"
+// Abort utilities
+export type { RawChangeEvent, RawChangeObserver } from "./raw-changes.js"
 // Retry types and utilities
 export type { RetryContext, RetryOptions } from "./retry-types.js"
 export {

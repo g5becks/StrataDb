@@ -5,6 +5,7 @@ const logical = new Set(["$and", "$or", "$nor", "$not"])
 const scalar = new Set(["$eq", "$ne", "$in", "$nin", "$exists"])
 const ordered = new Set(["$gt", "$gte", "$lt", "$lte"])
 const strings = new Set([
+  "$regex",
   "$like",
   "$ilike",
   "$contains",
@@ -130,6 +131,8 @@ function stringCondition(
     return false
   }
   switch (op) {
+    case "$regex":
+      return new RegExp(operand, "u").test(value)
     case "$like":
       return patternMatch(value, operand)
     case "$ilike":

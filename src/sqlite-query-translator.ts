@@ -694,6 +694,8 @@ export class SQLiteQueryTranslator<T extends Document>
   }): string | null {
     const { fieldSql, op, value, params } = context
     switch (op) {
+      case "$regex":
+        return `strata_regexp(${bind(value as string, params)}, ${fieldSql}) = 1`
       case "$eq":
         return value === null
           ? `${fieldSql} IS NULL`
