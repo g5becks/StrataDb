@@ -1,4 +1,3 @@
-import type { Database as SQLiteDatabase } from "bun:sqlite"
 import type { Collection } from "./collection-types.js"
 import type { Document } from "./core-types.js"
 import type { JsonPath, SchemaFieldName } from "./path-types.js"
@@ -10,7 +9,6 @@ import type {
   SQLiteType,
   TypeScriptToSQLite,
 } from "./schema-types.js"
-import { SQLiteCollection } from "./sqlite-collection.js"
 
 /**
  * Fluent builder for creating collections with inline schema definition.
@@ -116,25 +114,24 @@ export type CollectionBuilder<T extends Document> = {
 export class CollectionBuilderImpl<T extends Document>
   implements CollectionBuilder<T>
 {
-  private readonly db: SQLiteDatabase
-  private readonly collectionName: string
-  private readonly idGenerator: () => string
+  private readonly createCollection: (
+    schema: SchemaDefinition<T>,
+    enableCache: boolean
+  ) => Collection<T>
   private readonly fieldDefs: SchemaField<T, keyof T>[] = []
   private readonly compoundIndexDefs: CompoundIndex<T>[] = []
-  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: used in timestamps() and build()
-  private enableTimestamps = false
+  private enableTimestamps: boolean | undefined
   private validatorFn: ((doc: unknown) => doc is T) | undefined
   private enableCacheOption: boolean
 
   constructor(
-    db: SQLiteDatabase,
-    collectionName: string,
-    idGenerator: () => string,
+    createCollection: (
+      schema: SchemaDefinition<T>,
+      enableCache: boolean
+    ) => Collection<T>,
     defaultEnableCache: boolean
   ) {
-    this.db = db
-    this.collectionName = collectionName
-    this.idGenerator = idGenerator
+    this.createCollection = createCollection
     this.enableCacheOption = defaultEnableCache
   }
 
@@ -222,7 +219,9 @@ export class CollectionBuilderImpl<T extends Document>
   build(): Collection<T> {
     const schema = {
       fields: this.fieldDefs,
-      timestamps: this.enableTimestamps,
+      ...(this.enableTimestamps === undefined
+        ? {}
+        : { timestamps: this.enableTimestamps }),
     } as SchemaDefinition<T>
 
     if (this.compoundIndexDefs.length > 0) {
@@ -235,14 +234,6 @@ export class CollectionBuilderImpl<T extends Document>
         this.validatorFn
     }
 
-    return new SQLiteCollection<T>(
-      this.db,
-      this.collectionName,
-      schema,
-      this.idGenerator,
-      this.enableCacheOption,
-      undefined,
-      undefined
-    )
+    return this.createCollection(schema, this.enableCacheOption)
   }
 }

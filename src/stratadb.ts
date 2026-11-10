@@ -13,11 +13,12 @@ import type {
   StrataDB as StrataDBInterface,
   Transaction,
 } from "./database-types.js"
-import { ConnectionError } from "./errors.js"
+import { ConnectionError, SchemaValidationError } from "./errors.js"
 import { quoteIdent } from "./field-resolver.js"
 import { generateId } from "./id-generator.js"
 import type { RetryOptions } from "./retry-types.js"
 import { configureSchemaDrift } from "./schema-evolution.js"
+import { schemaSignature } from "./schema-signature.js"
 import type { SchemaDefinition } from "./schema-types.js"
 import { sqliteCall } from "./sqlite-boundary.js"
 import { SQLiteCollection } from "./sqlite-collection.js"
@@ -69,6 +70,7 @@ export class Strata implements StrataDBInterface {
   private readonly enableCacheDefault: boolean
   private readonly retryOptionsDefault: RetryOptions | undefined
   private readonly collections = new Map<string, Collection<Document>>()
+  private readonly schemaSignatures = new Map<string, string>()
 
   /**
    * Creates a new StrataDB instance.
@@ -147,15 +149,20 @@ export class Strata implements StrataDBInterface {
       assertDatabaseOpen(this.sqliteDb)
       // Return builder for fluent schema definition
       return new CollectionBuilderImpl<T>(
-        this.sqliteDb,
-        name,
-        this.idGeneratorFn,
+        (built, cacheEnabled) =>
+          this.collection(name, built, { enableCache: cacheEnabled }),
         this.enableCacheDefault
       )
     }
 
+    const signature = schemaSignature(schema)
     const existing = this.collections.get(name)
     if (existing) {
+      if (this.schemaSignatures.get(name) !== signature) {
+        throw new SchemaValidationError(
+          `Collection ${name} is already cached with a different schema`
+        )
+      }
       return existing as Collection<T>
     }
     assertDatabaseOpen(this.sqliteDb)
@@ -173,6 +180,7 @@ export class Strata implements StrataDBInterface {
       options?.retry
     )
     this.collections.set(name, collection as Collection<Document>)
+    this.schemaSignatures.set(name, signature)
 
     return collection
   }

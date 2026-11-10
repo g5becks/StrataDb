@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test"
 import { CollectionBuilderImpl } from "../../src/collection-builder.js"
 import type { Document } from "../../src/core-types.js"
 import { createSchema } from "../../src/schema-builder.js"
+import { Strata } from "../../src/stratadb.js"
 
 describe("Collection Builder", () => {
   type TestUser = Document<{
@@ -17,12 +18,9 @@ describe("Collection Builder", () => {
     // since that requires a real database connection
     const createTestBuilder = () => {
       // We'll test the internal state by accessing private fields through casting
-      return new CollectionBuilderImpl<TestUser>(
-        undefined as any, // We won't actually call build() in most tests
-        "users",
-        () => "test-id",
-        true
-      )
+      return new CollectionBuilderImpl<TestUser>(() => {
+        throw new Error("Unexpected build in a configuration-only test")
+      }, true)
     }
 
     it("should create instance with correct initial state", () => {
@@ -242,13 +240,12 @@ describe("Collection Builder", () => {
     // For the build method test, we'll need to create a proper database instance
     it("should build complete schema with all features (with real DB)", () => {
       // Create a real database instance for the build test
-      const db = new (require("bun:sqlite").Database)(":memory:")
-      const builder = new CollectionBuilderImpl<TestUser>(
-        db,
-        "users",
-        () => "test-id",
-        true
-      )
+      using db = new Strata({
+        database: ":memory:",
+        idGenerator: () => "test-id",
+        enableCache: true,
+      })
+      const builder = db.collection<TestUser>("users")
 
       const validator = (doc: unknown): doc is TestUser =>
         typeof doc === "object" && doc !== null
@@ -262,13 +259,11 @@ describe("Collection Builder", () => {
         .timestamps(true)
         .validate(validator)
 
-      const _schema = builder.build()
-
-      // The build method returns a Collection, which has schema property
-      // But we need to get the schema definition from the builder before building
-      // Let's test the internal state instead since the build method creates SQLiteCollection
-      // which requires proper setup
-      db.close()
+      const collection = builder.build()
+      expect(collection.schema.fields).toHaveLength(4)
+      expect(collection.schema.compoundIndexes).toHaveLength(1)
+      expect(collection.schema.timestamps).toBe(true)
+      expect(collection.schema.validate).toBe(validator)
     })
 
     // Test the actual schema building through createSchema helper which doesn't call build()
@@ -348,12 +343,9 @@ describe("Collection Builder", () => {
     // since that requires a real database connection
     const createTestBuilder = () => {
       // We'll test the internal state by accessing private fields through casting
-      return new CollectionBuilderImpl<TestUser>(
-        undefined as any, // We won't actually call build() in these tests
-        "users",
-        () => "test-id",
-        true
-      )
+      return new CollectionBuilderImpl<TestUser>(() => {
+        throw new Error("Unexpected build in a configuration-only test")
+      }, true)
     }
 
     it("should support full fluent API chain", () => {

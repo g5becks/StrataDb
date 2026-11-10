@@ -16,6 +16,21 @@ const schema = createSchema<User>()
 Unchecked names still require safe identifier segments at runtime; the escape
 only bypasses document-name type checking.
 
+## Reusing collection names
+
+Schema-based and fluent creation share one collection cache and database
+cache/retry defaults. Both enable visible timestamps by default; use
+`.timestamps(false)` explicitly to opt out. `.cache(false)` overrides the fluent
+builder's database cache default.
+
+Reusing a name returns the same instance only for an equivalent schema. A
+mismatch throws `SchemaValidationError`. Field/index declaration order and
+omitted ordinary defaults are normalized; compound-index field order remains
+significant. Validator functions must be the same function object, because
+equivalent source text cannot establish equivalent closure behavior. Keep a
+shared schema or validator reference. Collection options are fixed by the first
+successful creation; a later lookup does not reconfigure the cached instance.
+
 ## Adding indexed fields to an existing collection
 
 Close and reopen the database with the updated schema. StrataDB adds missing

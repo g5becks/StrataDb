@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- Cached collection lookups reject schema mismatches with `SchemaValidationError`, including different validator function identities. Fluent collections now share cache identity and inherit database retries and the default enabled timestamps. Use the same schema/validator when reusing a name; opt out of timestamps explicitly with `.timestamps(false)` if required.
+
 - Checked schema and collection-builder field declarations and compound-index fields accept only document string keys or dotted `DocumentPath` values. Correct misspellings; use `fieldUnchecked` and `compoundIndexUnchecked` for intentionally dynamic names. These explicit escapes still undergo runtime identifier validation.
 
 - Cursor pagination rejects unknown/malformed IDs and requires a nonempty sort. Every sorted find appends ascending `_id` unless explicitly sorted, so tied rows have a stable order from the first page. `before` returns the nearest previous page in the requested order. Review clients that relied on invalid cursors returning the first page or on insertion order for ties.
