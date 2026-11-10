@@ -100,6 +100,7 @@ export class SQLiteQueryTranslator<T extends Document>
 {
   /** Map of field names to their schema definitions */
   private readonly fieldMap: Map<keyof T, SchemaField<T, keyof T>>
+  private elementAlias = 0
 
   /** Cache for query SQL templates to avoid repeated translation */
   private readonly queryCache: Map<
@@ -187,6 +188,7 @@ export class SQLiteQueryTranslator<T extends Document>
    * due to their complex value extraction requirements.
    */
   translate(filter: QueryFilter<T>): QueryTranslatorResult {
+    this.elementAlias = 0
     validateQuery(filter)
     // Empty filter matches all documents
     if (!filter || Object.keys(filter).length === 0) {
@@ -515,12 +517,13 @@ export class SQLiteQueryTranslator<T extends Document>
    */
   private translateFilter(
     filter: QueryFilter<T>,
-    params: SQLiteBindValue[]
+    params: SQLiteBindValue[],
+    root?: string
   ): string {
     const conditions: string[] = []
 
     for (const [key, value] of Object.entries(filter)) {
-      const condition = this.translateFilterEntry(key, value, params)
+      const condition = this.translateFilterEntry(key, value, params, root)
       if (condition) {
         conditions.push(condition)
       }
@@ -542,7 +545,8 @@ export class SQLiteQueryTranslator<T extends Document>
   private translateFilterEntry(
     key: string,
     value: unknown,
-    params: SQLiteBindValue[]
+    params: SQLiteBindValue[],
+    root?: string
   ): string | null {
     // Handle logical operators
     if (key === "$and") {
@@ -550,7 +554,9 @@ export class SQLiteQueryTranslator<T extends Document>
       if (filters.length === 0) {
         return "1=1" // Empty $and matches everything (vacuous truth)
       }
-      const andConditions = filters.map((f) => this.translateFilter(f, params))
+      const andConditions = filters.map((f) =>
+        this.translateFilter(f, params, root)
+      )
       return `(${andConditions.join(" AND ")})`
     }
 
@@ -559,7 +565,9 @@ export class SQLiteQueryTranslator<T extends Document>
       if (filters.length === 0) {
         return "1=1" // Empty $or matches everything
       }
-      const orConditions = filters.map((f) => this.translateFilter(f, params))
+      const orConditions = filters.map((f) =>
+        this.translateFilter(f, params, root)
+      )
       return `(${orConditions.join(" OR ")})`
     }
 
@@ -568,17 +576,23 @@ export class SQLiteQueryTranslator<T extends Document>
       if (filters.length === 0) {
         return "1=1" // Empty $nor matches everything
       }
-      const norConditions = filters.map((f) => this.translateFilter(f, params))
-      return `NOT (${norConditions.join(" OR ")})`
+      const norConditions = filters.map((f) =>
+        this.translateFilter(f, params, root)
+      )
+      return `NOT COALESCE((${norConditions.join(" OR ")}), 0)`
     }
 
     if (key === "$not") {
-      const notCondition = this.translateFilter(value as QueryFilter<T>, params)
-      return `NOT (${notCondition})`
+      const notCondition = this.translateFilter(
+        value as QueryFilter<T>,
+        params,
+        root
+      )
+      return `NOT COALESCE((${notCondition}), 0)`
     }
 
     // Handle field conditions
-    return this.translateFieldCondition(key as keyof T, value, params)
+    return this.translateFieldCondition(key as keyof T, value, params, root)
   }
 
   /**
@@ -594,9 +608,10 @@ export class SQLiteQueryTranslator<T extends Document>
   private translateFieldCondition(
     fieldName: keyof T,
     value: unknown,
-    params: SQLiteBindValue[]
+    params: SQLiteBindValue[],
+    root?: string
   ): string | null {
-    const fieldSql = this.resolveFieldName(fieldName, params)
+    const fieldSql = this.resolveFieldName(fieldName, params, root)
     if (value === null) {
       return `${fieldSql} IS NULL`
     }
@@ -616,8 +631,8 @@ export class SQLiteQueryTranslator<T extends Document>
         fieldSql,
         value as Record<string, unknown>,
         params,
-        "$exists" in value
-          ? resolvePresence(String(fieldName), params)
+        "$exists" in value || "$elemMatch" in value
+          ? resolvePresence(String(fieldName), params, root)
           : undefined
       )
       return operatorSql || null
@@ -728,7 +743,12 @@ export class SQLiteQueryTranslator<T extends Document>
         return this.translateSizeOperator(fieldSql, value, params)
 
       case "$elemMatch":
-        return this.translateElemMatchOperator(fieldSql, value, params)
+        return this.translateElemMatchOperator(
+          fieldSql,
+          value,
+          params,
+          context.presenceSql
+        )
 
       case "$index":
         return this.translateIndexOperator(fieldSql, value, params)
@@ -844,9 +864,15 @@ export class SQLiteQueryTranslator<T extends Document>
    */
   private resolveFieldName(
     fieldName: keyof T,
-    params: SQLiteBindValue[]
+    params: SQLiteBindValue[],
+    root?: string
   ): string {
-    return resolveField(String(fieldName), [...this.fieldMap.values()], params)
+    return resolveField(
+      String(fieldName),
+      [...this.fieldMap.values()],
+      params,
+      root
+    )
   }
 
   /**
@@ -925,29 +951,38 @@ export class SQLiteQueryTranslator<T extends Document>
   private translateElemMatchOperator(
     fieldSql: string,
     elementFilter: unknown,
-    params: SQLiteBindValue[]
+    params: SQLiteBindValue[],
+    fieldTypeSql?: string
   ): string {
     // Extract the nested filter conditions
     const filter = elementFilter as Record<string, unknown>
     const conditions: string[] = []
-
+    const alias = `strata_elem_${this.elementAlias}`
+    this.elementAlias += 1
+    const root = `CASE WHEN ${alias}.type = 'object' THEN ${alias}.value END`
+    let objectFilter = false
     for (const [op, value] of Object.entries(filter)) {
-      // Use json_each.value to reference array elements
-      const elementSql = "json_each.value"
-      const condition = this.translateSingleOperator({
-        fieldSql: elementSql,
-        op,
-        value,
-        operators: filter,
-        params,
-      })
+      const objectEntry =
+        !op.startsWith("$") || ["$and", "$or", "$nor", "$not"].includes(op)
+      objectFilter ||= objectEntry
+      const condition = objectEntry
+        ? this.translateFilterEntry(op, value, params, root)
+        : this.translateSingleOperator({
+            fieldSql: `${alias}.value`,
+            presenceSql: `${alias}.type`,
+            op,
+            value,
+            operators: filter,
+            params,
+          })
       if (condition) {
         conditions.push(condition)
       }
     }
 
-    const whereClause = conditions.join(" AND ")
-    return `EXISTS (SELECT 1 FROM json_each(${fieldSql}) WHERE ${whereClause})`
+    const whereClause = `${objectFilter ? `${alias}.type = 'object' AND ` : ""}${conditions.join(" AND ")}`
+    const array = `CASE WHEN ${fieldTypeSql ?? `json_type(${fieldSql})`} = 'array' THEN ${fieldSql} END`
+    return `EXISTS (SELECT 1 FROM json_each(${array}) AS ${alias} WHERE ${whereClause})`
   }
 
   /**

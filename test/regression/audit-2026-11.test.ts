@@ -245,13 +245,13 @@ test("A11 [TASK-237] $ne includes missing and null for non-null operand", async 
   expect(await users.count({ nick: { $ne: "B" } })).toBe(3)
 })
 
-test.failing("A12 [TASK-245] $elemMatch resolves object fields", async () => {
+test("A12 [TASK-245] $elemMatch resolves object fields", async () => {
   expect(
     await users.find({ items: { $elemMatch: { sku: "X" } } } as never)
   ).toMatchObject([{ name: "alice" }])
 })
 
-test.failing("A12 [TASK-245] $elemMatch resolves nested operators", async () => {
+test("A12 [TASK-245] $elemMatch resolves nested operators", async () => {
   expect(
     await users.find({ items: { $elemMatch: { qty: { $gte: 2 } } } } as never)
   ).toMatchObject([{ name: "alice" }])

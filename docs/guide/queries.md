@@ -72,6 +72,21 @@ await users.find({
 })
 ```
 
+Object arrays support field filters, dotted paths, logical filters, and nested
+array conditions. Every condition must match the same element:
+
+```typescript
+await orders.find({
+  items: { $elemMatch: { sku: 'X', qty: { $gte: 2 } } }
+})
+```
+
+Object filters skip scalar/null array elements. Non-array fields do not match
+`$elemMatch`. `$exists` inside an element distinguishes JSON null from missing
+paths. Logical `$not` and `$nor` normalize unknown comparisons to false before
+negating, just as at the document level; add an explicit `$exists: true` condition
+if missing fields should be excluded.
+
 ## Logical Operators
 
 ```typescript

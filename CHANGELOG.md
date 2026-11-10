@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- Logical `$not` and `$nor` treat an unknown (null/missing) comparison as false before negation, including inside `$elemMatch`. Review negated bulk-write filters that relied on SQL NULL dropping missing fields; add `$exists: true` when presence is required.
+
 - Successful `update` event documents are now typed as non-null, and delete events discriminate `_id: string` on success from `_id: null` on a miss. Batch update/delete payloads require `ids`. Update manually constructed event fixtures accordingly. `deleteOne` now emits a miss event consistently for both ID and object filters.
 
 ### Added
+
+- `$elemMatch` supports object fields, dotted paths, nested field operators and arrays, and logical object filters. All conditions apply to the same element. Scalar forms remain supported, non-array input is ignored safely, and object filters skip non-object elements.
 
 - Delete events identify the resolved row, with optional deleted-document snapshots through `deleteOne(filter, { includeDocument: true })`. Batch events include IDs from actual SQLite RETURNING rows; updates ignored by a trigger are excluded from IDs and modified counts. ID order follows SQLite RETURNING and is not guaranteed. Commit buffering and rollback suppression are preserved.
 

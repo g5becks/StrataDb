@@ -354,8 +354,7 @@ describe("Complex Query Integration Tests", () => {
       expect(results[0].name).toBe("Mouse")
     })
 
-    // biome-ignore lint/suspicious/noSkippedTests: TODO: $elemMatch translation needs debugging - SQL syntax error
-    it.skip("should handle $elemMatch operator with complex conditions", async () => {
+    it("should handle $elemMatch operator with complex conditions", async () => {
       type Order = Document<{
         customer: string
         items: Array<{ name: string; quantity: number; price: number }>
@@ -364,7 +363,7 @@ describe("Complex Query Integration Tests", () => {
 
       const schema = createSchema<Order>()
         .field("customer", { type: "TEXT", indexed: true })
-        .field("items", { type: "JSON" })
+        .field("items", { type: "BLOB" })
         .field("total", { type: "REAL", indexed: true })
         .build()
 

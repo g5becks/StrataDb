@@ -258,7 +258,7 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     const result = translator.translate(filter)
 
     expect(result.sql).toBe(
-      "NOT ((lower(\"_name\") LIKE lower(?) ESCAPE '\\'))"
+      "NOT COALESCE(((lower(\"_name\") LIKE lower(?) ESCAPE '\\')), 0)"
     )
     expect(result.params).toEqual(["%test%"])
   })
@@ -269,7 +269,7 @@ describe("SQLiteQueryTranslator - Combined String Operators", () => {
     }
     const result = translator.translate(filter)
 
-    expect(result.sql).toBe('NOT ((instr("_email", ?) > 0))')
+    expect(result.sql).toBe('NOT COALESCE(((instr("_email", ?) > 0)), 0)')
     expect(result.params).toEqual(["spam"])
   })
 })

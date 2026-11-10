@@ -319,7 +319,7 @@ describe("SQLiteQueryTranslator - Logical Operators", () => {
     const result = userTranslator.translate(filter)
 
     expect(result.sql).toBe(
-      "NOT (jsonb_extract(body, ?) = ? OR jsonb_extract(body, ?) = ?)"
+      "NOT COALESCE((jsonb_extract(body, ?) = ? OR jsonb_extract(body, ?) = ?), 0)"
     )
     expect(result.params).toEqual(["$.status", "inactive", "$.active", false])
   })
@@ -330,7 +330,7 @@ describe("SQLiteQueryTranslator - Logical Operators", () => {
     }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("NOT (jsonb_extract(body, ?) = ?)")
+    expect(result.sql).toBe("NOT COALESCE((jsonb_extract(body, ?) = ?), 0)")
     expect(result.params).toEqual(["$.status", "inactive"])
   })
 
@@ -340,7 +340,7 @@ describe("SQLiteQueryTranslator - Logical Operators", () => {
     }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe('NOT (("_age" >= ? AND "_age" < ?))')
+    expect(result.sql).toBe('NOT COALESCE((("_age" >= ? AND "_age" < ?)), 0)')
     expect(result.params).toEqual([18, 65])
   })
 
@@ -383,10 +383,10 @@ describe("SQLiteQueryTranslator - Nested Queries", () => {
     // Implementation wraps:
     // - Field operators consistently: (_field op ?)
     // - Logical operators: (condition1 OP condition2)
-    // - NOT: NOT (condition) without extra outer parens
+    // - NOT normalizes an unknown comparison to false before negating
     // This ensures predictable SQL generation with proper precedence
     expect(result.sql).toBe(
-      '((("_name" IS NULL OR "_name" != ?)) AND ((("_age" >= ?) AND ("_age" < ?)) OR NOT (jsonb_extract(body, ?) = ?)))'
+      '((("_name" IS NULL OR "_name" != ?)) AND ((("_age" >= ?) AND ("_age" < ?)) OR NOT COALESCE((jsonb_extract(body, ?) = ?), 0)))'
     )
     expect(result.params).toEqual(["System", 18, 65, "$.status", "suspended"])
   })

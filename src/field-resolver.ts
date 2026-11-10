@@ -45,9 +45,13 @@ export function bind(
 export function resolveField(
   name: string,
   fields: readonly { readonly name: PropertyKey; readonly indexed?: boolean }[],
-  params: SQLiteBindValue[]
+  params: SQLiteBindValue[],
+  root?: string
 ): string {
   const path = fieldPath(name)
+  if (root !== undefined) {
+    return `jsonb_extract(${root}, ${bind(path, params)})`
+  }
   if (name === "_id" || name === "createdAt" || name === "updatedAt") {
     return quoteIdent(name)
   }
@@ -59,15 +63,19 @@ export function resolveField(
 
 export function resolvePresence(
   name: string,
-  params: SQLiteBindValue[]
+  params: SQLiteBindValue[],
+  root?: string
 ): string {
   const path = fieldPath(name)
-  if (name === "_id" || name === "createdAt" || name === "updatedAt") {
+  if (
+    root === undefined &&
+    (name === "_id" || name === "createdAt" || name === "updatedAt")
+  ) {
     return quoteIdent(name)
   }
   // Inspect the original JSON: extraction and generated columns conflate
   // explicit JSON null with missing paths, and extracted text isn't JSON.
-  return `json_type(body, ${bind(path, params)})`
+  return `json_type(${root ?? "body"}, ${bind(path, params)})`
 }
 
 // SQLite forbids parameters in generated-column/index DDL. Only this validated

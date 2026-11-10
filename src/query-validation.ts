@@ -144,7 +144,9 @@ function validateElement(value: unknown): void {
     throw new QueryError("$elemMatch requires a nonempty object")
   }
   for (const [key, operand] of Object.entries(value)) {
-    if (key.startsWith("$")) {
+    if (["$and", "$or", "$nor", "$not"].includes(key)) {
+      validateQuery({ [key]: operand })
+    } else if (key.startsWith("$")) {
       validateOperator(key, operand)
     } else {
       fieldPath(key)
