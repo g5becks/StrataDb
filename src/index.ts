@@ -64,6 +64,7 @@ export type {
 } from "./collection-types.js"
 // Core document types
 export type {
+  AtomicUpdate,
   BulkWriteResult,
   Document,
   DocumentInput,

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- Update APIs and event payloads use `DocumentUpdate<T>`, a union of plain deep merges and atomic operator forms, with immutable ID/timestamp metadata. Consumers inspecting `event.update` should narrow the operator form before reading plain fields. Mixed forms, overlapping paths and malformed operators reject with `QueryError`.
+
 - Cached collection lookups reject schema mismatches with `SchemaValidationError`, including different validator function identities. Fluent collections now share cache identity and inherit database retries and the default enabled timestamps. Use the same schema/validator when reusing a name; opt out of timestamps explicitly with `.timestamps(false)` if required.
 
 - Checked schema and collection-builder field declarations and compound-index fields accept only document string keys or dotted `DocumentPath` values. Correct misspellings; use `fieldUnchecked` and `compoundIndexUnchecked` for intentionally dynamic names. These explicit escapes still undergo runtime identifier validation.
@@ -20,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Successful `update` event documents are now typed as non-null, and delete events discriminate `_id: string` on success from `_id: null` on a miss. Batch update/delete payloads require `ids`. Update manually constructed event fixtures accordingly. `deleteOne` now emits a miss event consistently for both ID and object filters.
 
 ### Added
+
+- Atomic `$set`, `$unset`, `$inc`, `$push` and `$pull` updates for single, find-and-update, batch and upsert APIs. Operator writes use one JSONB UPDATE per operation, preserving validation, transaction/event buffering and metadata. `$push` appends one value; `$pull` removes every structurally equal JSON value (object key order ignored, array order and JSON types preserved). Missing numeric/array fields initialize for increment/push; null or incompatible targets reject. Dotted scalar equality filters now seed nested upsert documents correctly.
 
 - Cursor predicates compare all sort keys lexicographically, including nested fields and NULL/missing values (NULLS FIRST ascending, NULLS LAST descending). Seeded fast-check pagination walks verify forward/backward completeness against an independent reference comparator.
 

@@ -13,7 +13,7 @@
  */
 
 import { EventEmitter } from "node:events"
-import type { Document } from "./core-types.js"
+import type { Document, DocumentUpdate } from "./core-types.js"
 import type { QueryFilter } from "./query-types.js"
 
 /**
@@ -86,7 +86,7 @@ export type UpdateEvent<T extends Document> = {
   /** The filter used to find the document (string ID or QueryFilter) */
   readonly filter: string | QueryFilter<T>
   /** The update that was applied */
-  readonly update: Partial<T>
+  readonly update: DocumentUpdate<T>
 } & (
   | { readonly upserted: false; readonly document: T }
   | { readonly upserted: true; readonly document: T }
@@ -116,7 +116,7 @@ export type UpdateManyEvent<T extends Document> = {
   /** The filter used to find documents */
   readonly filter: QueryFilter<T>
   /** The update that was applied */
-  readonly update: Partial<T>
+  readonly update: DocumentUpdate<T>
   /** Number of documents that matched the filter */
   readonly matchedCount: number
   /** Number of documents that were modified */
@@ -257,7 +257,7 @@ export type FindOneAndUpdateEvent<T extends Document> = {
   /** The filter used to find the document */
   readonly filter: string | QueryFilter<T>
   /** The update that was applied */
-  readonly update: Partial<T>
+  readonly update: DocumentUpdate<T>
   /** The document (before or after based on options), or null if not found */
   readonly document: T | null
   /** Whether this was an upsert (document was created) */

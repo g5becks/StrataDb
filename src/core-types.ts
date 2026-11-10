@@ -5,6 +5,7 @@ import type {
   SetOptional,
   Simplify,
 } from "type-fest"
+import type { PathValue, SchemaFieldName } from "./path-types.js"
 
 /**
  * Document type with immutable ID.
@@ -94,15 +95,47 @@ export type DocumentInput<T extends Document> = Simplify<
   SetOptional<Except<T, "_id">, never> & { _id?: string }
 >
 
+type UpdatePath<T> = SchemaFieldName<Omit<T, "_id" | "createdAt" | "updatedAt">>
+type ArrayValue<T> = NonNullable<T> extends readonly (infer Element)[]
+  ? Element
+  : never
+
+/** Atomic operators over mutable document paths. Operator and merge forms cannot mix. */
+export type AtomicUpdate<T extends Document> = {
+  readonly $set?: { readonly [Path in UpdatePath<T>]?: PathValue<T, Path> }
+  readonly $unset?: { readonly [Path in UpdatePath<T>]?: true | 1 | "" }
+  readonly $inc?: {
+    readonly [Path in UpdatePath<T> as NonNullable<
+      PathValue<T, Path>
+    > extends number
+      ? Path
+      : never]?: number
+  }
+  readonly $push?: {
+    readonly [Path in UpdatePath<T> as ArrayValue<
+      PathValue<T, Path>
+    > extends never
+      ? never
+      : Path]?: ArrayValue<PathValue<T, Path>>
+  }
+  readonly $pull?: {
+    readonly [Path in UpdatePath<T> as ArrayValue<
+      PathValue<T, Path>
+    > extends never
+      ? never
+      : Path]?: ArrayValue<PathValue<T, Path>>
+  }
+} & { readonly [Key in keyof T]?: never }
+
 /**
  * Document update type for update operations.
  *
  * @typeParam T - The full document type (Document<YourShape>)
  *
  * @remarks
- * All fields are optional (deep partial) except for the ID which cannot be updated.
+ * Accepts a deep merge or atomic operators. IDs and timestamp metadata are immutable.
  * Used for `updateOne()` and `updateMany()` operations.
- * Supports nested updates using dot notation.
+ * Atomic operator paths support dotted fields; plain updates deep-merge objects.
  *
  * @example
  * ```typescript
@@ -124,9 +157,15 @@ export type DocumentInput<T extends Document> = Simplify<
  * await users.updateOne('user-id', update);
  * ```
  */
-export type DocumentUpdate<T extends Document> = Simplify<
-  PartialDeep<Except<T, "_id">>
->
+export type DocumentUpdate<T extends Document> =
+  | (Simplify<PartialDeep<Except<T, "_id" | "createdAt" | "updatedAt">>> & {
+      readonly $set?: never
+      readonly $unset?: never
+      readonly $inc?: never
+      readonly $push?: never
+      readonly $pull?: never
+    })
+  | AtomicUpdate<T>
 
 /**
  * Result type for bulk insert operations.

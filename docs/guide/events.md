@@ -48,13 +48,13 @@ await users.deleteOne('user-id')
 |------------|---------|---------|
 | `insert` | After `insertOne` succeeds | `{ document: T }` |
 | `insertMany` | After `insertMany` succeeds | `{ documents: readonly T[], insertedCount: number }` |
-| `update` | After a successful update or upsert | `{ filter: string \| QueryFilter<T>, update: Partial<T>, document: T, upserted: boolean }` |
-| `updateMany` | After `updateMany` succeeds | `{ filter: QueryFilter<T>, update: Partial<T>, matchedCount: number, modifiedCount: number, ids: readonly string[] }` |
+| `update` | After a successful update or upsert | `{ filter: string \| QueryFilter<T>, update: DocumentUpdate<T>, document: T, upserted: boolean }` |
+| `updateMany` | After `updateMany` succeeds | `{ filter: QueryFilter<T>, update: DocumentUpdate<T>, matchedCount: number, modifiedCount: number, ids: readonly string[] }` |
 | `replace` | After `replaceOne` succeeds | `{ filter: string \| QueryFilter<T>, document: T \| null }` |
 | `delete` | After `deleteOne` attempts deletion | `{ filter, deleted: true, _id: string, document?: T }` or `{ filter, deleted: false, _id: null }` |
 | `deleteMany` | After `deleteMany` succeeds | `{ filter: QueryFilter<T>, deletedCount: number, ids: readonly string[] }` |
 | `findOneAndDelete` | After `findOneAndDelete` succeeds | `{ filter: string \| QueryFilter<T>, document: T \| null }` |
-| `findOneAndUpdate` | After `findOneAndUpdate` succeeds | `{ filter: string \| QueryFilter<T>, update: Partial<T>, document: T \| null, upserted: boolean }` |
+| `findOneAndUpdate` | After `findOneAndUpdate` succeeds | `{ filter: string \| QueryFilter<T>, update: DocumentUpdate<T>, document: T \| null, upserted: boolean }` |
 | `findOneAndReplace` | After `findOneAndReplace` succeeds | `{ filter: string \| QueryFilter<T>, document: T \| null, upserted: boolean }` |
 | `drop` | After collection is dropped | `{ name: string }` |
 | `error` | When an event listener fails | `{ operation: string, error: Error, context?: unknown }` |

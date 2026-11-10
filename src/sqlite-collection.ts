@@ -2,6 +2,13 @@ import type { Database as SQLiteDatabase, SQLQueryBindings } from "bun:sqlite"
 import stringify from "fast-safe-stringify"
 import { throwIfAborted } from "./abort-utils.js"
 import {
+  type AtomicPlan,
+  applyAtomicUpdate,
+  compileAtomicBody,
+  parseAtomicUpdate,
+  seedEqualities,
+} from "./atomic-updates.js"
+import {
   CollectionEventEmitter,
   type CollectionEventMap,
   type CollectionEventName,
@@ -12,7 +19,7 @@ import type {
   InsertManyResult,
   UpdateResult,
 } from "./collection-types.js"
-import type { Document } from "./core-types.js"
+import type { Document, DocumentUpdate } from "./core-types.js"
 import {
   buildCursorPredicate,
   cursorOrder,
@@ -311,9 +318,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     filter: string | QueryFilter<T>
     data: Partial<T>
     now: number
+    atomic: AtomicPlan | null
   }): T {
-    const { kind, before, filter, data, now } = context
-    const equalities =
+    const { kind, before, filter, data, now, atomic } = context
+    const equalities = seedEqualities(
       typeof filter === "string"
         ? { _id: filter }
         : Object.fromEntries(
@@ -323,8 +331,11 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
                 (value === null || typeof value !== "object")
             )
           )
+    )
     let contents: Partial<T> = data
-    if (!before) {
+    if (atomic) {
+      contents = applyAtomicUpdate((before ?? equalities) as Partial<T>, atomic)
+    } else if (!before) {
       contents = { ...equalities, ...data } as Partial<T>
     } else if (kind === "update") {
       contents = mergeDocumentUpdate<T, T>(before, {
@@ -356,8 +367,23 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
     return after
   }
 
-  private writeMutation(after: T, exists: boolean, now: number): void {
+  private writeMutation(
+    after: T,
+    exists: boolean,
+    now: number,
+    atomic: AtomicPlan | null
+  ): void {
     if (exists) {
+      if (atomic) {
+        const params: SQLQueryBindings[] = []
+        const body = positional(compileAtomicBody(atomic, params), params)
+        this.sql
+          .prepare(
+            `UPDATE ${this.tableSql} SET body = ${body.sql}, updatedAt = ? WHERE _id = ?`
+          )
+          .run(...body.params, now, after._id)
+        return
+      }
       this.sql
         .prepare(
           `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ?`
@@ -380,6 +406,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
   ): MutationResult<T> {
     assertDatabaseOpen(this.db)
     throwIfAborted(options?.signal)
+    const atomic = kind === "update" ? parseAtomicUpdate(data) : null
     const result = this.db
       .transaction(() => {
         const before = this.readOneSync(filter, options?.sort)
@@ -401,9 +428,10 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           filter,
           data,
           now,
+          atomic,
         })
         throwIfAborted(options?.signal)
-        this.writeMutation(after, before !== null, now)
+        this.writeMutation(after, before !== null, now, atomic)
         return { before, after, upserted: !before }
       })
       .immediate()
@@ -412,6 +440,33 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       after: result.after ? this.visibleDocument(result.after) : null,
       upserted: result.upserted,
     }
+  }
+
+  private writeBatchUpdates(context: {
+    docs: readonly T[]
+    now: number
+    atomic: AtomicPlan | null
+    whereClause: string
+    params: SQLQueryBindings[]
+  }): string[] {
+    const { docs, now, atomic, whereClause, params } = context
+    if (atomic) {
+      const bodyParams: SQLQueryBindings[] = []
+      const body = positional(compileAtomicBody(atomic, bodyParams), bodyParams)
+      return this.sql
+        .prepare<{ _id: string }, SQLQueryBindings[]>(
+          `UPDATE ${this.tableSql} SET body = ${body.sql}, updatedAt = ? WHERE ${whereClause} RETURNING _id`
+        )
+        .all(...body.params, now, ...params)
+        .map((row) => row._id)
+    }
+    const statement = this.sql.prepare<{ _id: string }, SQLQueryBindings[]>(
+      `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ? RETURNING _id`
+    )
+    return docs.flatMap((doc) => {
+      const row = statement.get(this.serializeDocument(doc), now, doc._id)
+      return row ? [row._id] : []
+    })
   }
 
   /**
@@ -1296,7 +1351,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    */
   updateOne(
     filter: string | QueryFilter<T>,
-    update: Omit<Partial<T>, "_id" | "createdAt" | "updatedAt">,
+    update: DocumentUpdate<T>,
     options?: { upsert?: boolean; signal?: AbortSignal }
   ): Promise<T | null> {
     return this.runOperation(
@@ -1314,7 +1369,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           const document = result.after
           this.emitEvent("update", () => ({
             filter,
-            update: update as Partial<T>,
+            update,
             document,
             upserted: result.upserted,
           }))
@@ -1621,7 +1676,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    */
   updateMany(
     filter: QueryFilter<T>,
-    update: Omit<Partial<T>, "_id" | "createdAt" | "updatedAt">,
+    update: DocumentUpdate<T>,
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<UpdateResult> {
     return this.runOperation(
@@ -1631,6 +1686,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
             assertDatabaseOpen(this.db)
             throwIfAborted(options?.signal)
 
+            const atomic = parseAtomicUpdate(update)
             const { sql: whereClause, params } =
               this.translator.translate(filter)
 
@@ -1651,7 +1707,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
               this.emitEvent("updateMany", () => ({
                 ids: [],
                 filter,
-                update: update as Partial<T>,
+                update,
                 matchedCount: 0,
                 modifiedCount: 0,
               }))
@@ -1671,39 +1727,35 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
               throwIfAborted(options?.signal)
 
               const existingDoc = this.hydrate(row, true)
-              const mergedDoc = mergeDocumentUpdate<
-                T,
-                typeof update & { _id: string; updatedAt: number }
-              >(existingDoc, {
-                ...update,
-                _id: row._id,
-                updatedAt: now,
-              })
+              const mergedDoc = atomic
+                ? applyAtomicUpdate({ ...existingDoc, updatedAt: now }, atomic)
+                : mergeDocumentUpdate<
+                    T,
+                    typeof update & { _id: string; updatedAt: number }
+                  >(existingDoc, {
+                    ...update,
+                    _id: row._id,
+                    updatedAt: now,
+                  })
 
               this.validateMutationDocument(mergedDoc)
 
               updatedDocs.push(mergedDoc)
             }
 
-            // Use transaction for atomic update
-            const updateStmt = this.sql.prepare<
-              { _id: string },
-              SQLQueryBindings[]
-            >(
-              `UPDATE ${this.tableSql} SET body = jsonb(?), updatedAt = ? WHERE _id = ? RETURNING _id`
-            )
-            const ids = updatedDocs.flatMap((doc) => {
-              const _id = doc._id
-              const body = this.serializeDocument(doc)
-              const changed = updateStmt.get(body, now, _id)
-              return changed ? [changed._id] : []
+            const ids = this.writeBatchUpdates({
+              docs: updatedDocs,
+              now,
+              atomic,
+              whereClause,
+              params,
             })
 
             // Emit updateMany event after successful operation
             this.emitEvent("updateMany", () => ({
               ids,
               filter,
-              update: update as Partial<T>,
+              update,
               matchedCount,
               modifiedCount: ids.length,
             }))
@@ -1845,7 +1897,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    */
   findOneAndUpdate(
     filter: string | QueryFilter<T>,
-    update: Omit<Partial<T>, "_id" | "createdAt" | "updatedAt">,
+    update: DocumentUpdate<T>,
     options?: {
       sort?: SortSpec<T>
       returnDocument?: "before" | "after"
@@ -1869,7 +1921,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           const after = result.after
           this.emitEvent("update", () => ({
             filter,
-            update: update as Partial<T>,
+            update,
             upserted: false,
             document: after,
           }))
@@ -1878,7 +1930,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           options?.returnDocument === "before" ? result.before : result.after
         this.emitEvent("findOneAndUpdate", () => ({
           filter,
-          update: update as Partial<T>,
+          update,
           document,
           upserted: result.upserted,
         }))

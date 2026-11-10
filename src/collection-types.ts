@@ -2,7 +2,7 @@ import type {
   CollectionEventMap,
   CollectionEventName,
 } from "./collection-events.js"
-import type { Document } from "./core-types.js"
+import type { Document, DocumentUpdate } from "./core-types.js"
 import type {
   QueryOptions,
   QueryOptionsWithOmit,
@@ -572,7 +572,7 @@ export type Collection<T extends Document> = {
    */
   updateOne(
     filter: string | QueryFilter<T>,
-    update: Omit<Partial<T>, "_id" | "createdAt" | "updatedAt">,
+    update: DocumentUpdate<T>,
     options?: {
       upsert?: boolean
       signal?: AbortSignal
@@ -789,7 +789,7 @@ export type Collection<T extends Document> = {
    */
   findOneAndUpdate(
     filter: string | QueryFilter<T>,
-    update: Omit<Partial<T>, "_id" | "createdAt" | "updatedAt">,
+    update: DocumentUpdate<T>,
     options?: {
       sort?: SortSpec<T>
       returnDocument?: "before" | "after"
@@ -937,7 +937,7 @@ export type Collection<T extends Document> = {
    */
   updateMany(
     filter: QueryFilter<T>,
-    update: Omit<Partial<T>, "_id" | "createdAt" | "updatedAt">,
+    update: DocumentUpdate<T>,
     options?: { signal?: AbortSignal; retry?: RetryOptions | false }
   ): Promise<UpdateResult>
 
