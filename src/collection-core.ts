@@ -43,6 +43,7 @@ import {
   sqliteOperation,
   wrapSqliteError,
 } from "./sqlite-boundary.js"
+import { registerCasefold } from "./sqlite-casefold.js"
 import { SQLiteQueryTranslator } from "./sqlite-query-translator.js"
 import { registerRegex } from "./sqlite-regex.js"
 import { transactionManager } from "./transaction-manager.js"
@@ -374,6 +375,7 @@ export class CollectionCore<T extends Document> {
   ) {
     assertDatabaseOpen(db)
     registerRegex(db)
+    registerCasefold(db)
     this.db = db
     this.sql = new SQLiteBoundary(db, name, config.statementCacheSize ?? 64)
     this.name = name

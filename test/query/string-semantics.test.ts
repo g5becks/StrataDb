@@ -30,7 +30,7 @@ for (const indexed of [false, true]) {
       { operator: "$like", value: "\\_literal", ids: ["underscore"] },
       { operator: "$ilike", value: "ALICE", ids: ["lower", "mixed", "upper"] },
       { operator: "$ilike", value: "a%", ids: ["lower", "mixed", "upper"] },
-      { operator: "$ilike", value: "ä%", ids: ["unicodeLower"] },
+      { operator: "$ilike", value: "ä%", ids: ["unicode", "unicodeLower"] },
       { operator: "$contains", value: "%", ids: ["percent"] },
       { operator: "$contains", value: "_", ids: ["underscore"] },
       { operator: "$contains", value: "\\", ids: ["slash"] },

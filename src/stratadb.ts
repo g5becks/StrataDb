@@ -27,6 +27,7 @@ import { configureSchemaDrift } from "./schema-evolution.js"
 import { schemaSignature } from "./schema-signature.js"
 import type { SchemaDefinition } from "./schema-types.js"
 import { sqliteCall } from "./sqlite-boundary.js"
+import { registerCasefold } from "./sqlite-casefold.js"
 import { SQLiteCollection } from "./sqlite-collection.js"
 import { registerRegex } from "./sqlite-regex.js"
 import {
@@ -135,6 +136,7 @@ export class Strata implements StrataDBInterface {
     this.retryOptionsDefault = options.retry
     configureSchemaDrift(this.sqliteDb, options.onSchemaDrift)
     registerRegex(this.sqliteDb)
+    registerCasefold(this.sqliteDb)
     this.releaseRawCapture = captureRawChanges(
       this.sqliteDb,
       options.onRawChange

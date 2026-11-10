@@ -122,7 +122,7 @@ export type ComparisonOperator<T> = T extends number | Date
  * For complex pattern matching that would typically use regular expressions,
  * consider using these alternatives:
  * - `$like`: For SQL-style pattern matching with % wildcards (case-sensitive)
- * - `$ilike`: For SQL-style patterns with ASCII case folding
+ * - `$ilike`: For SQL-style patterns with Unicode NFC normalization and locale-independent lowercase
  * - `$contains`: For case-sensitive literal substring containment
  * - `$startsWith`: For case-sensitive literal prefix matching
  * - `$endsWith`: For case-sensitive literal suffix matching
@@ -171,7 +171,7 @@ export type StringOperator = {
    *
    * @remarks
    * The `$ilike` operator performs case-insensitive pattern matching using
-   * ASCII case folding. Use the same `%` and `_` wildcards as `$like`:
+   * Unicode NFC normalization and locale-independent lowercase. Use the same `%` and `_` wildcards as `$like`:
    * - `%` matches zero or more characters
    * - `_` matches exactly one character
    *

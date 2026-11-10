@@ -1,9 +1,11 @@
 ---
 id: TASK-272
 title: 'Semantics: Unicode-aware case-insensitive matching for $ilike and text search'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-11-10T16:03:00Z'
+updated_date: '2026-11-10T16:10:00Z'
 labels:
   - semantics
   - breaking
@@ -36,3 +38,11 @@ SQLite's `lower()` and `LIKE` only fold ASCII. Measured on main (2026-11-10): wi
 - [ ] #4 Docs, JSDoc and CHANGELOG (Breaking changes) describe the new folding; benchmark before/after recorded in notes
 - [ ] #5 Quality gate and scripts/ci-local.sh pass
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Add Unicode regressions for ilike/search, literal escaping, caches, UDF registration and readonly; benchmark old behavior.
+2. Register deterministic NFC/toLowerCase UDF once per connection and use it for both query paths; update semantics, JSDoc and migration notes.
+3. Record before/after performance and run all required checks plus ci-local before closing.
+<!-- SECTION:PLAN:END -->

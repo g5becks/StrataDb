@@ -189,7 +189,7 @@ export class QueryOperators<
       case "$like":
         return `${fieldSql} GLOB ${bind(likeToGlob(value as string), params)}`
       case "$ilike":
-        return `lower(${fieldSql}) LIKE lower(${bind(this.toBindValue(value), params)}) ESCAPE '\\'`
+        return `strata_casefold(${fieldSql}) LIKE strata_casefold(${bind(this.toBindValue(value), params)}) ESCAPE '\\'`
       case "$contains":
       case "$startsWith":
       case "$endsWith":

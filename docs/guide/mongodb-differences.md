@@ -2,6 +2,12 @@
 
 StrataDB provides a MongoDB-style API for developers familiar with MongoDB who want an embedded SQLite database. This guide defines its scalar semantics, shared operations, differences and migration considerations.
 
+## Unicode text matching
+
+`$ilike` and text search with `caseSensitive: false` normalize both strings to NFC, then call JavaScript `toLowerCase()` without a locale. Accented Latin, Greek and Cyrillic case pairs match; canonically equivalent text matches. ASCII matching and LIKE escaping (`%`, `_`, backslash) are preserved. Case-sensitive search and `$like` do not normalize or fold.
+
+This is lowercase matching, not full Unicode case folding or accent removal: `ß` matches `ẞ` but not `ss`; `İ` lowercases to `i` plus a combining dot and does not equal plain `i`; dotless `ı` remains distinct. Context-dependent lowercase (such as Greek final sigma) follows JavaScript. Non-string values retain SQLite LIKE coercion. The deterministic connection-local function runs per candidate row and can cost more than SQLite's ASCII-only `lower()`; it does not add indexable Unicode matching.
+
 ## Document values
 
 Writes accept finite numbers, strings, booleans, null, arrays and plain objects (including null-prototype objects). Non-finite numbers, BigInt, Map, Set, functions, symbols, undefined array elements (including holes), circular references and class instances without `toJSON()` reject with `ValidationError` naming the path and type. Shared references without cycles are allowed. A depth guard rejects nesting beyond 256 levels. Object properties set to `undefined` are omitted.
