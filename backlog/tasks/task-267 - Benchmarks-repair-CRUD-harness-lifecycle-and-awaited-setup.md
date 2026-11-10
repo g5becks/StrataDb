@@ -1,11 +1,11 @@
 ---
 id: TASK-267
 title: 'Benchmarks: repair CRUD harness lifecycle and awaited setup'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-10T02:13:00Z'
-updated_date: '2026-11-10T13:38:00Z'
+updated_date: '2026-11-10T13:40:00Z'
 labels:
   - performance
 milestone: m-2
@@ -27,7 +27,7 @@ Source review during P1/TASK-252 found CRUD benchmark groups that close their sh
 <!-- AC:BEGIN -->
 - [x] #1 All existing CRUD benchmark cases are retained and complete against live databases without closed-database or unhandled-promise failures
 - [x] #2 Shared setup and insert results are awaited where needed, and shared databases are closed only after benchmark execution
-- [ ] #3 The runner fails on benchmark errors; bench:all, the host quality gate and required local CI checks pass, with local results recorded
+- [x] #3 The runner fails on benchmark errors; bench:all, the host quality gate and required local CI checks pass, with local results recorded
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -48,4 +48,6 @@ Source review during P1/TASK-252 found CRUD benchmark groups that close their sh
 - Verification: bench:all PASS, full host gate PASS with1055 tests/no failures/skips, source TS5.9.3/6.0.3/7.0.2, lint, build, type tests and packed consumer TS6/7+CRUD. Committed local CI pending.
 - Decisions: use mitata native async group support and throw propagation; no case removal, timing shortcuts or temporary cache changes.
 - Follow-ups: TASK-257 will publish these formats as workflow artifacts when Actions is available.
+
+Verified with scripts/ci-local.sh (f0e73809e6596d2755707fa19427a7d6511777ef, PASS); GitHub Actions unavailable (billing lock). macOS/Linux Bun pinned/latest1.4.4, source/type suites TS5.9.3/6.0.3/7.0.2 and advisory7.1-beta all PASS.
 <!-- SECTION:NOTES:END -->
