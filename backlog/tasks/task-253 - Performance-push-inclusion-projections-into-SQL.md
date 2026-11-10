@@ -1,11 +1,11 @@
 ---
 id: TASK-253
 title: 'Performance: push inclusion projections into SQL'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-10T02:34:00Z'
+updated_date: '2026-11-10T02:36:00Z'
 labels:
   - performance
 milestone: m-2
@@ -32,7 +32,7 @@ For inclusion projections, build `json_object('a', jsonb_extract(body, ?), ...)`
 - [x] #1 Inclusion projections are computed in SQL (test inspects generated SQL)
 - [x] #2 A wide-document benchmark shows a measurable improvement (numbers recorded in notes)
 - [x] #3 Projection behavior is unchanged (existing projection tests pass)
-- [ ] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #5 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
 
@@ -54,4 +54,8 @@ For inclusion projections, build `json_object('a', jsonb_extract(body, ?), ...)`
 - Verification: typecheck, lint, full bun test, build, type tests, packed consumer TS6/7 and CRUD, source TS5.9.3/6.0.3 PASS; local CI pending committed implementation.
 - Decisions: preserve literal top-level projection semantics; FieldResolver owns literal JSON path encoding.
 - Follow-ups: none.
+
+- Verified with scripts/ci-local.sh (c4568723dc5fdd2ae8d02ee3001b1cece519adda, PASS); GitHub Actions unavailable (billing lock). macOS/Linux Bun pinned/latest 1.4.4, TS5.9.3/6.0.3/7.0.2 and advisory7.1-beta all PASS.
+- Clean committed benchmark confirmation: median8.4598825 us/read, 15.4% lower latency; after.json records SHA and dirty:false.
+- Full host suite: 1036 pass, 0 fail, 0 skip.
 <!-- SECTION:NOTES:END -->
