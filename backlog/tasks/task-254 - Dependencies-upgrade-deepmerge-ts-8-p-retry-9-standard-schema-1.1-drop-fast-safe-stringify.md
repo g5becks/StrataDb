@@ -3,11 +3,11 @@ id: TASK-254
 title: >-
   Dependencies: upgrade deepmerge-ts 8, p-retry 9, standard-schema 1.1; drop
   fast-safe-stringify
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-10T02:39:00Z'
+updated_date: '2026-11-10T02:40:00Z'
 labels:
   - deps
 milestone: m-2
@@ -37,7 +37,7 @@ Runtime deps are behind: deepmerge-ts 7 → 8 (agentx already forces ^8 via over
 - [x] #1 bun outdated shows no outdated runtime dependency
 - [x] #2 fast-safe-stringify is removed; circular documents reject with ValidationError (test)
 - [x] #3 Consumer smoke test passes
-- [ ] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
+- [x] #4 bun test, bun run typecheck, bun run lint and bun run build all pass locally and in CI
 - [x] #5 CHANGELOG.md has an entry under ## [Unreleased] describing the change
 <!-- AC:END -->
 
@@ -59,4 +59,6 @@ Runtime deps are behind: deepmerge-ts 7 → 8 (agentx already forces ^8 via over
 - Decisions: retain deepmerge-ts for plain merge updates, including array replacement/undefined behavior; no unsafe entrypoint. RetryContext reexports current upstream type without adapter.
 - Sources reviewed: https://github.com/sindresorhus/p-retry/releases/tag/v9.0.0 and v8.0.0; https://github.com/RebeccaStevens/deepmerge-ts/releases/tag/v8.0.0.
 - Follow-ups: none.
+
+Verified with scripts/ci-local.sh (494fc428629334151a53756ce22d4b33962e0702, PASS); GitHub Actions unavailable (billing lock). macOS/Linux pinned/latest Bun1.4.4, TS5.9.3/6.0.3/7.0.2 and advisory7.1-beta all PASS.
 <!-- SECTION:NOTES:END -->
