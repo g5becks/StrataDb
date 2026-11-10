@@ -1,5 +1,4 @@
 import type { Database as SQLiteDatabase, SQLQueryBindings } from "bun:sqlite"
-import stringify from "fast-safe-stringify"
 import { throwIfAborted } from "./abort-utils.js"
 import {
   type AtomicPlan,
@@ -51,6 +50,7 @@ import {
   resolveField,
 } from "./field-resolver.js"
 import { generateId } from "./id-generator.js"
+import { serializeJSON } from "./json-serialization.js"
 import { inclusionSQL } from "./projection-sql.js"
 import type {
   CursorSpec,
@@ -310,7 +310,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       updatedAt: _updatedAt,
       ...body
     } = doc
-    return stringify(body)
+    return serializeJSON(body)
   }
 
   private readOneSync(
@@ -1621,6 +1621,9 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
             throwIfAborted(options?.signal)
 
             const ordered = options?.ordered ?? true
+            // Reject serialization errors before the per-document catch path
+            // can swallow them or earlier documents can be written.
+            serializeJSON(docs)
             const now = Date.now()
             const insertedDocs: T[] = []
             const insertedIds: string[] = []

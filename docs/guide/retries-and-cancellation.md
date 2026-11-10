@@ -1,5 +1,10 @@
 # Retries & Cancellation
 
+Retry callbacks use p-retry 9 semantics: `shouldConsumeRetry` runs before
+`onFailedAttempt`, followed by `shouldRetry`. Context includes `retryDelay` in
+milliseconds. When the signal aborts during an attempt or callback, its reason
+wins and remaining callbacks are suppressed. Retrying remains opt-in.
+
 StrataDB v0.4.0 introduces automatic retry logic for transient failures and AbortSignal support for canceling long-running operations.
 
 ## Operation Cancellation

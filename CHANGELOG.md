@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- Circular/non-serializable documents now reject with `ValidationError` instead of storing circular-reference markers. Batch inserts reject serialization failures before writing. Runtime dependencies are deepmerge-ts 8, p-retry 9 and Standard Schema 1.1; fast-safe-stringify was removed. Retry callback order is now `shouldConsumeRetry` → `onFailedAttempt` → `shouldRetry`, `RetryContext` includes `retryDelay`, and an aborted signal wins over attempt errors and suppresses remaining callbacks. Review custom retry callbacks and manually constructed contexts.
+
 - Differential testing corrected query edge cases: empty `$or` matches nothing; `$in` lists containing null include null/missing scalar fields; `$all` can require actual null array elements; `$index` requires an existing array element and distinguishes present null from a missing index. Review bulk-write filters using these forms.
 
 - Update APIs and event payloads use `DocumentUpdate<T>`, a union of plain deep merges and atomic operator forms, with immutable ID/timestamp metadata. Consumers inspecting `event.update` should narrow the operator form before reading plain fields. Mixed forms, overlapping paths and malformed operators reject with `QueryError`.

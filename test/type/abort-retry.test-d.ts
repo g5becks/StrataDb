@@ -64,6 +64,7 @@ expectTypeOf({
   attemptNumber: 1,
   retriesLeft: 2,
   retriesConsumed: 0,
+  retryDelay: 1000,
   error: new Error("test"),
 } satisfies RetryContext).toMatchTypeOf<RetryContext>()
 

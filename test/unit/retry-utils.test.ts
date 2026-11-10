@@ -29,6 +29,70 @@ function sqliteError(errno: number): SQLiteError {
   throw new Error("Expected SQLiteError")
 }
 
+test("[TASK-254] p-retry 9 callback order and retryDelay are exposed", async () => {
+  const calls: string[] = []
+  let attempts = 0
+  expect(
+    await withRetry(
+      () => {
+        attempts += 1
+        return attempts === 1
+          ? Promise.reject(new Error("transient"))
+          : Promise.resolve("ok")
+      },
+      {
+        retries: 1,
+        minTimeout: 1,
+        maxTimeout: 1,
+        randomize: false,
+        shouldConsumeRetry: () => {
+          calls.push("consume")
+          return true
+        },
+        onFailedAttempt: (context) => {
+          calls.push("failed")
+          expect(context.retryDelay).toBe(1)
+        },
+        shouldRetry: () => {
+          calls.push("retry")
+          return true
+        },
+      }
+    )
+  ).toBe("ok")
+  expect(calls).toEqual(["consume", "failed", "retry"])
+  expect(attempts).toBe(2)
+})
+
+test("[TASK-254] abort during an attempt wins and suppresses retry callbacks", async () => {
+  const controller = new AbortController()
+  const reason = new Error("cancelled")
+  let callbacks = 0
+  const promise = withRetry(
+    () => {
+      controller.abort(reason)
+      return Promise.reject(new Error("attempt failure"))
+    },
+    {
+      retries: 2,
+      signal: controller.signal,
+      shouldConsumeRetry: () => {
+        callbacks += 1
+        return true
+      },
+      onFailedAttempt: () => {
+        callbacks += 1
+      },
+      shouldRetry: () => {
+        callbacks += 1
+        return true
+      },
+    }
+  )
+  await expect(promise).rejects.toBe(reason)
+  expect(callbacks).toBe(0)
+})
+
 describe("withRetry", () => {
   test("executes operation once when retries is 0", async () => {
     let callCount = 0

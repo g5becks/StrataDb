@@ -54,6 +54,8 @@ export type RetryOptions = {
   /**
    * Callback invoked when a retry attempt fails.
    * Receives context with error details and retry state.
+   * Runs after shouldConsumeRetry and before shouldRetry. Context includes
+   * retryDelay in milliseconds. Aborted signals suppress remaining callbacks.
    *
    * @param context - Retry context containing error and attempt information
    */
