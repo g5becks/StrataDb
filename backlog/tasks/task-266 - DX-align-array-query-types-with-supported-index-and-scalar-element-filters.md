@@ -1,11 +1,11 @@
 ---
 id: TASK-266
 title: 'DX: align array query types with supported index and scalar element filters'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-10T01:40:00Z'
-updated_date: '2026-11-10T13:30:00Z'
+updated_date: '2026-11-10T13:32:00Z'
 labels:
   - api
 milestone: m-2
@@ -28,7 +28,7 @@ While implementing Q4 differential coverage (TASK-251), source inspection found 
 <!-- AC:BEGIN -->
 - [x] #1 Type tests accept $index objects with typed scalar/operator conditions and reject the obsolete numeric shorthand and malformed shapes
 - [x] #2 Type tests accept scalar numeric/string and nested object $elemMatch filters with appropriate operand types
-- [ ] #3 Runtime behavior and validation remain unchanged; full quality gate and local CI pass; documentation and CHANGELOG identify the corrected types
+- [x] #3 Runtime behavior and validation remain unchanged; full quality gate and local CI pass; documentation and CHANGELOG identify the corrected types
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -48,4 +48,6 @@ While implementing Q4 differential coverage (TASK-251), source inspection found 
 - Verification: full host gate PASS with1055 tests/no failures/skips. Source and type suites PASS on TS5.9.3/6.0.3/7.0.2; lint, build, packed consumer TS6/7+CRUD PASS. docs:build PASS with zero TypeDoc validation warnings; VitePress chunk advisory retained. Query type source584 lines, preserving the refactor size limit. Committed local CI pending.
 - Decisions: index literal conditions are scalar; nested element operator forms retain their element types. No runtime acceptance was loosened.
 - Follow-ups: none.
+
+Verified with scripts/ci-local.sh (c4164c66e89286fd5fd03c1688514e73f0c5fd39, PASS); GitHub Actions unavailable (billing lock). macOS/Linux Bun pinned/latest1.4.4, source/type suites TS5.9.3/6.0.3/7.0.2 and advisory7.1-beta all PASS.
 <!-- SECTION:NOTES:END -->
