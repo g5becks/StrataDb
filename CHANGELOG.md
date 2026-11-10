@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-10
+
 ### Breaking changes
 
 - `$ilike` and case-insensitive text search now normalize strings to NFC and apply locale-independent Unicode lowercase, broadening matches for accents, Greek and Cyrillic (including canonically equivalent strings). ASCII and literal escaping stay the same. Review affected filters before bulk writes; use `$like` or `caseSensitive: true` when exact case is required. This is not full case folding: ß does not equal ss, and Turkish dotted/dotless i remain distinct as defined by JavaScript lowercase.
