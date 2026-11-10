@@ -6,7 +6,7 @@
 type SchemaFieldName<T> = Extract<keyof T | DocumentPath<T>, string>;
 ```
 
-Defined in: [src/path-types.ts:49](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/path-types.ts#L49)
+Defined in: [src/path-types.ts:49](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/path-types.ts#L49)
 
 String field names accepted by checked schema declarations.
 

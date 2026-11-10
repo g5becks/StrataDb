@@ -6,7 +6,7 @@
 type AtomicUpdate<T> = object & { readonly [Key in keyof T]?: never };
 ```
 
-Defined in: [src/core-types.ts:103](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/core-types.ts#L103)
+Defined in: [src/core-types.ts:107](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/core-types.ts#L107)
 
 Atomic operators over mutable document paths. Operator and merge forms cannot mix.
 

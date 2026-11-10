@@ -2,7 +2,7 @@
 
 # Class: ConnectionError
 
-Defined in: [src/errors.ts:306](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/errors.ts#L306)
+Defined in: [src/errors.ts:307](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L307)
 
 Error thrown when database connection fails.
 
@@ -34,7 +34,7 @@ try {
 new ConnectionError(message, sqliteCode?): ConnectionError;
 ```
 
-Defined in: [src/errors.ts:313](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/errors.ts#L313)
+Defined in: [src/errors.ts:314](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L314)
 
 #### Parameters
 
@@ -62,7 +62,7 @@ Defined in: [src/errors.ts:313](https://github.com/g5becks/StrataDb/blob/a0aa3cd
 readonly category: "database";
 ```
 
-Defined in: [src/errors.ts:307](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/errors.ts#L307)
+Defined in: [src/errors.ts:308](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L308)
 
 Error category for grouping related error types
 
@@ -78,7 +78,7 @@ Error category for grouping related error types
 readonly cause?: unknown;
 ```
 
-Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/errors.ts#L45)
+Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L46)
 
 The cause of the error.
 
@@ -94,7 +94,7 @@ The cause of the error.
 readonly code: "CONNECTION_ERROR" = "CONNECTION_ERROR";
 ```
 
-Defined in: [src/errors.ts:308](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/errors.ts#L308)
+Defined in: [src/errors.ts:309](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L309)
 
 Unique error code for programmatic identification
 
@@ -110,7 +110,7 @@ Unique error code for programmatic identification
 readonly context?: SQLiteErrorContext;
 ```
 
-Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/errors.ts#L44)
+Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L45)
 
 #### Inherited from
 
@@ -124,7 +124,7 @@ Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/a0aa3cd0
 readonly errno?: number;
 ```
 
-Defined in: [src/errors.ts:42](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/errors.ts#L42)
+Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L43)
 
 #### Inherited from
 
@@ -166,7 +166,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 readonly sqliteCode?: number;
 ```
 
-Defined in: [src/errors.ts:311](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/errors.ts#L311)
+Defined in: [src/errors.ts:312](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L312)
 
 SQLite error code (if available)
 
@@ -178,7 +178,7 @@ SQLite error code (if available)
 readonly sqliteCodeName?: string;
 ```
 
-Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/errors.ts#L43)
+Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/errors.ts#L44)
 
 #### Inherited from
 

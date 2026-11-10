@@ -6,7 +6,7 @@
 type FindOneAndDeleteEvent<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:227](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L227)
+Defined in: [src/collection-events.ts:227](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-events.ts#L227)
 
 Event payload for findOneAndDelete operations.
 
@@ -42,7 +42,7 @@ The document type extending Document
 readonly document: T | null;
 ```
 
-Defined in: [src/collection-events.ts:231](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L231)
+Defined in: [src/collection-events.ts:231](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-events.ts#L231)
 
 The deleted document, or null if not found
 
@@ -54,6 +54,6 @@ The deleted document, or null if not found
 readonly filter: string | QueryFilter<T>;
 ```
 
-Defined in: [src/collection-events.ts:229](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L229)
+Defined in: [src/collection-events.ts:229](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-events.ts#L229)
 
 The filter used to find the document

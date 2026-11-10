@@ -53,12 +53,19 @@ const adults = await users.find({ age: { $gte: 18 } });
 ## Type Aliases
 
 - [ArrayOperator](type-aliases/ArrayOperator.md)
+- [ArrayValue](type-aliases/ArrayValue.md)
 - [AtomicUpdate](type-aliases/AtomicUpdate.md)
 - [BulkWriteResult](type-aliases/BulkWriteResult.md)
 - [Collection](type-aliases/Collection.md)
+- [CollectionAdminContract](type-aliases/CollectionAdminContract.md)
+- [CollectionBatchContract](type-aliases/CollectionBatchContract.md)
 - [CollectionBuilder](type-aliases/CollectionBuilder.md)
 - [CollectionEventMap](type-aliases/CollectionEventMap.md)
 - [CollectionEventName](type-aliases/CollectionEventName.md)
+- [CollectionEventsContract](type-aliases/CollectionEventsContract.md)
+- [CollectionOptions](type-aliases/CollectionOptions.md)
+- [CollectionReadContract](type-aliases/CollectionReadContract.md)
+- [CollectionWriteContract](type-aliases/CollectionWriteContract.md)
 - [ComparisonOperator](type-aliases/ComparisonOperator.md)
 - [CompoundIndex](type-aliases/CompoundIndex.md)
 - [CursorSpec](type-aliases/CursorSpec.md)
@@ -101,6 +108,7 @@ const adults = await users.find({ age: { $gte: 18 } });
 - [RawChangeEvent](type-aliases/RawChangeEvent.md)
 - [RawChangeObserver](type-aliases/RawChangeObserver.md)
 - [ReplaceEvent](type-aliases/ReplaceEvent.md)
+- [RetryableOptions](type-aliases/RetryableOptions.md)
 - [RetryContext](type-aliases/RetryContext.md)
 - [RetryOptions](type-aliases/RetryOptions.md)
 - [SchemaBuilder](type-aliases/SchemaBuilder.md)
@@ -111,6 +119,7 @@ const adults = await users.find({ age: { $gte: 18 } });
 - [SchemaFieldName](type-aliases/SchemaFieldName.md)
 - [SelectSpec](type-aliases/SelectSpec.md)
 - [SortSpec](type-aliases/SortSpec.md)
+- [SQLiteErrorContext](type-aliases/SQLiteErrorContext.md)
 - [SQLiteType](type-aliases/SQLiteType.md)
 - [StrataDB](type-aliases/StrataDB.md)
 - [StringOperator](type-aliases/StringOperator.md)
@@ -120,6 +129,7 @@ const adults = await users.find({ age: { $gte: 18 } });
 - [TypeScriptToSQLite](type-aliases/TypeScriptToSQLite.md)
 - [UpdateEvent](type-aliases/UpdateEvent.md)
 - [UpdateManyEvent](type-aliases/UpdateManyEvent.md)
+- [UpdatePath](type-aliases/UpdatePath.md)
 - [UpdateResult](type-aliases/UpdateResult.md)
 
 ## Functions

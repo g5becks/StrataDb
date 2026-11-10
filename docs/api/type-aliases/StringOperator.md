@@ -6,7 +6,7 @@
 type StringOperator = object;
 ```
 
-Defined in: [src/query-types.ts:163](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-types.ts#L163)
+Defined in: [src/query-types.ts:163](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-types.ts#L163)
 
 String-specific query operators for pattern matching.
 
@@ -65,7 +65,7 @@ const complexStringQuery: StringOperator = {
 readonly $contains?: string;
 ```
 
-Defined in: [src/query-types.ts:229](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-types.ts#L229)
+Defined in: [src/query-types.ts:229](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-types.ts#L229)
 
 Substring containment check (case-sensitive).
 
@@ -107,7 +107,7 @@ const filtered = await collection.find({
 readonly $endsWith?: string;
 ```
 
-Defined in: [src/query-types.ts:235](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-types.ts#L235)
+Defined in: [src/query-types.ts:235](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-types.ts#L235)
 
 String ends with the specified suffix
 
@@ -119,7 +119,7 @@ String ends with the specified suffix
 readonly $ilike?: string;
 ```
 
-Defined in: [src/query-types.ts:196](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-types.ts#L196)
+Defined in: [src/query-types.ts:196](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-types.ts#L196)
 
 SQL-style LIKE pattern matching (case-insensitive).
 
@@ -157,7 +157,7 @@ const gmailUsers = await collection.find({
 readonly $like?: string;
 ```
 
-Defined in: [src/query-types.ts:167](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-types.ts#L167)
+Defined in: [src/query-types.ts:167](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-types.ts#L167)
 
 SQL-style LIKE pattern matching (case-sensitive)
 
@@ -169,7 +169,7 @@ SQL-style LIKE pattern matching (case-sensitive)
 readonly $regex?: string;
 ```
 
-Defined in: [src/query-types.ts:165](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-types.ts#L165)
+Defined in: [src/query-types.ts:165](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-types.ts#L165)
 
 JavaScript Unicode regex string, case-sensitive and non-indexable.
 
@@ -181,6 +181,6 @@ JavaScript Unicode regex string, case-sensitive and non-indexable.
 readonly $startsWith?: string;
 ```
 
-Defined in: [src/query-types.ts:232](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-types.ts#L232)
+Defined in: [src/query-types.ts:232](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-types.ts#L232)
 
 String starts with the specified prefix

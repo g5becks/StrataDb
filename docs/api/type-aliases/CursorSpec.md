@@ -6,7 +6,7 @@
 type CursorSpec = object;
 ```
 
-Defined in: [src/cursor-types.ts:75](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/cursor-types.ts#L75)
+Defined in: [src/cursor-types.ts:75](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/cursor-types.ts#L75)
 
 Cursor-based pagination specification for efficient large dataset navigation.
 
@@ -95,7 +95,7 @@ const backToFirstPage = await users.find(
 readonly after?: string;
 ```
 
-Defined in: [src/cursor-types.ts:80](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/cursor-types.ts#L80)
+Defined in: [src/cursor-types.ts:80](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/cursor-types.ts#L80)
 
 Get items after this cursor (forward pagination).
 Value is the `_id` of the boundary document.
@@ -108,7 +108,7 @@ Value is the `_id` of the boundary document.
 readonly before?: string;
 ```
 
-Defined in: [src/cursor-types.ts:86](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/cursor-types.ts#L86)
+Defined in: [src/cursor-types.ts:86](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/cursor-types.ts#L86)
 
 Get items before this cursor (backward pagination).
 Value is the `_id` of the boundary document.

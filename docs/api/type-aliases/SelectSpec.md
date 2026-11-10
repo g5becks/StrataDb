@@ -6,7 +6,7 @@
 type SelectSpec<T> = readonly (keyof T)[];
 ```
 
-Defined in: [src/query-projection-types.ts:176](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-projection-types.ts#L176)
+Defined in: [src/query-projection-types.ts:176](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-projection-types.ts#L176)
 
 Array-based field selection for query results (inclusion).
 

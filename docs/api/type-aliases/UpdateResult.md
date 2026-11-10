@@ -6,7 +6,7 @@
 type UpdateResult = object;
 ```
 
-Defined in: [src/collection-types.ts:71](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-types.ts#L71)
+Defined in: [src/collection-types.ts:71](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-types.ts#L71)
 
 Result of an update operation.
 
@@ -34,7 +34,7 @@ console.log(`Matched: ${result.matchedCount}, Modified: ${result.modifiedCount}`
 readonly matchedCount: number;
 ```
 
-Defined in: [src/collection-types.ts:73](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-types.ts#L73)
+Defined in: [src/collection-types.ts:73](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-types.ts#L73)
 
 Number of documents that matched the filter
 
@@ -46,6 +46,6 @@ Number of documents that matched the filter
 readonly modifiedCount: number;
 ```
 
-Defined in: [src/collection-types.ts:76](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-types.ts#L76)
+Defined in: [src/collection-types.ts:76](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-types.ts#L76)
 
 Number of documents that were actually modified

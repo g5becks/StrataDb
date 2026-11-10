@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Named public option/context and contract types are available from the package root: `CollectionOptions`, `RetryableOptions`, `SQLiteErrorContext`, collection contract groups, `UpdatePath` and `ArrayValue`. Generated API pages document and link these signatures without TypeDoc validation warnings.
+
 - `$regex` accepts a JavaScript Unicode regex string through a deterministic SQLite UDF registered once per connection. Invalid patterns reject with `QueryError`, including cache hits and empty tables. Matching is case-sensitive, applies to strings only and cannot use an index.
 
 - Opt-in `onRawChange` observes SQLite row metadata for this connection, including raw SQL. It owns the connection's hooks exclusively, isolates observer exceptions and reports changes before commit (including later rollbacks). It does not replace commit-buffered collection events; see the events guide for hook limits.

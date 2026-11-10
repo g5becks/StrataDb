@@ -74,6 +74,10 @@
         "link": "/api/type-aliases/ArrayOperator.md"
       },
       {
+        "text": "ArrayValue",
+        "link": "/api/type-aliases/ArrayValue.md"
+      },
+      {
         "text": "AtomicUpdate",
         "link": "/api/type-aliases/AtomicUpdate.md"
       },
@@ -86,6 +90,14 @@
         "link": "/api/type-aliases/Collection.md"
       },
       {
+        "text": "CollectionAdminContract",
+        "link": "/api/type-aliases/CollectionAdminContract.md"
+      },
+      {
+        "text": "CollectionBatchContract",
+        "link": "/api/type-aliases/CollectionBatchContract.md"
+      },
+      {
         "text": "CollectionBuilder",
         "link": "/api/type-aliases/CollectionBuilder.md"
       },
@@ -96,6 +108,22 @@
       {
         "text": "CollectionEventName",
         "link": "/api/type-aliases/CollectionEventName.md"
+      },
+      {
+        "text": "CollectionEventsContract",
+        "link": "/api/type-aliases/CollectionEventsContract.md"
+      },
+      {
+        "text": "CollectionOptions",
+        "link": "/api/type-aliases/CollectionOptions.md"
+      },
+      {
+        "text": "CollectionReadContract",
+        "link": "/api/type-aliases/CollectionReadContract.md"
+      },
+      {
+        "text": "CollectionWriteContract",
+        "link": "/api/type-aliases/CollectionWriteContract.md"
       },
       {
         "text": "ComparisonOperator",
@@ -266,6 +294,10 @@
         "link": "/api/type-aliases/ReplaceEvent.md"
       },
       {
+        "text": "RetryableOptions",
+        "link": "/api/type-aliases/RetryableOptions.md"
+      },
+      {
         "text": "RetryContext",
         "link": "/api/type-aliases/RetryContext.md"
       },
@@ -306,6 +338,10 @@
         "link": "/api/type-aliases/SortSpec.md"
       },
       {
+        "text": "SQLiteErrorContext",
+        "link": "/api/type-aliases/SQLiteErrorContext.md"
+      },
+      {
         "text": "SQLiteType",
         "link": "/api/type-aliases/SQLiteType.md"
       },
@@ -340,6 +376,10 @@
       {
         "text": "UpdateManyEvent",
         "link": "/api/type-aliases/UpdateManyEvent.md"
+      },
+      {
+        "text": "UpdatePath",
+        "link": "/api/type-aliases/UpdatePath.md"
       },
       {
         "text": "UpdateResult",

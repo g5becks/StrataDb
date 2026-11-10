@@ -1,6 +1,6 @@
 import type { Document } from "./core-types.js"
 import type { RetryOptions } from "./retry-types.js"
-/** @inline */
+/** Admin members of {@link Collection}. */
 export type CollectionAdminContract<T extends Document> = {
   /**
    * Drop the collection (delete the table).

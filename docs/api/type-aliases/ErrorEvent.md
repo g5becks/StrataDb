@@ -6,7 +6,7 @@
 type ErrorEvent = object;
 ```
 
-Defined in: [src/collection-events.ts:335](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L335)
+Defined in: [src/collection-events.ts:335](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-events.ts#L335)
 
 Event payload for error events.
 
@@ -35,7 +35,7 @@ collection.on('error', (event) => {
 readonly context?: unknown;
 ```
 
-Defined in: [src/collection-events.ts:341](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L341)
+Defined in: [src/collection-events.ts:341](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-events.ts#L341)
 
 Additional context about the operation
 
@@ -47,7 +47,7 @@ Additional context about the operation
 readonly error: Error;
 ```
 
-Defined in: [src/collection-events.ts:339](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L339)
+Defined in: [src/collection-events.ts:339](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-events.ts#L339)
 
 The error that occurred
 
@@ -59,6 +59,6 @@ The error that occurred
 readonly operation: string;
 ```
 
-Defined in: [src/collection-events.ts:337](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L337)
+Defined in: [src/collection-events.ts:337](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-events.ts#L337)
 
 The event whose listener failed

@@ -6,7 +6,7 @@
 type SortSpec<T> = { readonly [K in keyof T]?: 1 | -1 };
 ```
 
-Defined in: [src/query-projection-types.ts:52](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/query-projection-types.ts#L52)
+Defined in: [src/query-projection-types.ts:52](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/query-projection-types.ts#L52)
 
 Sort specification for query result ordering.
 

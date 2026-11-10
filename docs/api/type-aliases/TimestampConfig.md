@@ -11,7 +11,7 @@ type TimestampConfig =
   | boolean;
 ```
 
-Defined in: [src/schema-types.ts:207](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/schema-types.ts#L207)
+Defined in: [src/schema-types.ts:207](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/schema-types.ts#L207)
 
 Configuration for automatic timestamp management.
 

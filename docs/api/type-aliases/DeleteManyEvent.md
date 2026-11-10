@@ -6,7 +6,7 @@
 type DeleteManyEvent<T> = object;
 ```
 
-Defined in: [src/collection-events.ts:199](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L199)
+Defined in: [src/collection-events.ts:199](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-events.ts#L199)
 
 Event payload for batch delete operations.
 
@@ -39,7 +39,7 @@ The document type extending Document
 readonly deletedCount: number;
 ```
 
-Defined in: [src/collection-events.ts:205](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L205)
+Defined in: [src/collection-events.ts:205](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-events.ts#L205)
 
 Number of documents deleted
 
@@ -51,7 +51,7 @@ Number of documents deleted
 readonly filter: QueryFilter<T>;
 ```
 
-Defined in: [src/collection-events.ts:203](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L203)
+Defined in: [src/collection-events.ts:203](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-events.ts#L203)
 
 The filter used to find documents
 
@@ -63,6 +63,6 @@ The filter used to find documents
 readonly ids: readonly string[];
 ```
 
-Defined in: [src/collection-events.ts:201](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-events.ts#L201)
+Defined in: [src/collection-events.ts:201](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-events.ts#L201)
 
 IDs of deleted rows, in SQLite RETURNING order.

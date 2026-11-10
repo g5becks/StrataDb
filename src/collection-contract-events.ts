@@ -4,7 +4,7 @@ import type {
 } from "./collection-events.js"
 import type { Collection } from "./collection-types.js"
 import type { Document } from "./core-types.js"
-/** @inline */
+/** Events members of {@link Collection}. */
 export type CollectionEventsContract<T extends Document> = {
   // ===== Event Methods =====
 

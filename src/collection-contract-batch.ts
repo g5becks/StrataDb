@@ -6,7 +6,7 @@ import type {
 import type { Document, DocumentUpdate } from "./core-types.js"
 import type { QueryFilter } from "./query-types.js"
 import type { RetryOptions } from "./retry-types.js"
-/** @inline */
+/** Batch members of {@link Collection}. */
 export type CollectionBatchContract<T extends Document> = {
   // ===== Batch Write Operations =====
 

@@ -6,7 +6,7 @@
 type Collection<T> = CollectionReadContract<T> & CollectionWriteContract<T> & CollectionBatchContract<T> & CollectionEventsContract<T> & CollectionAdminContract<T>;
 ```
 
-Defined in: [src/collection-types.ts:183](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/collection-types.ts#L183)
+Defined in: [src/collection-types.ts:189](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/collection-types.ts#L189)
 
 MongoDB-like collection interface for type-safe document operations.
 
@@ -23,6 +23,12 @@ The document type, must extend Document
 Collection provides a complete CRUD API with full type safety. It wraps a SQLite
 table and provides MongoDB-like methods for querying and manipulating documents.
 
+Method reference: [reads/search](CollectionReadContract.md),
+[single writes](CollectionWriteContract.md),
+[batch writes](CollectionBatchContract.md),
+[event listeners](CollectionEventsContract.md), and
+[validation/lifecycle](CollectionAdminContract.md).
+
 **Key Features:**
 - Type-safe query filters with auto-completion
 - Generated columns for indexed fields (optimized queries)
@@ -32,7 +38,7 @@ table and provides MongoDB-like methods for querying and manipulating documents.
 - Transaction support through database instance
 
 **Document Storage:**
-- All documents stored in a single `data` JSONB column
+- User data stored in a single `body` JSONB column
 - Indexed fields have generated columns with underscore prefix (e.g., `_age`)
 - Auto-generated `_id` and `createdAt` fields
 - Optional `updatedAt` tracking

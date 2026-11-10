@@ -7,7 +7,7 @@ import type {
 import type { QueryFilter } from "./query-types.js"
 import type { RetryOptions } from "./retry-types.js"
 import type { SchemaDefinition } from "./schema-types.js"
-/** @inline */
+/** Read members of {@link Collection}. */
 export type CollectionReadContract<T extends Document> = {
   /**
    * Collection name (table name in SQLite).

@@ -104,6 +104,12 @@ export type DeleteResult = {
  * Collection provides a complete CRUD API with full type safety. It wraps a SQLite
  * table and provides MongoDB-like methods for querying and manipulating documents.
  *
+ * Method reference: {@link CollectionReadContract | reads/search},
+ * {@link CollectionWriteContract | single writes},
+ * {@link CollectionBatchContract | batch writes},
+ * {@link CollectionEventsContract | event listeners}, and
+ * {@link CollectionAdminContract | validation/lifecycle}.
+ *
  * **Key Features:**
  * - Type-safe query filters with auto-completion
  * - Generated columns for indexed fields (optimized queries)
@@ -113,7 +119,7 @@ export type DeleteResult = {
  * - Transaction support through database instance
  *
  * **Document Storage:**
- * - All documents stored in a single `data` JSONB column
+ * - User data stored in a single `body` JSONB column
  * - Indexed fields have generated columns with underscore prefix (e.g., `_age`)
  * - Auto-generated `_id` and `createdAt` fields
  * - Optional `updatedAt` tracking

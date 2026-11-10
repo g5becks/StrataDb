@@ -1,3 +1,4 @@
+/** SQL text, collection and operation associated with a mapped SQLite error. */
 export type SQLiteErrorContext = {
   readonly sql?: string
   readonly collection?: string

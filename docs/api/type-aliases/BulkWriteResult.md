@@ -6,7 +6,7 @@
 type BulkWriteResult<T> = object;
 ```
 
-Defined in: [src/core-types.ts:197](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/core-types.ts#L197)
+Defined in: [src/core-types.ts:201](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/core-types.ts#L201)
 
 Result type for bulk insert operations.
 
@@ -51,7 +51,7 @@ The document type extending Document
 readonly documents: readonly T[];
 ```
 
-Defined in: [src/core-types.ts:205](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/core-types.ts#L205)
+Defined in: [src/core-types.ts:209](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/core-types.ts#L209)
 
 Array of successfully inserted documents with IDs
 
@@ -63,7 +63,7 @@ Array of successfully inserted documents with IDs
 readonly errors: readonly object[];
 ```
 
-Defined in: [src/core-types.ts:208](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/core-types.ts#L208)
+Defined in: [src/core-types.ts:212](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/core-types.ts#L212)
 
 Array of errors for failed insertions
 
@@ -75,7 +75,7 @@ Array of errors for failed insertions
 readonly insertedCount: number;
 ```
 
-Defined in: [src/core-types.ts:199](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/core-types.ts#L199)
+Defined in: [src/core-types.ts:203](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/core-types.ts#L203)
 
 Number of documents successfully inserted
 
@@ -87,6 +87,6 @@ Number of documents successfully inserted
 readonly insertedIds: readonly string[];
 ```
 
-Defined in: [src/core-types.ts:202](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/core-types.ts#L202)
+Defined in: [src/core-types.ts:206](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/core-types.ts#L206)
 
 Array of generated IDs for successfully inserted documents

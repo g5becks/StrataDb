@@ -35,6 +35,12 @@
 // biome-ignore lint/performance/noBarrelFile: library entry point requires re-exports
 export { createAbortPromise, throwIfAborted } from "./abort-utils.js"
 export type { CollectionBuilder } from "./collection-builder.js"
+// Collection types
+export type { CollectionAdminContract } from "./collection-contract-admin.js"
+export type { CollectionBatchContract } from "./collection-contract-batch.js"
+export type { CollectionEventsContract } from "./collection-contract-events.js"
+export type { CollectionReadContract } from "./collection-contract-read.js"
+export type { CollectionWriteContract } from "./collection-contract-write.js"
 // Collection event types
 export {
   CollectionEventEmitter,
@@ -53,7 +59,6 @@ export {
   type UpdateEvent,
   type UpdateManyEvent,
 } from "./collection-events.js"
-// Collection types
 export type {
   Collection,
   DeleteResult,
@@ -63,18 +68,22 @@ export type {
 } from "./collection-types.js"
 // Core document types
 export type {
+  ArrayValue,
   AtomicUpdate,
   BulkWriteResult,
   Document,
   DocumentInput,
   DocumentUpdate,
+  UpdatePath,
 } from "./core-types.js"
 // Database types
 export type {
+  CollectionOptions,
   DatabaseOptions,
   StrataDB,
   Transaction,
 } from "./database-types.js"
+export type { SQLiteErrorContext } from "./errors.js"
 export {
   AbortedError,
   ConnectionError,
@@ -130,6 +139,7 @@ export type {
 export type { RawChangeEvent, RawChangeObserver } from "./raw-changes.js"
 // Retry types and utilities
 export type { RetryContext, RetryOptions } from "./retry-types.js"
+export type { RetryableOptions } from "./retry-utils.js"
 export {
   defaultShouldRetry,
   mergeRetryOptions,

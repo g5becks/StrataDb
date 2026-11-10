@@ -95,8 +95,12 @@ export type DocumentInput<T extends Document> = Simplify<
   SetOptional<Except<T, "_id">, never> & { _id?: string }
 >
 
-type UpdatePath<T> = SchemaFieldName<Omit<T, "_id" | "createdAt" | "updatedAt">>
-type ArrayValue<T> =
+/** Mutable document paths used by atomic operators, excluding metadata. */
+export type UpdatePath<T> = SchemaFieldName<
+  Omit<T, "_id" | "createdAt" | "updatedAt">
+>
+/** Element type of a possibly nullable array; non-array inputs resolve to never. */
+export type ArrayValue<T> =
   NonNullable<T> extends readonly (infer Element)[] ? Element : never
 
 /** Atomic operators over mutable document paths. Operator and merge forms cannot mix. */

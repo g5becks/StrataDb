@@ -2,7 +2,7 @@ import type { Document, DocumentUpdate } from "./core-types.js"
 import type { SortSpec } from "./query-options-types.js"
 import type { QueryFilter } from "./query-types.js"
 import type { RetryOptions } from "./retry-types.js"
-/** @inline */
+/** Write members of {@link Collection}. */
 export type CollectionWriteContract<T extends Document> = {
   // ===== Single Write Operations =====
 
@@ -15,25 +15,9 @@ export type CollectionWriteContract<T extends Document> = {
    * @remarks
    * Validates the document against the schema before inserting.
    * Automatically generates:
-   * - `_id`: UUID v4
+   * - `_id`: Configured generator (UUID v7 by default)
    * - `createdAt`: Current timestamp
-   * - `updatedAt`: Current timestamp (if schema has this field)
-   *
-   * **Validation:**
-   * If validation fails, throws `ValidationError` with details.
-   *
-  /**
-   * Insert a single document into the collection.
-   *
-   * @param doc - Document to insert (without _id, createdAt, updatedAt)
-   * @returns Promise resolving to the inserted document with generated _id
-   *
-   * @remarks
-   * Validates the document against the schema before inserting.
-   * Automatically generates:
-   * - `_id`: UUID v4
-   * - `createdAt`: Current timestamp
-   * - `updatedAt`: Current timestamp (if schema has this field)
+   * - `updatedAt`: Current timestamp; metadata visibility follows timestamps
    *
    * **Validation:**
    * If validation fails, throws `ValidationError` with details.

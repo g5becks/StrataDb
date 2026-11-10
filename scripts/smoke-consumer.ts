@@ -50,21 +50,25 @@ try {
   await Bun.write(
     join(temporary, "consumer.ts"),
     `import assert from "node:assert/strict"
-import { Strata, createSchema, type Document } from "stratadb"
+import { Strata, createSchema, type Document, type CollectionOptions, type RetryableOptions, type SQLiteErrorContext } from "stratadb"
 import metadata from "stratadb/package.json" with { type: "json" }
 
 type User = Document<{ name: string; age: number }>
+const collectionOptions: CollectionOptions = { statementCacheSize: 4 }
+const retryOptions: RetryableOptions = { retries: 0 }
+const context: SQLiteErrorContext = { operation: "consumer" }
+assert.equal(context.operation, "consumer")
 using db = new Strata({ database: ":memory:" })
 const users = db.collection("users", createSchema<User>()
   .field("name", { type: "TEXT", indexed: true })
-  .field("age", { type: "INTEGER" }).build())
+  .field("age", { type: "INTEGER" }).build(), collectionOptions)
 const inserted = await users.insertOne({ name: "Alice", age: 30 })
 assert.equal((await users.findById(inserted._id))?.name, "Alice")
 assert.equal((await users.find({ age: { $gte: 18 } })).length, 1)
 assert.equal((await users.updateOne(inserted._id, { age: 31 }))?.age, 31)
 assert.equal((await users.findOne(inserted._id, { select: ["name"] as const }))?.name, "Alice")
 assert.equal(await users.deleteOne(inserted._id), true)
-assert.equal(await users.count({}), 0)
+assert.equal(await users.count({}, { retry: retryOptions }), 0)
 function rejectsWrongFieldType() {
   // @ts-expect-error - published types must reject a wrong field value
   return users.insertOne({ name: "Invalid", age: "old" })

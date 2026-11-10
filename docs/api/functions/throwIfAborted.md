@@ -6,7 +6,7 @@
 function throwIfAborted(signal?): void;
 ```
 
-Defined in: [src/abort-utils.ts:22](https://github.com/g5becks/StrataDb/blob/a0aa3cd074f4d17bb0effadb4531ba4667df1b45/src/abort-utils.ts#L22)
+Defined in: [src/abort-utils.ts:22](https://github.com/g5becks/StrataDb/blob/231fa60d02b0b5d47ae5a05e0d85917918d4437d/src/abort-utils.ts#L22)
 
 Throws AbortedError if the signal is already aborted.
 
