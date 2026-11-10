@@ -415,20 +415,21 @@ describe("defaultShouldRetry", () => {
     expect(result).toBe(true)
   })
 
-  test.each([
-    517, 262, 266,
-  ])("returns true for extended SQLite errno %i", (errno) => {
-    const error = sqliteError(errno)
-    expect(error).toBeInstanceOf(SQLiteError)
-    expect(
-      defaultShouldRetry({
-        error,
-        attemptNumber: 1,
-        retriesLeft: 2,
-        retriesConsumed: 0,
-      })
-    ).toBe(true)
-  })
+  test.each([517, 262, 266])(
+    "returns true for extended SQLite errno %i",
+    (errno) => {
+      const error = sqliteError(errno)
+      expect(error).toBeInstanceOf(SQLiteError)
+      expect(
+        defaultShouldRetry({
+          error,
+          attemptNumber: 1,
+          retriesLeft: 2,
+          retriesConsumed: 0,
+        })
+      ).toBe(true)
+    }
+  )
 
   test("returns false for unknown errors", () => {
     const error = new Error("Unknown error")

@@ -53,6 +53,7 @@ const adults = await users.find({ age: { $gte: 18 } });
 ## Type Aliases
 
 - [ArrayOperator](type-aliases/ArrayOperator.md)
+- [AtomicUpdate](type-aliases/AtomicUpdate.md)
 - [BulkWriteResult](type-aliases/BulkWriteResult.md)
 - [Collection](type-aliases/Collection.md)
 - [CollectionBuilder](type-aliases/CollectionBuilder.md)
@@ -73,6 +74,7 @@ const adults = await users.find({ age: { $gte: 18 } });
 - [EqualityOperators](type-aliases/EqualityOperators.md)
 - [ErrorEvent](type-aliases/ErrorEvent.md)
 - [ExistenceOperator](type-aliases/ExistenceOperator.md)
+- [FieldDefinitionOptions](type-aliases/FieldDefinitionOptions.md)
 - [FieldOperator](type-aliases/FieldOperator.md)
 - [FindOneAndDeleteEvent](type-aliases/FindOneAndDeleteEvent.md)
 - [FindOneAndReplaceEvent](type-aliases/FindOneAndReplaceEvent.md)
@@ -101,7 +103,10 @@ const adults = await users.find({ age: { $gte: 18 } });
 - [RetryOptions](type-aliases/RetryOptions.md)
 - [SchemaBuilder](type-aliases/SchemaBuilder.md)
 - [SchemaDefinition](type-aliases/SchemaDefinition.md)
+- [SchemaDrift](type-aliases/SchemaDrift.md)
+- [SchemaDriftHandler](type-aliases/SchemaDriftHandler.md)
 - [SchemaField](type-aliases/SchemaField.md)
+- [SchemaFieldName](type-aliases/SchemaFieldName.md)
 - [SelectSpec](type-aliases/SelectSpec.md)
 - [SortSpec](type-aliases/SortSpec.md)
 - [SQLiteType](type-aliases/SQLiteType.md)

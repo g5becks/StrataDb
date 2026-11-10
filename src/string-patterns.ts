@@ -1,4 +1,4 @@
-const LIKE_LITERAL = /[\\%_]/g
+const LIKE_LITERAL = /[\\%_]/gu
 const GLOB_LITERAL: Readonly<Record<string, string>> = {
   "*": "[*]",
   "?": "[?]",

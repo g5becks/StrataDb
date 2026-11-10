@@ -575,7 +575,6 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
    *
    * @internal
    */
-  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: called in constructor
   private createTable(): void {
     quoteIdent(this.name)
     for (const field of this.schema.fields) {
@@ -772,7 +771,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
       return projection as ProjectionSpec<T>
     }
 
-    return
+    return undefined
   }
 
   /**
@@ -1639,7 +1638,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
               `INSERT INTO ${this.tableSql} (_id, body, createdAt, updatedAt) VALUES (?, jsonb(?), ?, ?)`
             )
 
-            for (let i = 0; i < docs.length; i++) {
+            for (let i = 0; i < docs.length; i += 1) {
               assertDatabaseOpen(this.db)
               throwIfAborted(options?.signal)
 
@@ -1972,7 +1971,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           this.emitEvent("insert", () => ({ document: result.after as T }))
         }
         if (result.before && result.after) {
-          const after = result.after
+          const { after } = result
           this.emitEvent("update", () => ({
             filter,
             update,
@@ -2069,7 +2068,7 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
           `SELECT DISTINCT ${column} as value FROM ${this.tableSql}`,
           columnParams
         )
-        let sql = selection.sql
+        let { sql } = selection
         const params: SQLQueryBindings[] = [...selection.params]
 
         if (filter) {
@@ -2148,8 +2147,6 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
             // Clean up event resources after emitting drop event
             transactionManager(this.db).event(() => this.cleanupEvents())
-
-            return
           })
         ),
       this.buildRetryOptions(options?.retry, options?.signal),

@@ -37,6 +37,7 @@ function jsonOperand(value: unknown): string {
       }
       return item
     })
+    // biome-ignore lint/suspicious/noUnnecessaryConditions: JSON.stringify can return undefined despite its library return type
     if (json === undefined) {
       throw new QueryError("Atomic update requires a JSON value")
     }
@@ -45,11 +46,16 @@ function jsonOperand(value: unknown): string {
     if (error instanceof QueryError) {
       throw error
     }
-    throw new ValidationError(
+    const wrapped = new ValidationError(
       "Atomic update value is not serializable JSON",
       undefined,
       value
     )
+    Object.defineProperty(wrapped, "cause", {
+      value: error,
+      configurable: true,
+    })
+    throw wrapped
   }
 }
 

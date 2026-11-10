@@ -7,8 +7,8 @@ import { SQLiteQueryTranslator } from "../../src/sqlite-query-translator"
 // TOP-LEVEL REGEX CONSTANTS (required by linter for performance)
 // ============================================================================
 
-const SQL_LINE_REGEX = /^SQL:/
-const PARAMS_LINE_REGEX = /^Parameters:/
+const SQL_LINE_REGEX = /^SQL:/u
+const PARAMS_LINE_REGEX = /^Parameters:/u
 
 // ============================================================================
 // TEST SCHEMAS AND TYPES

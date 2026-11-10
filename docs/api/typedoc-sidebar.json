@@ -74,6 +74,10 @@
         "link": "/api/type-aliases/ArrayOperator.md"
       },
       {
+        "text": "AtomicUpdate",
+        "link": "/api/type-aliases/AtomicUpdate.md"
+      },
+      {
         "text": "BulkWriteResult",
         "link": "/api/type-aliases/BulkWriteResult.md"
       },
@@ -152,6 +156,10 @@
       {
         "text": "ExistenceOperator",
         "link": "/api/type-aliases/ExistenceOperator.md"
+      },
+      {
+        "text": "FieldDefinitionOptions",
+        "link": "/api/type-aliases/FieldDefinitionOptions.md"
       },
       {
         "text": "FieldOperator",
@@ -266,8 +274,20 @@
         "link": "/api/type-aliases/SchemaDefinition.md"
       },
       {
+        "text": "SchemaDrift",
+        "link": "/api/type-aliases/SchemaDrift.md"
+      },
+      {
+        "text": "SchemaDriftHandler",
+        "link": "/api/type-aliases/SchemaDriftHandler.md"
+      },
+      {
         "text": "SchemaField",
         "link": "/api/type-aliases/SchemaField.md"
+      },
+      {
+        "text": "SchemaFieldName",
+        "link": "/api/type-aliases/SchemaFieldName.md"
       },
       {
         "text": "SelectSpec",

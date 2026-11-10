@@ -300,6 +300,7 @@ test("A15 [TASK-246] unknown cursor raises QueryError", async () => {
 })
 
 for (const name of ["order", "user-data"]) {
+  // biome-ignore lint/suspicious/noLoopFunc: db is initialized separately by beforeEach for each registered test
   test(`A16 [TASK-228] quoted collection name ${name} supports CRUD`, async () => {
     const collection = db.collection(name, schema())
     const inserted = await collection.insertOne({ name: "legal", role: "user" })

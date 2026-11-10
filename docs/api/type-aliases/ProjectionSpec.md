@@ -6,7 +6,7 @@
 type ProjectionSpec<T> = { readonly [K in keyof T]?: 1 | 0 };
 ```
 
-Defined in: [src/query-options-types.ts:118](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L118)
+Defined in: [src/query-options-types.ts:118](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L118)
 
 Projection specification for field selection in query results.
 

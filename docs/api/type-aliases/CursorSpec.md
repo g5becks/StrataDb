@@ -6,7 +6,7 @@
 type CursorSpec = object;
 ```
 
-Defined in: [src/query-options-types.ts:395](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L395)
+Defined in: [src/query-options-types.ts:399](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L399)
 
 Cursor-based pagination specification for efficient large dataset navigation.
 
@@ -37,7 +37,11 @@ beneficial for:
 
 **Cursor value format:**
 The cursor is simply the `_id` of the last/first document from the previous page.
-The sort field value is extracted from the database for proper comparison.
+All sort values are read from the boundary row and compared lexicographically.
+Sorted finds append ascending `_id` unless explicitly supplied. NULL/missing
+values sort first ascending and last descending. `before` returns the nearest
+previous page in the requested order. Unknown/malformed cursors or a cursor
+without a nonempty sort reject with QueryError.
 
 ## Example
 
@@ -91,7 +95,7 @@ const backToFirstPage = await users.find(
 readonly after?: string;
 ```
 
-Defined in: [src/query-options-types.ts:400](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L400)
+Defined in: [src/query-options-types.ts:404](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L404)
 
 Get items after this cursor (forward pagination).
 Value is the `_id` of the boundary document.
@@ -104,7 +108,7 @@ Value is the `_id` of the boundary document.
 readonly before?: string;
 ```
 
-Defined in: [src/query-options-types.ts:406](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L406)
+Defined in: [src/query-options-types.ts:410](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L410)
 
 Get items before this cursor (backward pagination).
 Value is the `_id` of the boundary document.

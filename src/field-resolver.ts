@@ -1,7 +1,7 @@
 import { QueryError, SchemaValidationError } from "./errors.js"
 import type { SQLiteBindValue } from "./query-translator-types.js"
 
-const SEGMENT = /^[A-Za-z_][A-Za-z0-9_]*$/
+const SEGMENT = /^[A-Za-z_][A-Za-z0-9_]*$/u
 
 export function quoteIdent(name: string): string {
   if (typeof name !== "string" || name.length === 0 || name.includes("\0")) {
@@ -149,7 +149,7 @@ export function positional(
   indexes: number[]
 } {
   const indexes: number[] = []
-  const expanded = sql.replace(/\?(\d+)/g, (_, number: string) => {
+  const expanded = sql.replace(/\?(?<binding>\d+)/gu, (_, number: string) => {
     indexes.push(Number(number) - 1)
     return "?"
   })

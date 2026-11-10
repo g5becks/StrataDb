@@ -3,7 +3,7 @@ import { generateId } from "../../src/id-generator.js"
 
 // UUID v7 format regex: 8-4-4-4-12 hex characters with version '7' in the right place
 const UUID_V7_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu
 
 describe("ID Generator", () => {
   describe("generateId", () => {
@@ -25,7 +25,7 @@ describe("ID Generator", () => {
 
     it("should generate multiple unique IDs", () => {
       const ids = new Set<string>()
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 100; i += 1) {
         const id = generateId()
         expect(ids.has(id)).toBe(false)
         ids.add(id)

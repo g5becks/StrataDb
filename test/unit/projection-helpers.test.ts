@@ -64,7 +64,7 @@ describe("SQLiteCollection - select option", () => {
     )
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect(result._id).toBe(inserted._id)
     expect(result.name).toBe("Alice")
     expect(result.email).toBe("alice@example.com")
@@ -84,7 +84,7 @@ describe("SQLiteCollection - select option", () => {
     const results = await collection.find({}, { select: ["name"] })
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect(result.name).toBe("Bob")
     expect("_id" in result).toBe(true)
     expect("email" in result).toBe(false)
@@ -170,7 +170,7 @@ describe("SQLiteCollection - omit option", () => {
     )
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect(result._id).toBe(inserted._id)
     expect(result.name).toBe("Alice")
     expect(result.age).toBe(30)
@@ -190,7 +190,7 @@ describe("SQLiteCollection - omit option", () => {
     const results = await collection.find({}, { omit: ["email"] })
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect("_id" in result).toBe(true)
     expect("name" in result).toBe(true)
     expect("age" in result).toBe(true)
@@ -275,7 +275,7 @@ describe("SQLiteCollection - projection option", () => {
     )
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect("_id" in result).toBe(true)
     expect("name" in result).toBe(true)
     expect("email" in result).toBe(true)
@@ -297,7 +297,7 @@ describe("SQLiteCollection - projection option", () => {
     )
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect("_id" in result).toBe(true)
     expect("name" in result).toBe(true)
     expect("age" in result).toBe(true)
@@ -319,7 +319,7 @@ describe("SQLiteCollection - projection option", () => {
     )
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect("_id" in result).toBe(false)
     expect("name" in result).toBe(true)
     expect("email" in result).toBe(true)
@@ -350,7 +350,7 @@ describe("SQLiteCollection - projection option precedence", () => {
     )
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect("name" in result).toBe(true)
     expect("email" in result).toBe(false) // select was ignored
     expect("age" in result).toBe(false)
@@ -366,7 +366,7 @@ describe("SQLiteCollection - projection option precedence", () => {
     )
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect("name" in result).toBe(true) // omit was ignored
     expect("email" in result).toBe(false)
   })
@@ -381,7 +381,7 @@ describe("SQLiteCollection - projection option precedence", () => {
     )
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect("name" in result).toBe(true)
     // When select is used, only selected fields + _id are included
     // So email is not present because it wasn't selected, not because of omit
@@ -406,7 +406,7 @@ describe("SQLiteCollection - projection edge cases", () => {
     const results = await collection.find({ _id: inserted._id })
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect(result._id).toBe(inserted._id)
     expect(result.name).toBe("Alice")
     expect(result.email).toBe("alice@example.com")
@@ -426,7 +426,7 @@ describe("SQLiteCollection - projection edge cases", () => {
 
     // Empty select means only _id is returned
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect("_id" in result).toBe(true)
   })
 
@@ -442,7 +442,7 @@ describe("SQLiteCollection - projection edge cases", () => {
 
     // Empty omit means all fields are returned
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect(result.name).toBe("Charlie")
     expect(result.email).toBe("charlie@example.com")
     expect(result.age).toBe(35)
@@ -464,7 +464,7 @@ describe("SQLiteCollection - projection edge cases", () => {
 
     // Empty projection means all fields are returned
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect(result.name).toBe("Diana")
     expect(result.email).toBe("diana@example.com")
   })
@@ -493,7 +493,7 @@ describe("SQLiteCollection - projection edge cases", () => {
     )
 
     expect(results).toHaveLength(1)
-    const result = results[0]
+    const [result] = results
     expect("name" in result).toBe(true)
     expect("createdAt" in result).toBe(true)
     expect("updatedAt" in result).toBe(true)

@@ -1,6 +1,6 @@
 export type Filter = Record<string, unknown>
-const SPECIAL = /[.*+?^${}()|[\]\\]/g
-const ASCII_UPPER = /[A-Z]/g
+const SPECIAL = /[.*+?^${}()|[\]\\]/gu
+const ASCII_UPPER = /[A-Z]/gu
 const logical = new Set(["$and", "$or", "$nor", "$not"])
 const scalar = new Set(["$eq", "$ne", "$in", "$nin", "$exists"])
 const ordered = new Set(["$gt", "$gte", "$lt", "$lte"])

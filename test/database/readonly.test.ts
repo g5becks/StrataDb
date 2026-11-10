@@ -13,7 +13,7 @@ import {
 } from "../../src/index.js"
 
 type Item = Document<{ name: string; count: number; rank?: number }>
-const DDL = /^\s*(CREATE|ALTER|DROP)\b/i
+const DDL = /^\s*(?:CREATE|ALTER|DROP)\b/iu
 const schema = createSchema<Item>()
   .field("count", { type: "INTEGER", indexed: true })
   .build()

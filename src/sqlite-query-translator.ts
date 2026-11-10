@@ -110,7 +110,6 @@ export class SQLiteQueryTranslator<T extends Document>
   > | null
 
   /** Maximum cache size before eviction */
-  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: used for cache eviction logic
   private static readonly MAX_CACHE_SIZE = 500
 
   /**
@@ -140,7 +139,7 @@ export class SQLiteQueryTranslator<T extends Document>
     }
 
     // Initialize query cache (enabled by default, null when disabled)
-    this.queryCache = options?.enableCache !== false ? new Map() : null
+    this.queryCache = options?.enableCache === false ? null : new Map()
   }
 
   /**
@@ -363,7 +362,7 @@ export class SQLiteQueryTranslator<T extends Document>
       if (this.isLogicalOperator(key)) {
         // Logical operators contain arrays of filters
         const filters = value as readonly QueryFilter<T>[]
-        for (let i = 0; i < filters.length; i++) {
+        for (let i = 0; i < filters.length; i += 1) {
           const subPaths = this.collectValuePaths(
             filters[i] as QueryFilter<T>,
             [...currentPath, String(i)]
@@ -397,7 +396,7 @@ export class SQLiteQueryTranslator<T extends Document>
 
           if (Array.isArray(opValue)) {
             // Array values like $in: [1, 2, 3]
-            for (let i = 0; i < opValue.length; i++) {
+            for (let i = 0; i < opValue.length; i += 1) {
               if ((op === "$nin" || op === "$in") && opValue[i] === null) {
                 continue
               }

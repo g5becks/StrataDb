@@ -97,9 +97,9 @@ for (const fluent of [false, true]) {
       expect(inserted.createdAt).toBeNumber()
       expect(inserted.updatedAt).toBeNumber()
       expect(await items.count({ name: "a" })).toBe(1)
-      const translator = (
-        items as unknown as { translator: { cacheSize: number } }
-      ).translator
+      const { translator } = items as unknown as {
+        translator: { cacheSize: number }
+      }
       expect(translator.cacheSize).toBe(enableCache ? 1 : 0)
     })
   }

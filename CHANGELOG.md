@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Inclusion projections (`select` and inclusion `projection`) construct only the requested JSON in SQLite. Literal property names, missing fields, JSON types and timestamp visibility are preserved; exclusion projections retain their JavaScript path. A 50-field/two-field benchmark improved from 9.99 to 8.38 µs/read (16% lower latency) on Bun 1.4.4, macOS arm64.
 
+### Tooling
+
+- Updated Biome to 2.6.6, Ultracite to 8.1.1, commitlint to 21.2.4, validator test libraries and remaining development tools. Kept TypeScript 7.0.2 for development and TypeScript 6.0.3 for TypeDoc; 7.1 remains advisory beta. Lint configuration preserves meaningful object order, public type/method styles and sequential database operations.
+
 ### Breaking changes
 
 - Circular/non-serializable documents now reject with `ValidationError` instead of storing circular-reference markers. Batch inserts reject serialization failures before writing. Runtime dependencies are deepmerge-ts 8, p-retry 9 and Standard Schema 1.1; fast-safe-stringify was removed. Retry callback order is now `shouldConsumeRetry` → `onFailedAttempt` → `shouldRetry`, `RetryContext` includes `retryDelay`, and an aborted signal wins over attempt errors and suppresses remaining callbacks. Review custom retry callbacks and manually constructed contexts.

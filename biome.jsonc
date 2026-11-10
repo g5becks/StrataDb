@@ -1,6 +1,34 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite/core"],
+  "extends": ["ultracite/biome/core"],
+  // Backlog metadata is managed exclusively by its CLI.
+  "files": { "includes": ["!!backlog", "!!.serena"] },
+  "yaml": { "formatter": { "enabled": false } },
+  "assist": {
+    "actions": {
+      "source": {
+        // Property order controls compound sorting, projection order and overloads.
+        "useSortedKeys": "off",
+        "useSortedProperties": "off",
+        "useSortedInterfaceMembers": "off",
+        "useSortedTypeFields": "off"
+      }
+    }
+  },
+  "linter": {
+    "rules": {
+      "performance": { "noAwaitInLoops": "off" },
+      "style": {
+        "useConsistentTypeDefinitions": {
+          "level": "error",
+          "options": { "style": "type" }
+        },
+        // Preserve the existing public callback/property and method variance.
+        "useConsistentMethodSignatures": "off",
+        "useThisInClassMethods": "off"
+      }
+    }
+  },
   "javascript": {
     "formatter": {
       "semicolons": "asNeeded"

@@ -63,7 +63,7 @@ describe("Collection Builder", () => {
       const internalBuilder = builder as any
       expect(internalBuilder.fieldDefs).toHaveLength(1)
 
-      const field = internalBuilder.fieldDefs[0]
+      const [field] = internalBuilder.fieldDefs
       expect(field.name).toBe("email")
       expect(field.type).toBe("TEXT")
       expect(field.indexed).toBe(true)
@@ -81,7 +81,7 @@ describe("Collection Builder", () => {
       const internalBuilder = builder as any
       expect(internalBuilder.fieldDefs).toHaveLength(1)
 
-      const field = internalBuilder.fieldDefs[0]
+      const [field] = internalBuilder.fieldDefs
       expect(field.name).toBe("name")
       expect(field.type).toBe("TEXT")
       // Optional properties should not exist when not specified

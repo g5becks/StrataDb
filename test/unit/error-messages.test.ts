@@ -55,7 +55,7 @@ describe("Error Message Utilities", () => {
     })
 
     it("should format RegExp", () => {
-      // biome-ignore lint/performance/useTopLevelRegex: test value
+      // biome-ignore lint/performance/useTopLevelRegex lint/style/useUnicodeRegex: formatting must preserve the original legacy flags
       expect(formatValue(/test/i)).toBe("/test/i")
     })
   })
@@ -70,7 +70,7 @@ describe("Error Message Utilities", () => {
       expect(getTypeName([])).toBe("array")
       expect(getTypeName(new Date())).toBe("Date")
       // biome-ignore lint/performance/useTopLevelRegex: test value
-      expect(getTypeName(/test/)).toBe("RegExp")
+      expect(getTypeName(/test/u)).toBe("RegExp")
       expect(getTypeName(new Uint8Array())).toBe("Uint8Array")
       expect(getTypeName({})).toBe("object")
     })

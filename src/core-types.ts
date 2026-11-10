@@ -96,9 +96,8 @@ export type DocumentInput<T extends Document> = Simplify<
 >
 
 type UpdatePath<T> = SchemaFieldName<Omit<T, "_id" | "createdAt" | "updatedAt">>
-type ArrayValue<T> = NonNullable<T> extends readonly (infer Element)[]
-  ? Element
-  : never
+type ArrayValue<T> =
+  NonNullable<T> extends readonly (infer Element)[] ? Element : never
 
 /** Atomic operators over mutable document paths. Operator and merge forms cannot mix. */
 export type AtomicUpdate<T extends Document> = {

@@ -1,5 +1,6 @@
 import type { Document } from "./core-types.js"
 import type { JsonPath, SchemaFieldName } from "./path-types.js"
+import type { SchemaDefinition } from "./schema-types.js"
 
 /** Field configuration used by explicit dynamic-name escape hatches. */
 export type FieldDefinitionOptions = {
@@ -10,8 +11,6 @@ export type FieldDefinitionOptions = {
   readonly unique?: boolean
   readonly default?: unknown
 }
-
-import type { SchemaDefinition } from "./schema-types.js"
 
 /**
  * Fluent builder interface for defining collection schemas.

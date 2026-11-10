@@ -310,7 +310,7 @@ group("Uniform Filter Support - String ID vs Query Filter", () => {
 
   // Seed data
   const seededUsers: User[] = []
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 1000; i += 1) {
     seededUsers.push({
       _id: `user-${i}`,
       name: `User ${i}`,
@@ -392,7 +392,7 @@ group("Atomic Operations", () => {
   const users = db.collection("users", userSchema)
 
   // Seed data
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 1000; i += 1) {
     users.insertOne({
       name: `User ${i}`,
       email: `user${i}@example.com`,
@@ -463,7 +463,7 @@ group("Utility Methods", () => {
   const users = db.collection("users", userSchema)
 
   // Seed data
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 1000; i += 1) {
     users.insertOne({
       name: `User ${i % 100}`, // Duplicate names
       email: `user${i}@example.com`,

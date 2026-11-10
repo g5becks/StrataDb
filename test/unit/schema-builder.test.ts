@@ -102,7 +102,7 @@ describe("SchemaBuilder", () => {
         .field("name", { type: "TEXT" })
         .build()
 
-      const field = schema.fields[0]
+      const [field] = schema.fields
       expect(field.name).toBe("name")
       expect(field.type).toBe("TEXT")
       expect(field.path).toBe("$.name")

@@ -6,7 +6,7 @@
 type CollectionBuilder<T> = object;
 ```
 
-Defined in: [src/collection-builder.ts:33](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L33)
+Defined in: [src/collection-builder.ts:33](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-builder.ts#L33)
 
 Fluent builder for creating collections with inline schema definition.
 
@@ -43,7 +43,7 @@ The document type extending Document
 build(): Collection<T>;
 ```
 
-Defined in: [src/collection-builder.ts:94](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L94)
+Defined in: [src/collection-builder.ts:107](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-builder.ts#L107)
 
 Build and return the collection with the defined schema.
 
@@ -61,7 +61,7 @@ The collection instance ready for operations
 cache(enabled): CollectionBuilder<T>;
 ```
 
-Defined in: [src/collection-builder.ts:87](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L87)
+Defined in: [src/collection-builder.ts:100](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-builder.ts#L100)
 
 Enable or disable query caching for this collection.
 
@@ -106,7 +106,7 @@ compoundIndex(
 ): CollectionBuilder<T>;
 ```
 
-Defined in: [src/collection-builder.ts:52](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L52)
+Defined in: [src/collection-builder.ts:58](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-builder.ts#L58)
 
 Define a compound index spanning multiple fields.
 
@@ -118,7 +118,43 @@ Define a compound index spanning multiple fields.
 
 ##### fields
 
-readonly (keyof `T`)[]
+readonly [`SchemaFieldName`](SchemaFieldName.md)&lt;`T`&gt;[]
+
+##### options?
+
+###### unique?
+
+`boolean`
+
+#### Returns
+
+`CollectionBuilder`&lt;`T`&gt;
+
+***
+
+### compoundIndexUnchecked()
+
+```ts
+compoundIndexUnchecked(
+   name,
+   fields,
+   options?
+): CollectionBuilder<T>;
+```
+
+Defined in: [src/collection-builder.ts:65](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-builder.ts#L65)
+
+Explicit escape hatch for dynamic compound-index field names.
+
+#### Parameters
+
+##### name
+
+`string`
+
+##### fields
+
+readonly `string`[]
 
 ##### options?
 
@@ -138,7 +174,7 @@ readonly (keyof `T`)[]
 field<K>(name, options): CollectionBuilder<T>;
 ```
 
-Defined in: [src/collection-builder.ts:37](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L37)
+Defined in: [src/collection-builder.ts:37](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-builder.ts#L37)
 
 Define an indexed field with type checking.
 
@@ -146,7 +182,7 @@ Define an indexed field with type checking.
 
 ##### K
 
-`K` *extends* `string` \| `number` \| `symbol`
+`K` *extends* `string`
 
 #### Parameters
 
@@ -158,7 +194,7 @@ Define an indexed field with type checking.
 
 ###### default?
 
-`T`\[`K`\]
+`K` *extends* keyof `T` ? `T`\[`K`\] : `unknown`
 
 ###### indexed?
 
@@ -174,11 +210,37 @@ Define an indexed field with type checking.
 
 ###### type
 
-[`TypeScriptToSQLite`](TypeScriptToSQLite.md)&lt;`T`\[`K`\]&gt;
+`K` *extends* keyof `T` ? [`TypeScriptToSQLite`](TypeScriptToSQLite.md)&lt;`T`\[`K`\]&gt; : [`SQLiteType`](SQLiteType.md)
 
 ###### unique?
 
 `boolean`
+
+#### Returns
+
+`CollectionBuilder`&lt;`T`&gt;
+
+***
+
+### fieldUnchecked()
+
+```ts
+fieldUnchecked(name, options): CollectionBuilder<T>;
+```
+
+Defined in: [src/collection-builder.ts:50](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-builder.ts#L50)
+
+Declare dynamic names with runtime identifier validation on build.
+
+#### Parameters
+
+##### name
+
+`string`
+
+##### options
+
+[`FieldDefinitionOptions`](FieldDefinitionOptions.md)
 
 #### Returns
 
@@ -192,7 +254,7 @@ Define an indexed field with type checking.
 timestamps(enabled?): CollectionBuilder<T>;
 ```
 
-Defined in: [src/collection-builder.ts:61](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L61)
+Defined in: [src/collection-builder.ts:74](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-builder.ts#L74)
 
 Enable automatic timestamp management.
 
@@ -214,7 +276,7 @@ Enable automatic timestamp management.
 validate(validator): CollectionBuilder<T>;
 ```
 
-Defined in: [src/collection-builder.ts:66](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-builder.ts#L66)
+Defined in: [src/collection-builder.ts:79](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/collection-builder.ts#L79)
 
 Add validation function using a type predicate.
 

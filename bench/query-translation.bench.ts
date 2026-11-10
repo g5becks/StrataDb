@@ -311,19 +311,19 @@ hotPathTranslator.translate({ $and: [{ status: "x" }, { role: "y" }] })
 
 group("Hot Path - Repeated Same Structure", () => {
   bench("100 iterations - simple equality (cached)", () => {
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 100; i += 1) {
       hotPathTranslator.translate({ name: `User${i}` })
     }
   })
 
   bench("100 iterations - $in operator (cached)", () => {
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 100; i += 1) {
       hotPathTranslator.translate({ age: { $in: [i, i + 1, i + 2] } })
     }
   })
 
   bench("100 iterations - $and with 2 conditions (cached)", () => {
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 100; i += 1) {
       hotPathTranslator.translate({
         $and: [{ status: `status${i}` }, { role: `role${i}` }],
       })

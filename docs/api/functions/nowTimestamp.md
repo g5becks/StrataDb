@@ -6,7 +6,7 @@
 function nowTimestamp(): number;
 ```
 
-Defined in: [src/timestamps.ts:72](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/timestamps.ts#L72)
+Defined in: [src/timestamps.ts:72](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/timestamps.ts#L72)
 
 Get the current timestamp in milliseconds since Unix epoch.
 

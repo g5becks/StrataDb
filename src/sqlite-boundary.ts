@@ -22,8 +22,9 @@ import {
 
 export const sqliteOperation: AsyncLocalStorage<string> =
   new AsyncLocalStorage<string>()
-const UNIQUE_FIELD = /UNIQUE constraint failed: .+\.(_?[A-Za-z_][A-Za-z0-9_]*)/
-const DDL = /^\s*(CREATE|ALTER|DROP|REINDEX|VACUUM)\b/i
+const UNIQUE_FIELD =
+  /UNIQUE constraint failed: .+\.(?<field>_?[A-Za-z_][A-Za-z0-9_]*)/u
+const DDL = /^\s*(?:CREATE|ALTER|DROP|REINDEX|VACUUM)\b/iu
 
 /** Preserve library errors and classify native SQLite errors only by errno. */
 export function wrapSqliteError(
@@ -33,7 +34,7 @@ export function wrapSqliteError(
   if (error instanceof StrataDBError || !(error instanceof SQLiteError)) {
     return error
   }
-  const errno = error.errno
+  const { errno } = error
   const primary = errno % 256
   let wrapped: StrataDBError
   if (primary === 5 || primary === 6 || primary === 14) {

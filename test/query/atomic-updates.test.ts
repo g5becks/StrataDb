@@ -28,7 +28,7 @@ test("[TASK-249] each atomic operator executes one real JSONB UPDATE", async () 
     tags: ["x", "x", { id: 1, meta: { a: 2 } }],
   })
   const statements: string[] = []
-  const prepare = db.sqliteDb.prepare
+  const { prepare } = db.sqliteDb
   Object.defineProperty(db.sqliteDb, "prepare", {
     value(sql: string, ...args: unknown[]) {
       statements.push(sql)
@@ -89,7 +89,7 @@ test("[TASK-249] batch operators use one UPDATE and retain actual event IDs", as
     { _id: "b", name: "b", count: 2, nested: {}, tags: [] },
   ])
   const statements: string[] = []
-  const prepare = db.sqliteDb.prepare
+  const { prepare } = db.sqliteDb
   Object.defineProperty(db.sqliteDb, "prepare", {
     value(sql: string, ...args: unknown[]) {
       statements.push(sql)

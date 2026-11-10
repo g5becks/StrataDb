@@ -6,7 +6,7 @@
 type TextSearchSpec<T> = object;
 ```
 
-Defined in: [src/query-options-types.ts:311](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L311)
+Defined in: [src/query-options-types.ts:311](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L311)
 
 Text search configuration for literal multi-field substring searching.
 
@@ -94,7 +94,7 @@ The document type being searched
 readonly caseSensitive?: boolean;
 ```
 
-Defined in: [src/query-options-types.ts:322](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L322)
+Defined in: [src/query-options-types.ts:322](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L322)
 
 Whether to perform case-sensitive matching. Default: false (case-insensitive)
 
@@ -106,7 +106,7 @@ Whether to perform case-sensitive matching. Default: false (case-insensitive)
 readonly fields: readonly (keyof T | string)[];
 ```
 
-Defined in: [src/query-options-types.ts:319](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L319)
+Defined in: [src/query-options-types.ts:319](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L319)
 
 Fields to search. Use field names for top-level, dot notation for nested.
 All fields are searched with OR logic (match any).
@@ -119,6 +119,6 @@ All fields are searched with OR logic (match any).
 readonly text: string;
 ```
 
-Defined in: [src/query-options-types.ts:313](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L313)
+Defined in: [src/query-options-types.ts:313](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-options-types.ts#L313)
 
 Literal substring text; percent, underscore and backslash stay literal

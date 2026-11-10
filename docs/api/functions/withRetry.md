@@ -6,7 +6,7 @@
 function withRetry<T>(operation, options?): Promise<T>;
 ```
 
-Defined in: [src/retry-utils.ts:94](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/retry-utils.ts#L94)
+Defined in: [src/retry-utils.ts:94](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/retry-utils.ts#L94)
 
 Wraps an async operation with automatic retry logic.
 

@@ -6,7 +6,7 @@
 type SchemaBuilder<T> = object;
 ```
 
-Defined in: [src/schema-builder-types.ts:50](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/schema-builder-types.ts#L50)
+Defined in: [src/schema-builder-types.ts:60](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L60)
 
 Fluent builder interface for defining collection schemas.
 
@@ -68,7 +68,7 @@ The document type extending Document
 build(): SchemaDefinition<T>;
 ```
 
-Defined in: [src/schema-builder-types.ts:242](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/schema-builder-types.ts#L242)
+Defined in: [src/schema-builder-types.ts:265](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L265)
 
 Build and return the complete schema definition.
 
@@ -114,7 +114,7 @@ compoundIndex(
 ): SchemaBuilder<T>;
 ```
 
-Defined in: [src/schema-builder-types.ts:135](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/schema-builder-types.ts#L135)
+Defined in: [src/schema-builder-types.ts:151](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L151)
 
 Define a compound index spanning multiple fields.
 
@@ -128,7 +128,7 @@ Unique name for the index
 
 ##### fields
 
-readonly (`string` \| keyof `T`)[]
+readonly [`SchemaFieldName`](SchemaFieldName.md)&lt;`T`&gt;[]
 
 Array of field names (order matters, supports dot notation for nested fields)
 
@@ -174,13 +174,49 @@ index to be effective.
 
 ***
 
+### compoundIndexUnchecked()
+
+```ts
+compoundIndexUnchecked(
+   name,
+   fields,
+   options?
+): SchemaBuilder<T>;
+```
+
+Defined in: [src/schema-builder-types.ts:158](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L158)
+
+Declare dynamic compound-index fields with runtime identifier validation.
+
+#### Parameters
+
+##### name
+
+`string`
+
+##### fields
+
+readonly `string`[]
+
+##### options?
+
+###### unique?
+
+`boolean`
+
+#### Returns
+
+`SchemaBuilder`&lt;`T`&gt;
+
+***
+
 ### field()
 
 ```ts
 field<K>(name, options): SchemaBuilder<T>;
 ```
 
-Defined in: [src/schema-builder-types.ts:85](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/schema-builder-types.ts#L85)
+Defined in: [src/schema-builder-types.ts:95](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L95)
 
 Define an indexed field with type checking.
 
@@ -188,7 +224,7 @@ Define an indexed field with type checking.
 
 ##### K
 
-`K` *extends* `string` \| `number` \| `symbol`
+`K` *extends* `string`
 
 #### Parameters
 
@@ -275,13 +311,39 @@ For deeply nested fields, any nesting depth is supported.
 
 ***
 
+### fieldUnchecked()
+
+```ts
+fieldUnchecked(name, options): SchemaBuilder<T>;
+```
+
+Defined in: [src/schema-builder-types.ts:114](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L114)
+
+Declare a dynamic field name; runtime identifier validation still applies.
+
+#### Parameters
+
+##### name
+
+`string`
+
+##### options
+
+[`FieldDefinitionOptions`](FieldDefinitionOptions.md)
+
+#### Returns
+
+`SchemaBuilder`&lt;`T`&gt;
+
+***
+
 ### timestamps()
 
 ```ts
 timestamps(enabled?): SchemaBuilder<T>;
 ```
 
-Defined in: [src/schema-builder-types.ts:170](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/schema-builder-types.ts#L170)
+Defined in: [src/schema-builder-types.ts:193](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L193)
 
 Enable automatic timestamp management.
 
@@ -332,7 +394,7 @@ interface UserWithTimestamps extends User {
 validate(validator): SchemaBuilder<T>;
 ```
 
-Defined in: [src/schema-builder-types.ts:213](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/schema-builder-types.ts#L213)
+Defined in: [src/schema-builder-types.ts:236](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/schema-builder-types.ts#L236)
 
 Add validation function using a type predicate.
 

@@ -3,10 +3,12 @@
 # Type Alias: DocumentUpdate&lt;T&gt;
 
 ```ts
-type DocumentUpdate<T> = Simplify<PartialDeep<Except<T, "_id">>>;
+type DocumentUpdate<T> =
+  | Simplify<PartialDeep<Except<T, "_id" | "createdAt" | "updatedAt">>> & object
+  | AtomicUpdate<T>;
 ```
 
-Defined in: [src/core-types.ts:127](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/core-types.ts#L127)
+Defined in: [src/core-types.ts:159](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/core-types.ts#L159)
 
 Document update type for update operations.
 
@@ -20,9 +22,9 @@ The full document type (Document\<YourShape\>)
 
 ## Remarks
 
-All fields are optional (deep partial) except for the ID which cannot be updated.
+Accepts a deep merge or atomic operators. IDs and timestamp metadata are immutable.
 Used for `updateOne()` and `updateMany()` operations.
-Supports nested updates using dot notation.
+Atomic operator paths support dotted fields; plain updates deep-merge objects.
 
 ## Example
 

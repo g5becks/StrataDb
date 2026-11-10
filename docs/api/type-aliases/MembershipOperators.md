@@ -6,7 +6,7 @@
 type MembershipOperators<T> = object;
 ```
 
-Defined in: [src/query-types.ts:103](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-types.ts#L103)
+Defined in: [src/query-types.ts:103](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-types.ts#L103)
 
 Membership comparison operators.
 
@@ -31,7 +31,7 @@ The field type
 readonly $in?: readonly T[];
 ```
 
-Defined in: [src/query-types.ts:105](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-types.ts#L105)
+Defined in: [src/query-types.ts:105](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-types.ts#L105)
 
 Value is included in the specified array
 
@@ -43,6 +43,6 @@ Value is included in the specified array
 readonly $nin?: readonly T[];
 ```
 
-Defined in: [src/query-types.ts:108](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-types.ts#L108)
+Defined in: [src/query-types.ts:108](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/query-types.ts#L108)
 
 Value is not included in the specified array

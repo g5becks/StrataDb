@@ -37,6 +37,7 @@ export class StatementCache {
   }
 
   private register(): void {
+    // biome-ignore lint/suspicious/noUnnecessaryConditions: register and dispose mutate this flag across calls
     if (this.registered) {
       return
     }

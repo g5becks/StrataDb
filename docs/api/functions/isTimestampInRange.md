@@ -10,7 +10,7 @@ function isTimestampInRange(
 ): boolean;
 ```
 
-Defined in: [src/timestamps.ts:171](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/timestamps.ts#L171)
+Defined in: [src/timestamps.ts:171](https://github.com/g5becks/StrataDb/blob/3829d1720c2811f54ed5e11d7a83bd64ad15a7b7/src/timestamps.ts#L171)
 
 Check if a timestamp is within a given time range.
 
