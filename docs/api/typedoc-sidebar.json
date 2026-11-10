@@ -74,12 +74,28 @@
         "link": "/api/type-aliases/ArrayOperator.md"
       },
       {
+        "text": "ArrayValue",
+        "link": "/api/type-aliases/ArrayValue.md"
+      },
+      {
+        "text": "AtomicUpdate",
+        "link": "/api/type-aliases/AtomicUpdate.md"
+      },
+      {
         "text": "BulkWriteResult",
         "link": "/api/type-aliases/BulkWriteResult.md"
       },
       {
         "text": "Collection",
         "link": "/api/type-aliases/Collection.md"
+      },
+      {
+        "text": "CollectionAdminContract",
+        "link": "/api/type-aliases/CollectionAdminContract.md"
+      },
+      {
+        "text": "CollectionBatchContract",
+        "link": "/api/type-aliases/CollectionBatchContract.md"
       },
       {
         "text": "CollectionBuilder",
@@ -92,6 +108,22 @@
       {
         "text": "CollectionEventName",
         "link": "/api/type-aliases/CollectionEventName.md"
+      },
+      {
+        "text": "CollectionEventsContract",
+        "link": "/api/type-aliases/CollectionEventsContract.md"
+      },
+      {
+        "text": "CollectionOptions",
+        "link": "/api/type-aliases/CollectionOptions.md"
+      },
+      {
+        "text": "CollectionReadContract",
+        "link": "/api/type-aliases/CollectionReadContract.md"
+      },
+      {
+        "text": "CollectionWriteContract",
+        "link": "/api/type-aliases/CollectionWriteContract.md"
       },
       {
         "text": "ComparisonOperator",
@@ -152,6 +184,10 @@
       {
         "text": "ExistenceOperator",
         "link": "/api/type-aliases/ExistenceOperator.md"
+      },
+      {
+        "text": "FieldDefinitionOptions",
+        "link": "/api/type-aliases/FieldDefinitionOptions.md"
       },
       {
         "text": "FieldOperator",
@@ -246,8 +282,20 @@
         "link": "/api/type-aliases/QueryOptionsWithSelect.md"
       },
       {
+        "text": "RawChangeEvent",
+        "link": "/api/type-aliases/RawChangeEvent.md"
+      },
+      {
+        "text": "RawChangeObserver",
+        "link": "/api/type-aliases/RawChangeObserver.md"
+      },
+      {
         "text": "ReplaceEvent",
         "link": "/api/type-aliases/ReplaceEvent.md"
+      },
+      {
+        "text": "RetryableOptions",
+        "link": "/api/type-aliases/RetryableOptions.md"
       },
       {
         "text": "RetryContext",
@@ -266,8 +314,20 @@
         "link": "/api/type-aliases/SchemaDefinition.md"
       },
       {
+        "text": "SchemaDrift",
+        "link": "/api/type-aliases/SchemaDrift.md"
+      },
+      {
+        "text": "SchemaDriftHandler",
+        "link": "/api/type-aliases/SchemaDriftHandler.md"
+      },
+      {
         "text": "SchemaField",
         "link": "/api/type-aliases/SchemaField.md"
+      },
+      {
+        "text": "SchemaFieldName",
+        "link": "/api/type-aliases/SchemaFieldName.md"
       },
       {
         "text": "SelectSpec",
@@ -276,6 +336,10 @@
       {
         "text": "SortSpec",
         "link": "/api/type-aliases/SortSpec.md"
+      },
+      {
+        "text": "SQLiteErrorContext",
+        "link": "/api/type-aliases/SQLiteErrorContext.md"
       },
       {
         "text": "SQLiteType",
@@ -312,6 +376,10 @@
       {
         "text": "UpdateManyEvent",
         "link": "/api/type-aliases/UpdateManyEvent.md"
+      },
+      {
+        "text": "UpdatePath",
+        "link": "/api/type-aliases/UpdatePath.md"
       },
       {
         "text": "UpdateResult",

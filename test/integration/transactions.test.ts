@@ -552,7 +552,7 @@ describe("Transactions", () => {
       const accounts = db.collection("accounts", schema)
 
       // Create multiple transactions in sequence
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 10; i += 1) {
         const tx = db.transaction()
         const txAccounts = tx.collection("accounts", schema)
 

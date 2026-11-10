@@ -6,7 +6,7 @@
 type CompoundIndex<T> = object;
 ```
 
-Defined in: [src/schema-types.ts:167](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/schema-types.ts#L167)
+Defined in: [src/schema-types.ts:167](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/schema-types.ts#L167)
 
 Compound index definition for multi-field indexes.
 
@@ -48,7 +48,7 @@ The document type
 readonly fields: ReadonlyArray<keyof T>;
 ```
 
-Defined in: [src/schema-types.ts:172](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/schema-types.ts#L172)
+Defined in: [src/schema-types.ts:172](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/schema-types.ts#L172)
 
 Array of field names to include in the index (order matters)
 
@@ -60,7 +60,7 @@ Array of field names to include in the index (order matters)
 readonly name: string;
 ```
 
-Defined in: [src/schema-types.ts:169](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/schema-types.ts#L169)
+Defined in: [src/schema-types.ts:169](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/schema-types.ts#L169)
 
 Unique name for the index (e.g., 'age_status', 'email_tenant')
 
@@ -72,6 +72,6 @@ Unique name for the index (e.g., 'age_status', 'email_tenant')
 readonly unique?: boolean;
 ```
 
-Defined in: [src/schema-types.ts:175](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/schema-types.ts#L175)
+Defined in: [src/schema-types.ts:175](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/schema-types.ts#L175)
 
 Whether to enforce uniqueness across the combination of fields

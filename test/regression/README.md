@@ -1,14 +1,12 @@
 # Audit regressions
 
-Each case names its audit finding and owning backlog task. Cases assert the
-intended behavior against real SQLite and start as `test.failing` while the bug
-exists. Inspect the actual failure to confirm the documented reason before
-checking TASK-227's criteria.
+All 30 audit regression cases are ordinary passing tests for v0.7.0. Each case
+names its audit finding and owning backlog task and asserts behavior against
+real SQLite. A7 and A18 also have passing integration/unit coverage from v0.5.1.
 
-When implementing a fix, convert its cases to plain `test` and require them to
-pass. Add regression cases before changing behavior. Never weaken the assertion
-or keep a passing case marked `test.failing`.
+Add a regression before changing behavior. Confirm that an unfixed case fails
+for its documented reason, then require it to pass after the fix. Never weaken
+assertions or leave resolved behavior marked as an expected failure.
 
-At v0.6.0 only A10 (TASK-243), A12 (TASK-245), A15 (TASK-246), and A17
-(TASK-244) may remain expected failures. At v0.7.0 none may remain. A7 and A18
-were already fixed in v0.5.1 and have passing integration/unit coverage.
+The former v0.7.0 owners A10 (TASK-243), A12 (TASK-245), A15 (TASK-246) and A17
+(TASK-244) are resolved. There are no expected-failure cases remaining.

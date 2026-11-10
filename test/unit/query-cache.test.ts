@@ -144,7 +144,7 @@ describe("Query Cache", () => {
       // Fill cache beyond MAX_CACHE_SIZE (500) with unique query structures
       // Each iteration creates a genuinely different query structure by using
       // combinations of operators and fields
-      for (let i = 0; i < 501; i++) {
+      for (let i = 0; i < 501; i += 1) {
         // Create unique query structures using combinations of operators
         if (i < 167) {
           // Simple equality with different fields creates unique structures

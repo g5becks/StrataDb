@@ -2,6 +2,35 @@
 
 StrataDB provides type-safe MongoDB-style query operators.
 
+## Typed array conditions
+
+```typescript
+await users.find({ tags: { $index: { index: 0, condition: 'admin' } } })
+await users.find({ scores: { $elemMatch: { $gte: 80, $lt: 100 } } })
+await users.find({ tags: { $elemMatch: { $startsWith: 'team-' } } })
+```
+
+`$index` requires an object with a nonnegative zero-based `index` and a typed
+scalar or operator `condition`; numeric shorthand is unsupported. `$elemMatch`
+accepts operators matching the array element type, or typed object-field queries
+for object elements. These declarations now follow the existing validated runtime.
+
+## Regular expressions
+
+```typescript
+await users.find({ name: { $regex: '^\\p{L}+$' } })
+```
+
+`$regex` accepts a pattern string using JavaScript Unicode (`u`) regex syntax.
+It performs a case-sensitive search unless anchors constrain it. RegExp objects
+and separate flags are unsupported. Null, missing and non-string values never
+match. Invalid patterns reject with `QueryError` before execution, including on
+empty collections or cached query shapes. Nested fields and `$elemMatch` also
+support the operator.
+
+The deterministic SQLite UDF is installed once per connection. Regex matching
+is non-indexable; combine it with selective indexed filters when appropriate.
+
 ## Comparison Operators
 
 ```typescript
@@ -64,13 +93,28 @@ await users.find({ tags: { $all: ['typescript', 'react'] } })
 await users.find({ tags: { $size: 3 } })
 
 // Element at index matches value
-await users.find({ scores: { $index: 0 } })  // first element
+await users.find({ scores: { $index: { index: 0, condition: { $gte: 90 } } } })
 
 // At least one element matches filter
 await users.find({
   scores: { $elemMatch: { $gte: 90 } }
 })
 ```
+
+Object arrays support field filters, dotted paths, logical filters, and nested
+array conditions. Every condition must match the same element:
+
+```typescript
+await orders.find({
+  items: { $elemMatch: { sku: 'X', qty: { $gte: 2 } } }
+})
+```
+
+Object filters skip scalar/null array elements. Non-array fields do not match
+`$elemMatch`. `$exists` inside an element distinguishes JSON null from missing
+paths. Logical `$not` and `$nor` normalize unknown comparisons to false before
+negating, just as at the document level; add an explicit `$exists: true` condition
+if missing fields should be excluded.
 
 ## Logical Operators
 
@@ -363,7 +407,15 @@ const backToPage1 = await collection.find(
 :::
 
 ::: warning
-Cursor pagination requires a `sort` option. If no sort is provided, the cursor is ignored.
+Cursor pagination requires a nonempty `sort` and exactly one nonempty `after` or
+`before` ID. Malformed or unknown cursors reject with `QueryError`.
+
+All sort keys participate in the comparison, including dotted paths. Every
+sorted find appends ascending `_id` unless it is explicitly part of the sort,
+giving the first page and later pages the same stable order. NULL and missing
+values sort first ascending and last descending. `before` selects the nearest
+previous page and returns it in the requested order. The boundary row may be
+outside the current filter, but it must still exist in the collection.
 :::
 
 ## Nested Fields

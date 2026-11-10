@@ -21,7 +21,7 @@ describe("Cache Configuration", () => {
       const collection = db.collection("test", schema)
 
       // Access the private translator to check cache size
-      const translator = (collection as any).translator
+      const { translator } = collection as any
 
       // Insert a document to trigger query translation
       collection.insertOne({ name: "test", value: 1 })
@@ -46,7 +46,7 @@ describe("Cache Configuration", () => {
 
       const collection = db.collection("test", schema)
 
-      const translator = (collection as any).translator
+      const { translator } = collection as any
 
       // Query should be cached
       collection.find({ name: "test" })
@@ -98,7 +98,7 @@ describe("Cache Configuration", () => {
       // Override: enable cache for this collection
       const collection = db.collection("test", schema, { enableCache: true })
 
-      const translator = (collection as any).translator
+      const { translator } = collection as any
 
       collection.find({ name: "test" })
       expect(translator.cacheSize).toBe(1)
@@ -120,7 +120,7 @@ describe("Cache Configuration", () => {
       // Override: disable cache for this collection
       const collection = db.collection("test", schema, { enableCache: false })
 
-      const translator = (collection as any).translator
+      const { translator } = collection as any
 
       collection.find({ name: "test" })
       expect(translator.cacheSize).toBe(0)
@@ -175,7 +175,7 @@ describe("Cache Configuration", () => {
         .cache(true) // Enable cache via builder
         .build()
 
-      const translator = (collection as any).translator
+      const { translator } = collection as any
 
       collection.find({ name: "test" })
       expect(translator.cacheSize).toBe(1)
@@ -196,7 +196,7 @@ describe("Cache Configuration", () => {
         // No .cache() call - should inherit database default
         .build()
 
-      const translator = (collection as any).translator
+      const { translator } = collection as any
 
       collection.find({ name: "test" })
       expect(translator.cacheSize).toBe(1)
@@ -217,7 +217,7 @@ describe("Cache Configuration", () => {
         .cache(false) // Override: disable cache
         .build()
 
-      const translator = (collection as any).translator
+      const { translator } = collection as any
 
       collection.find({ name: "test" })
       expect(translator.cacheSize).toBe(0)
@@ -236,7 +236,7 @@ describe("Cache Configuration", () => {
         .timestamps(true)
         .build()
 
-      const translator = (collection as any).translator
+      const { translator } = collection as any
 
       collection.find({ name: "test" })
       expect(translator.cacheSize).toBe(1)
@@ -267,7 +267,7 @@ describe("Cache Configuration", () => {
         { name: "Charlie", value: 300 },
       ])
 
-      const translator = (collection as any).translator
+      const { translator } = collection as any
 
       // First query - should populate cache
       await collection.find({ name: "Alice" })
@@ -302,7 +302,7 @@ describe("Cache Configuration", () => {
         { name: "Bob", value: 200 },
       ])
 
-      const translator = (collection as any).translator
+      const { translator } = collection as any
 
       // Multiple queries should not populate cache
       await collection.find({ name: "Alice" })

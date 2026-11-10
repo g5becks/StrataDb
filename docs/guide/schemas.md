@@ -1,5 +1,52 @@
 # Schemas
 
+Field names and compound-index fields are checked against the document type,
+including optional dotted paths such as `profile.city`. Misspellings fail during
+TypeScript compilation. For schemas assembled from runtime metadata, use the
+explicit escapes on either `createSchema<T>()` or `db.collection<T>(name)`:
+
+```typescript
+const dynamicName: string = 'extra'
+const schema = createSchema<User>()
+  .fieldUnchecked(dynamicName, { type: 'TEXT', indexed: true })
+  .compoundIndexUnchecked('dynamic-index', [dynamicName])
+  .build()
+```
+
+Unchecked names still require safe identifier segments at runtime; the escape
+only bypasses document-name type checking.
+
+## Reusing collection names
+
+Schema-based and fluent creation share one collection cache and database
+cache/retry defaults. Both enable visible timestamps by default; use
+`.timestamps(false)` explicitly to opt out. `.cache(false)` overrides the fluent
+builder's database cache default.
+
+Reusing a name returns the same instance only for an equivalent schema. A
+mismatch throws `SchemaValidationError`. Field/index declaration order and
+omitted ordinary defaults are normalized; compound-index field order remains
+significant. Validator functions must be the same function object, because
+equivalent source text cannot establish equivalent closure behavior. Keep a
+shared schema or validator reference. Collection options are fixed by the first
+successful creation; a later lookup does not reconfigure the cached instance.
+
+## Adding indexed fields to an existing collection
+
+Close and reopen the database with the updated schema. StrataDB adds missing
+virtual generated columns and their indexes in one transaction, including
+dotted fields, so existing documents are immediately queryable. An index failure
+(for example duplicate values under a new unique index) rolls the DDL back.
+
+Removed or type-changed stored generated columns are retained. By default,
+StrataDB logs a warning; configure `onSchemaDrift: change => report(change)` on
+the database to handle it, or `onSchemaDrift: "error"` to reject opening the
+collection. Drift reports identify the collection, stored column, kind, stored
+SQL type, and expected type when changed. BOOLEAN and INTEGER share SQLite's
+INTEGER representation. Unindexed document properties have no stored column
+declaration to compare. Renames, removals and type conversions require an
+explicit application migration; StrataDB does not rewrite stored data.
+
 Schemas define which fields get **generated columns** for fast querying. Fields not in the schema are still stored - they just live in the JSONB blob.
 
 ## How Storage Works

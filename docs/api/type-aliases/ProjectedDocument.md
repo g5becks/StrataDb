@@ -6,7 +6,7 @@
 type ProjectedDocument<T, K> = [K] extends [never] ? T : Pick<T, K | keyof T & "_id">;
 ```
 
-Defined in: [src/query-options-types.ts:832](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L832)
+Defined in: [src/query-projection-types.ts:242](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-projection-types.ts#L242)
 
 Helper type to extract the result type based on projection options.
 Returns Pick\<T, K | '_id'\> for select, Omit\<T, K\> for omit, or T for no projection.

@@ -1,3 +1,11 @@
+# Historical initial proposal
+
+This document preserves the original design proposal. Its examples, dependencies,
+API sketches and checklists are historical and may differ from the implementation.
+Use [the current architecture](../DESIGN.md), the API reference and guides for current behavior.
+The former root copy differed in regex sketches and related examples; those differences
+are preserved in `root-proposal-differences.patch` (root proposal to docs proposal).
+
 # StrataDB - Design Document
 
 ## Executive Summary
@@ -588,20 +596,20 @@ export type SchemaDefinition<T> = {
 - Does NOT match documents without `tags` field
 - Use `{ $or: [{ tags: [] }, { tags: { $exists: false } }] }` to match both
 
-**Regex Behavior:**
-- `$regex` requires explicit `$options: 'i'` for case-insensitive matching
-- Default is case-sensitive
-- Special regex characters must be escaped by the user
+**String Pattern Matching:**
+- `$regex` is NOT supported - use `$like`, `$startsWith`, or `$endsWith` instead
+- `$like` uses SQL LIKE syntax with `%` wildcard and `_` single character
+- `$startsWith` and `$endsWith` are convenience operators
 - Examples:
   ```typescript
-  // Case-sensitive (default)
-  { email: { $regex: /^admin@/ } }
+  // Prefix matching
+  { email: { $startsWith: 'admin@' } }
 
-  // Case-insensitive
-  { name: { $regex: /alice/, $options: 'i' } }
+  // Suffix matching
+  { email: { $endsWith: '@example.com' } }
 
-  // User must escape special characters
-  { email: { $regex: /user\+test@example\.com/ } }
+  // Contains (using LIKE wildcards)
+  { name: { $like: '%alice%' } }
   ```
 
 **Array Indexing:**
@@ -714,10 +722,9 @@ export type ComparisonOperator<T> =
 
 // String-specific operators
 export type StringOperator =
-  | { $regex: RegExp | string; $options?: 'i' } // Case-insensitive with 'i' flag
-  | { $like: string }
-  | { $startsWith: string }
-  | { $endsWith: string };
+  | { $like: string }        // SQL LIKE pattern with % and _ wildcards
+  | { $startsWith: string }  // Prefix matching
+  | { $endsWith: string };   // Suffix matching
 
 // Array operators
 export type ArrayOperator<T> = T extends ReadonlyArray<infer U>
@@ -1462,7 +1469,7 @@ throw new ValidationError(
 throw new TypeMismatchError(
   "Invalid operator '$gt' for string field 'name' at path '$.name'. " +
   "Comparison operators ($gt, $gte, $lt, $lte) only work with number and Date fields. " +
-  "For string fields, use: $regex, $like, $startsWith, or $endsWith.",
+  "For string fields, use: $like, $startsWith, or $endsWith.",
   'name',
   'number | Date',
   'string'
@@ -1598,7 +1605,7 @@ expectError(
 - [ ] Implement QueryOptions types (sort, limit, skip, projection)
 - [ ] Create query translator (filter to SQL WHERE clause)
 - [ ] Add comparison operators ($eq, $ne, $gt, $gte, $lt, $lte, $in, $nin)
-- [ ] Add string operators ($regex, $like)
+- [x] Add string operators ($like, $startsWith, $endsWith)
 - [ ] Add array operators ($all, $size, $elemMatch)
 - [ ] Add logical operators ($and, $or, $nor, $not)
 - [ ] Add existence operator ($exists)
@@ -1829,7 +1836,7 @@ const results = await users.find({
     { age: { $gte: 18, $lte: 65 } },
     { 
       $or: [
-        { name: { $regex: /^A/ } },
+        { name: { $startsWith: 'A' } },
         { tags: { $in: ['admin', 'moderator'] } }
       ]
     },
@@ -2175,7 +2182,7 @@ const users = db.collection<User>('users', schema);
 
 // Example 1: Query nested string
 const result1 = await users.find({
-  'profile.bio': { $regex: /engineer/i }
+  'profile.bio': { $like: '%engineer%' }
 });
 
 // Example 2: Query deeply nested boolean
@@ -3126,28 +3133,37 @@ describe('Query Operators', () => {
     });
   });
 
-  describe('$regex', () => {
-    test('matches pattern', async () => {
+  describe('String Operators', () => {
+    test('$endsWith matches suffix', async () => {
       using db = await createTestDB();
       const users = await seedUsers(db);
-      const results = await users.find({ 
-        email: { $regex: /@example\.com$/ } 
+      const results = await users.find({
+        email: { $endsWith: '@example.com' }
       });
-      
-      expect(results.every(u => 
+
+      expect(results.every(u =>
         u.email.endsWith('@example.com')
       )).toBe(true);
     });
 
-    test('case-insensitive matching', async () => {
+    test('$like matches pattern', async () => {
       using db = await createTestDB();
       const users = await seedUsers(db);
-      const results = await users.find({ 
-        name: { $regex: /alice/i } 
+      const results = await users.find({
+        name: { $like: '%alice%' }
       });
-      
-      expect(results.some(u => u.name === 'ALICE')).toBe(true);
-      expect(results.some(u => u.name === 'Alice')).toBe(true);
+
+      expect(results.some(u => u.name.toLowerCase().includes('alice'))).toBe(true);
+    });
+
+    test('$startsWith matches prefix', async () => {
+      using db = await createTestDB();
+      const users = await seedUsers(db);
+      const results = await users.find({
+        name: { $startsWith: 'A' }
+      });
+
+      expect(results.every(u => u.name.startsWith('A'))).toBe(true);
     });
   });
 

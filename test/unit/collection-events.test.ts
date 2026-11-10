@@ -1173,7 +1173,7 @@ describe("Collection Events - Registration Methods", () => {
     it("should emit deleteMany event after all documents are removed", async () => {
       let deletedCount = 0
       collection.on("deleteMany", (event) => {
-        deletedCount = event.deletedCount
+        ;({ deletedCount } = event)
       })
 
       await collection.insertMany([

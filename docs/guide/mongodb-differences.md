@@ -19,6 +19,14 @@ StrataDB matches explicit JSON `null` and missing fields with `{ nick: null }` o
 
 For `$nin`, an empty exclusion list matches all documents. Including `null` in the list excludes both null and missing fields: `$nin: [null]` requires a non-null value, and `$nin: [null, 'B']` additionally excludes `'B'`. These are StrataDB's explicit scalar rules; MongoDB also documents array-specific membership behavior in its [`$nin` reference](https://www.mongodb.com/docs/manual/reference/operator/query/nin/).
 
+`$in` includes null/missing scalar fields when its list contains null; an empty
+list matches nothing. Empty `$and` and `$nor` match all documents, while empty
+`$or` matches none. `$all: []` is vacuously true; a nonempty `$all` requires actual
+array elements, including actual JSON null for a null operand. `$index` requires
+an existing array element before applying its condition. Present null elements
+count as existing; out-of-bounds indices never match, even for null, `$ne`, or
+`$exists: false` conditions.
+
 The same rules apply to indexed and unindexed fields and to read and write filters. Migrating from earlier StrataDB versions can therefore change the documents matched by bulk updates and deletes.
 
 ## Philosophy

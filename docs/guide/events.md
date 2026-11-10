@@ -1,5 +1,38 @@
 # Collection Events
 
+## Raw connection changes
+
+```typescript
+const db = new Strata({
+  database: 'app.db',
+  onRawChange(change) {
+    console.log(change.operation, change.schema, change.table, change.rowid)
+  }
+})
+```
+
+`onRawChange` is opt-in and observes inserts, updates and deletes on this SQLite
+connection, including raw SQL and StrataDB writes. Its payload contains row
+metadata, not a document or StrataDB `_id`. It is separate from the collection
+events below, which remain buffered until commit.
+
+SQLite calls row hooks while the statement executes, before commit. Notifications
+can describe changes that later roll back. Hooks omit `WITHOUT ROWID` tables,
+unfiltered `DELETE` optimizations, rows removed by `INSERT OR REPLACE`, and writes
+from another connection or process. They are not a durable change log.
+
+The hook occupies the connection's single update-hook facility. Enabling capture
+when any caller hook is installed rejects with `SchemaValidationError`; disabling
+capture preserves caller hooks. Assigning native hooks afterward replaces capture.
+StrataDB removes only its own hooks when closing.
+
+Do not query the connection inside the observer: Bun rejects reentrant database
+use while the hook runs. Defer such work with `queueMicrotask` until the statement
+ends; a later read may see further changes and cannot recover a deleted row.
+Native hooks normally report thrown exceptions as uncaught exceptions. StrataDB
+catches synchronous throws and rejected observer promises and reports them through
+`console.error`, keeping them outside the write's result.
+
 StrataDB collections emit events when documents are created, updated, or deleted. This enables reactive patterns like audit logging, cache invalidation, and real-time notifications.
 
 ## Quick Start
@@ -48,18 +81,26 @@ await users.deleteOne('user-id')
 |------------|---------|---------|
 | `insert` | After `insertOne` succeeds | `{ document: T }` |
 | `insertMany` | After `insertMany` succeeds | `{ documents: readonly T[], insertedCount: number }` |
-| `update` | After `updateOne` succeeds | `{ filter: string \| QueryFilter<T>, update: Partial<T>, document: T \| null, upserted: boolean }` |
-| `updateMany` | After `updateMany` succeeds | `{ filter: QueryFilter<T>, update: Partial<T>, matchedCount: number, modifiedCount: number }` |
+| `update` | After a successful update or upsert | `{ filter: string \| QueryFilter<T>, update: DocumentUpdate<T>, document: T, upserted: boolean }` |
+| `updateMany` | After `updateMany` succeeds | `{ filter: QueryFilter<T>, update: DocumentUpdate<T>, matchedCount: number, modifiedCount: number, ids: readonly string[] }` |
 | `replace` | After `replaceOne` succeeds | `{ filter: string \| QueryFilter<T>, document: T \| null }` |
-| `delete` | After `deleteOne` succeeds | `{ filter: string \| QueryFilter<T>, deleted: boolean }` |
-| `deleteMany` | After `deleteMany` succeeds | `{ filter: QueryFilter<T>, deletedCount: number }` |
+| `delete` | After `deleteOne` attempts deletion | `{ filter, deleted: true, _id: string, document?: T }` or `{ filter, deleted: false, _id: null }` |
+| `deleteMany` | After `deleteMany` succeeds | `{ filter: QueryFilter<T>, deletedCount: number, ids: readonly string[] }` |
 | `findOneAndDelete` | After `findOneAndDelete` succeeds | `{ filter: string \| QueryFilter<T>, document: T \| null }` |
-| `findOneAndUpdate` | After `findOneAndUpdate` succeeds | `{ filter: string \| QueryFilter<T>, update: Partial<T>, document: T \| null, upserted: boolean }` |
+| `findOneAndUpdate` | After `findOneAndUpdate` succeeds | `{ filter: string \| QueryFilter<T>, update: DocumentUpdate<T>, document: T \| null, upserted: boolean }` |
 | `findOneAndReplace` | After `findOneAndReplace` succeeds | `{ filter: string \| QueryFilter<T>, document: T \| null, upserted: boolean }` |
 | `drop` | After collection is dropped | `{ name: string }` |
 | `error` | When an event listener fails | `{ operation: string, error: Error, context?: unknown }` |
 
 ## Event Timing
+
+`deleteOne(filter, { includeDocument: true })` includes a snapshot of the deleted
+document, respecting `timestamps(false)`. Without that option the payload carries
+only the resolved ID. A miss emits `deleted: false` and `_id: null` for either
+filter form. `update` is emitted only for a successful update or upsert, so its
+document is non-null. Batch `ids` contain actual affected rows, including an empty
+array for no changes; their SQLite RETURNING order is unspecified. Trigger-ignored
+updates count as matched but are excluded from `modifiedCount` and `ids`.
 
 Events are delivered synchronously after commit, in listener registration order, at most once per listener registration and emitted event. Inside `execute()` or a manual transaction, delivery waits for the outermost commit; rollback discards its events. Nested savepoint commits defer delivery to their parent.
 

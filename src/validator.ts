@@ -123,7 +123,7 @@ export function wrapStandardSchema<T>(
 
     // Validation failed - convert Standard Schema issues to ValidationError
     // Take the first issue for the ValidationError
-    const firstIssue = result.issues[0]
+    const [firstIssue] = result.issues
 
     if (!firstIssue) {
       throw new ValidationError(
@@ -162,6 +162,7 @@ function extractFieldPath(
   return path
     .map((segment) => {
       // Check if segment is a PathSegment object with key property
+      // biome-ignore lint/suspicious/noUnnecessaryConditions: external Standard Schema implementations can supply malformed null segments
       if (typeof segment === "object" && segment !== null && "key" in segment) {
         return String(segment.key)
       }
@@ -193,6 +194,7 @@ function extractValueAtPath(
   for (const segment of path) {
     // Get the key from segment
     const key =
+      // biome-ignore lint/suspicious/noUnnecessaryConditions: retain runtime null guard for external validator input
       typeof segment === "object" && segment !== null && "key" in segment
         ? segment.key
         : segment

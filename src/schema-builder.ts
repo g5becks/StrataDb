@@ -1,6 +1,9 @@
 import type { Document } from "./core-types.js"
-import type { JsonPath } from "./path-types.js"
-import type { SchemaBuilder } from "./schema-builder-types.js"
+import type { JsonPath, SchemaFieldName } from "./path-types.js"
+import type {
+  FieldDefinitionOptions,
+  SchemaBuilder,
+} from "./schema-builder-types.js"
 import type {
   CompoundIndex,
   SchemaDefinition,
@@ -78,16 +81,16 @@ class SchemaBuilderImpl<T extends Document> implements SchemaBuilder<T> {
    *   .field('user.settings.theme', { type: 'TEXT', indexed: true })
    * ```
    */
-  field<K extends keyof T | string>(
+  field<K extends SchemaFieldName<T>>(
     name: K,
-    options: {
-      readonly path?: JsonPath
-      readonly type: string
-      readonly nullable?: boolean
-      readonly indexed?: boolean
-      readonly unique?: boolean
-      readonly default?: unknown
-    }
+    options: FieldDefinitionOptions
+  ): SchemaBuilder<T> {
+    return this.fieldUnchecked(name, options)
+  }
+
+  fieldUnchecked(
+    name: string,
+    options: FieldDefinitionOptions
   ): SchemaBuilder<T> {
     // If path is explicitly provided, use it
     // Otherwise, if name contains a dot, it's a nested field - use as JSON path
@@ -126,7 +129,7 @@ class SchemaBuilderImpl<T extends Document> implements SchemaBuilder<T> {
    *
    * @remarks
    * Field names can use dot notation to reference nested properties.
-   * The field names must match those used in .field() declarations.
+   * Checked field names must be document keys or dotted document paths.
    * This allows compound indexes across both top-level and nested fields.
    *
    * @example
@@ -144,7 +147,15 @@ class SchemaBuilderImpl<T extends Document> implements SchemaBuilder<T> {
    */
   compoundIndex(
     name: string,
-    fields: readonly (keyof T | string)[],
+    fields: readonly SchemaFieldName<T>[],
+    options?: { readonly unique?: boolean }
+  ): SchemaBuilder<T> {
+    return this.compoundIndexUnchecked(name, fields, options)
+  }
+
+  compoundIndexUnchecked(
+    name: string,
+    fields: readonly string[],
     options?: { readonly unique?: boolean }
   ): SchemaBuilder<T> {
     const index: CompoundIndex<T> = {

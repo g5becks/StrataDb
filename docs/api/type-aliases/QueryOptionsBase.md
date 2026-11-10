@@ -6,7 +6,7 @@
 type QueryOptionsBase<T> = object;
 ```
 
-Defined in: [src/query-options-types.ts:540](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L540)
+Defined in: [src/query-options-types.ts:237](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-options-types.ts#L237)
 
 Base query options without projection (returns full document type).
 
@@ -26,7 +26,7 @@ The document type being queried
 readonly cursor?: CursorSpec;
 ```
 
-Defined in: [src/query-options-types.ts:561](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L561)
+Defined in: [src/query-options-types.ts:258](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-options-types.ts#L258)
 
 Cursor-based pagination configuration.
 Requires `sort` to be set. More efficient than skip/limit for large datasets.
@@ -39,7 +39,7 @@ Requires `sort` to be set. More efficient than skip/limit for large datasets.
 readonly limit?: number;
 ```
 
-Defined in: [src/query-options-types.ts:545](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L545)
+Defined in: [src/query-options-types.ts:242](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-options-types.ts#L242)
 
 Maximum number of documents to return
 
@@ -51,7 +51,7 @@ Maximum number of documents to return
 readonly retry?: RetryOptions | false;
 ```
 
-Defined in: [src/query-options-types.ts:574](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L574)
+Defined in: [src/query-options-types.ts:271](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-options-types.ts#L271)
 
 Retry configuration for this operation.
 Overrides collection and database-level retry settings.
@@ -65,7 +65,7 @@ Pass `false` to disable retries for this operation.
 readonly search?: TextSearchSpec<T>;
 ```
 
-Defined in: [src/query-options-types.ts:555](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L555)
+Defined in: [src/query-options-types.ts:252](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-options-types.ts#L252)
 
 Multi-field text search configuration.
 Searches across specified fields with OR logic (match any field).
@@ -79,7 +79,7 @@ Combined with filter using AND logic.
 readonly signal?: AbortSignal;
 ```
 
-Defined in: [src/query-options-types.ts:567](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L567)
+Defined in: [src/query-options-types.ts:264](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-options-types.ts#L264)
 
 AbortSignal for cancelling the operation.
 When the signal is aborted, the operation will throw an AbortedError.
@@ -92,7 +92,7 @@ When the signal is aborted, the operation will throw an AbortedError.
 readonly skip?: number;
 ```
 
-Defined in: [src/query-options-types.ts:548](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L548)
+Defined in: [src/query-options-types.ts:245](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-options-types.ts#L245)
 
 Number of documents to skip (for pagination)
 
@@ -104,6 +104,6 @@ Number of documents to skip (for pagination)
 readonly sort?: SortSpec<T>;
 ```
 
-Defined in: [src/query-options-types.ts:542](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-options-types.ts#L542)
+Defined in: [src/query-options-types.ts:239](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-options-types.ts#L239)
 
 Sort order for results (MongoDB-style: 1 = asc, -1 = desc)

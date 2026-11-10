@@ -2,7 +2,7 @@
 
 # Class: SchemaValidationError
 
-Defined in: [src/errors.ts:122](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L122)
+Defined in: [src/errors.ts:123](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L123)
 
 Error thrown when document fails schema validation.
 
@@ -40,7 +40,7 @@ new SchemaValidationError(
 ): SchemaValidationError;
 ```
 
-Defined in: [src/errors.ts:132](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L132)
+Defined in: [src/errors.ts:133](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L133)
 
 #### Parameters
 
@@ -72,7 +72,7 @@ Defined in: [src/errors.ts:132](https://github.com/g5becks/StrataDb/blob/b779de7
 readonly category: "validation";
 ```
 
-Defined in: [src/errors.ts:123](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L123)
+Defined in: [src/errors.ts:124](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L124)
 
 Error category for grouping related error types
 
@@ -88,7 +88,7 @@ Error category for grouping related error types
 readonly cause?: unknown;
 ```
 
-Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L45)
+Defined in: [src/errors.ts:46](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L46)
 
 The cause of the error.
 
@@ -104,7 +104,7 @@ The cause of the error.
 readonly code: "SCHEMA_VALIDATION_ERROR" = "SCHEMA_VALIDATION_ERROR";
 ```
 
-Defined in: [src/errors.ts:124](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L124)
+Defined in: [src/errors.ts:125](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L125)
 
 Unique error code for programmatic identification
 
@@ -120,7 +120,7 @@ Unique error code for programmatic identification
 readonly context?: SQLiteErrorContext;
 ```
 
-Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L44)
+Defined in: [src/errors.ts:45](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L45)
 
 #### Inherited from
 
@@ -134,7 +134,7 @@ Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/b779de76
 readonly errno?: number;
 ```
 
-Defined in: [src/errors.ts:42](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L42)
+Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L43)
 
 #### Inherited from
 
@@ -148,7 +148,7 @@ Defined in: [src/errors.ts:42](https://github.com/g5becks/StrataDb/blob/b779de76
 readonly field?: string;
 ```
 
-Defined in: [src/errors.ts:127](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L127)
+Defined in: [src/errors.ts:128](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L128)
 
 Optional field name that failed validation
 
@@ -188,7 +188,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1074
 readonly sqliteCodeName?: string;
 ```
 
-Defined in: [src/errors.ts:43](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L43)
+Defined in: [src/errors.ts:44](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L44)
 
 #### Inherited from
 
@@ -216,7 +216,7 @@ Defined in: docs/node\_modules/typescript/lib/lib.es5.d.ts:1076
 readonly value?: unknown;
 ```
 
-Defined in: [src/errors.ts:130](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/errors.ts#L130)
+Defined in: [src/errors.ts:131](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/errors.ts#L131)
 
 The value that failed validation
 

@@ -6,7 +6,7 @@
 type InsertOneResult<T> = T;
 ```
 
-Defined in: [src/collection-types.ts:32](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-types.ts#L32)
+Defined in: [src/collection-types.ts:24](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/collection-types.ts#L24)
 
 Result of inserting a single document into a collection.
 

@@ -10,7 +10,7 @@ export default defineConfig({
   fixedExtension: true,
   sourcemap: true,
   deps: {
-    neverBundle: ["bun:sqlite", /^node:/],
+    neverBundle: ["bun:sqlite", /^node:/u],
     onlyBundle: ["type-fest", "tagged-tag"],
   },
 })

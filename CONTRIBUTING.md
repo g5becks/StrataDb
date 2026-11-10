@@ -11,6 +11,30 @@ bun run test:types
 bun run test:consumer
 ```
 
+## Benchmark history
+
+The `Benchmarks` workflow runs manually and Sundays at 03:45 UTC with Bun 1.4.4.
+It runs `bun run bench:all` and uploads a `benchmarks-<sha>` artifact for 90 days.
+`environment.txt` identifies the source revision, Bun, OS and SQLite versions.
+`bench-all.txt` contains query/CRUD/batch means, ranges and percentiles; CRUD
+fresh-database cases include setup and cleanup in their timed operation, while
+shared read fixtures are seeded outside the timed callback. Runner errors fail
+the job; a failure artifact can contain partial output and is not a valid baseline.
+
+The separate `statement-cache.json` and `projection.json` files contain fixed
+fixtures, warmup/iteration counts, five trial samples and medians. Compare the
+same protocol on the same runtime, OS and hardware; inspect the sample spread
+before interpreting small changes. Compare these JSON medians with their own
+history, rather than means from a different CRUD workload.
+
+Actions is currently billing-locked, so scheduled jobs cannot run. Reproduce
+locally with `bun run bench:all`, `bun bench/statement-cache.bench.ts` and
+`bun bench/projection.bench.ts`, recording the revision and environment. The
+TASK-267 local baseline on Bun 1.4.4/Apple M5/macOS arm64 measured warm cached
+translation 179.50 ns, findById 866.10 ns, indexed findOne 1.51 µs and atomic
+findOneAndUpdate 6.24 µs (means). Fixed-protocol medians and before/after numbers
+are retained in the performance task notes and the performance guide.
+
 ## Local CI when GitHub Actions is unavailable
 
 The account currently has a GitHub Actions billing lock. Jobs cannot start, so
@@ -25,6 +49,29 @@ The script must print `RESULT: PASS`. It tests macOS on the host and Linux in
 Docker, pinned and latest Bun, and TypeScript 5.9/6.0/7.0 with 7.1-beta advisory.
 Docker/Colima must already be running. Preserve its result table and SHA in the
 release PR. Update this script whenever the CI workflow's checks change.
+
+## Differential query testing
+
+`bun test` includes 500 fast-check cases with fixed seed `20261110`. The suite
+compares real SQLite queries with an independent evaluator across indexed and
+unindexed fields, cache on/off, nested/logical filters and scalar/array operators.
+Each generated filter is repeated and its literals varied to exercise cache hits.
+
+The nightly/on-demand `query-properties.yml` workflow selects and prints a random
+seed. While Actions is locked, exercise that path locally with:
+
+```bash
+STRATADB_PROPERTY_RANDOM=1 bun test test/property/query-differential.test.ts
+```
+
+The output prints a replay command. To reproduce a failure, copy its seed:
+
+```bash
+STRATADB_PROPERTY_SEED=<seed> bun test test/property/query-differential.test.ts
+```
+
+Keep minimized counterexamples as ordinary focused regressions. Fix production
+queries rather than changing the independent semantics or narrowing generators.
 
 ## One-time npm trusted-publisher setup
 

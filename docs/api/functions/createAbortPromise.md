@@ -6,7 +6,7 @@
 function createAbortPromise(signal?): object;
 ```
 
-Defined in: [src/abort-utils.ts:58](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/abort-utils.ts#L58)
+Defined in: [src/abort-utils.ts:58](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/abort-utils.ts#L58)
 
 Creates a promise that rejects when the signal is aborted.
 

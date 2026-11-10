@@ -7,8 +7,8 @@ import { SQLiteQueryTranslator } from "../../src/sqlite-query-translator"
 // TOP-LEVEL REGEX CONSTANTS (required by linter for performance)
 // ============================================================================
 
-const SQL_LINE_REGEX = /^SQL:/
-const PARAMS_LINE_REGEX = /^Parameters:/
+const SQL_LINE_REGEX = /^SQL:/u
+const PARAMS_LINE_REGEX = /^Parameters:/u
 
 // ============================================================================
 // TEST SCHEMAS AND TYPES
@@ -319,7 +319,7 @@ describe("SQLiteQueryTranslator - Logical Operators", () => {
     const result = userTranslator.translate(filter)
 
     expect(result.sql).toBe(
-      "NOT (jsonb_extract(body, ?) = ? OR jsonb_extract(body, ?) = ?)"
+      "NOT COALESCE((jsonb_extract(body, ?) = ? OR jsonb_extract(body, ?) = ?), 0)"
     )
     expect(result.params).toEqual(["$.status", "inactive", "$.active", false])
   })
@@ -330,7 +330,7 @@ describe("SQLiteQueryTranslator - Logical Operators", () => {
     }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe("NOT (jsonb_extract(body, ?) = ?)")
+    expect(result.sql).toBe("NOT COALESCE((jsonb_extract(body, ?) = ?), 0)")
     expect(result.params).toEqual(["$.status", "inactive"])
   })
 
@@ -340,7 +340,7 @@ describe("SQLiteQueryTranslator - Logical Operators", () => {
     }
     const result = userTranslator.translate(filter)
 
-    expect(result.sql).toBe('NOT (("_age" >= ? AND "_age" < ?))')
+    expect(result.sql).toBe('NOT COALESCE((("_age" >= ? AND "_age" < ?)), 0)')
     expect(result.params).toEqual([18, 65])
   })
 
@@ -383,10 +383,10 @@ describe("SQLiteQueryTranslator - Nested Queries", () => {
     // Implementation wraps:
     // - Field operators consistently: (_field op ?)
     // - Logical operators: (condition1 OP condition2)
-    // - NOT: NOT (condition) without extra outer parens
+    // - NOT normalizes an unknown comparison to false before negating
     // This ensures predictable SQL generation with proper precedence
     expect(result.sql).toBe(
-      '((("_name" IS NULL OR "_name" != ?)) AND ((("_age" >= ?) AND ("_age" < ?)) OR NOT (jsonb_extract(body, ?) = ?)))'
+      '((("_name" IS NULL OR "_name" != ?)) AND ((("_age" >= ?) AND ("_age" < ?)) OR NOT COALESCE((jsonb_extract(body, ?) = ?), 0)))'
     )
     expect(result.params).toEqual(["System", 18, 65, "$.status", "suspended"])
   })
@@ -405,7 +405,7 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const options: QueryOptions<User> = { sort: { name: 1 } }
     const result = userTranslator.translateOptions(options)
 
-    expect(result.sql).toBe('ORDER BY "_name" ASC')
+    expect(result.sql).toBe('ORDER BY "_name" ASC NULLS FIRST')
     expect(result.params).toEqual([])
   })
 
@@ -416,7 +416,7 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const result = userTranslator.translateOptions(options)
 
     expect(result.sql).toBe(
-      'ORDER BY "_age" DESC, "_name" ASC, jsonb_extract(body, ?) ASC'
+      'ORDER BY "_age" DESC NULLS LAST, "_name" ASC NULLS FIRST, jsonb_extract(body, ?) ASC NULLS FIRST'
     )
     expect(result.params).toEqual(["$.status"])
   })
@@ -428,7 +428,7 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const result = userTranslator.translateOptions(options)
 
     expect(result.sql).toBe(
-      "ORDER BY jsonb_extract(body, ?) ASC, jsonb_extract(body, ?) DESC"
+      "ORDER BY jsonb_extract(body, ?) ASC NULLS FIRST, jsonb_extract(body, ?) DESC NULLS LAST"
     )
     expect(result.params).toEqual(["$.status", "$.active"])
   })
@@ -466,7 +466,7 @@ describe("SQLiteQueryTranslator - Query Options", () => {
     const result = userTranslator.translateOptions(options)
 
     expect(result.sql).toBe(
-      'ORDER BY "_age" DESC, "_name" ASC LIMIT ? OFFSET ?'
+      'ORDER BY "_age" DESC NULLS LAST, "_name" ASC NULLS FIRST LIMIT ? OFFSET ?'
     )
     expect(result.params).toEqual([10, 20])
   })

@@ -7,6 +7,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-10
+
+### Breaking changes
+
+- Array query types now match runtime forms: replace numeric `$index: 0` with `$index: { index: 0, condition: valueOrOperators }`. Numeric shorthand already rejected at runtime and now also fails type checking. Scalar `$elemMatch` accepts typed number/string/array operators; object element filters retain typed field and dotted-path operands. Runtime validation and SQL are unchanged.
+
+- Circular/non-serializable documents now reject with `ValidationError` instead of storing circular-reference markers. Batch inserts reject serialization failures before writing. Runtime dependencies are deepmerge-ts 8, p-retry 9 and Standard Schema 1.1; fast-safe-stringify was removed. Retry callback order is now `shouldConsumeRetry` → `onFailedAttempt` → `shouldRetry`, `RetryContext` includes `retryDelay`, and an aborted signal wins over attempt errors and suppresses remaining callbacks. Review custom retry callbacks and manually constructed contexts.
+
+- Differential testing corrected query edge cases: empty `$or` matches nothing; `$in` lists containing null include null/missing scalar fields; `$all` can require actual null array elements; `$index` requires an existing array element and distinguishes present null from a missing index. Review bulk-write filters using these forms.
+
+- Update APIs and event payloads use `DocumentUpdate<T>`, a union of plain deep merges and atomic operator forms, with immutable ID/timestamp metadata. Consumers inspecting `event.update` should narrow the operator form before reading plain fields. Mixed forms, overlapping paths and malformed operators reject with `QueryError`.
+
+- Cached collection lookups reject schema mismatches with `SchemaValidationError`, including different validator function identities. Fluent collections now share cache identity and inherit database retries and the default enabled timestamps. Use the same schema/validator when reusing a name; opt out of timestamps explicitly with `.timestamps(false)` if required.
+
+- Checked schema and collection-builder field declarations and compound-index fields accept only document string keys or dotted `DocumentPath` values. Correct misspellings; use `fieldUnchecked` and `compoundIndexUnchecked` for intentionally dynamic names. These explicit escapes still undergo runtime identifier validation.
+
+- Cursor pagination rejects unknown/malformed IDs and requires a nonempty sort. Every sorted find appends ascending `_id` unless explicitly sorted, so tied rows have a stable order from the first page. `before` returns the nearest previous page in the requested order. Review clients that relied on invalid cursors returning the first page or on insertion order for ties.
+
+- Logical `$not` and `$nor` treat an unknown (null/missing) comparison as false before negation, including inside `$elemMatch`. Review negated bulk-write filters that relied on SQL NULL dropping missing fields; add `$exists: true` when presence is required.
+
+- Successful `update` event documents are now typed as non-null, and delete events discriminate `_id: string` on success from `_id: null` on a miss. Batch update/delete payloads require `ids`. Update manually constructed event fixtures accordingly. `deleteOne` now emits a miss event consistently for both ID and object filters.
+
+### Added
+
+- Named public option/context and contract types are available from the package root: `CollectionOptions`, `RetryableOptions`, `SQLiteErrorContext`, collection contract groups, `UpdatePath` and `ArrayValue`. Generated API pages document and link these signatures without TypeDoc validation warnings.
+
+- `$regex` accepts a JavaScript Unicode regex string through a deterministic SQLite UDF registered once per connection. Invalid patterns reject with `QueryError`, including cache hits and empty tables. Matching is case-sensitive, applies to strings only and cannot use an index.
+
+- Opt-in `onRawChange` observes SQLite row metadata for this connection, including raw SQL. It owns the connection's hooks exclusively, isolates observer exceptions and reports changes before commit (including later rollbacks). It does not replace commit-buffered collection events; see the events guide for hook limits.
+
+- Each collection keeps a configurable prepared-statement LRU (64 entries by default) via database/collection `statementCacheSize`. Statements are finalized on eviction, DDL, drop and close; rolled-back drops preserve collection identity. Simple `findOne` calls use a direct single-row path while complex options retain the general query path. Reproducible 50k-read benchmarks show more than 5× lower latency than v0.6.0 on the recorded host; optional translator caching remains separately configurable.
+
+- A 500-case seeded fast-check differential suite compares SQLite against an independent query evaluator, repeating and varying literals across indexed/unindexed and cached/uncached collections. A SHA-pinned nightly workflow prints a random replay seed; local replay instructions and minimized regressions are retained.
+
+- `new Strata({ database: path, readonly: true })` opens an existing file with Bun's read-only flag alone. Collection setup validates stored columns without DDL; missing tables/indexed columns require a writable migration. All write APIs reject with nonretryable-by-default `DatabaseError` (`sqliteCode: 8`), while reads and read transactions remain available. The policy is connection-scoped for supplied Bun connections.
+
+- Atomic `$set`, `$unset`, `$inc`, `$push` and `$pull` updates for single, find-and-update, batch and upsert APIs. Operator writes use one JSONB UPDATE per operation, preserving validation, transaction/event buffering and metadata. `$push` appends one value; `$pull` removes every structurally equal JSON value (object key order ignored, array order and JSON types preserved). Missing numeric/array fields initialize for increment/push; null or incompatible targets reject. Dotted scalar equality filters now seed nested upsert documents correctly.
+
+- Cursor predicates compare all sort keys lexicographically, including nested fields and NULL/missing values (NULLS FIRST ascending, NULLS LAST descending). Seeded fast-check pagination walks verify forward/backward completeness against an independent reference comparator.
+
+- `$elemMatch` supports object fields, dotted paths, nested field operators and arrays, and logical object filters. All conditions apply to the same element. Scalar forms remain supported, non-array input is ignored safely, and object filters skip non-object elements.
+
+- Delete events identify the resolved row, with optional deleted-document snapshots through `deleteOne(filter, { includeDocument: true })`. Batch events include IDs from actual SQLite RETURNING rows; updates ignored by a trigger are excluded from IDs and modified counts. ID order follows SQLite RETURNING and is not guaranteed. Commit buffering and rollback suppression are preserved.
+
+- Reopening a collection adds newly declared indexed fields as virtual generated columns and creates their indexes atomically. Existing rows become queryable through the new fields; affected indexes left by earlier failed evolution attempts are rebuilt. Bun's query cache is cleared after DDL. Removed or type-changed stored generated columns are retained and reported through `onSchemaDrift` (default console warning); set it to `"error"` to require an explicit migration.
+
+### Fixed
+
+- Repaired CRUD benchmark fixture lifetime and awaited setup/results while retaining every case. All benchmark runners now propagate errors instead of reporting a successful run with failed cases.
+
+- `updateOne` now forwards operation-level retry overrides. `retry: false` suppresses inherited retries, and an explicit policy/predicate overrides defaults while retaining promise rejections and atomic failure behavior.
+
+### Performance
+
+- Inclusion projections (`select` and inclusion `projection`) construct only the requested JSON in SQLite. Literal property names, missing fields, JSON types and timestamp visibility are preserved; exclusion projections retain their JavaScript path. A 50-field/two-field benchmark improved from 9.99 to 8.46 µs/read (15% lower latency) on Bun 1.4.4, macOS arm64.
+
+### Tooling
+
+- Added a SHA-pinned weekly/manual benchmark workflow with environment metadata, strict query/CRUD/batch results and fixed-protocol JSON artifacts. CONTRIBUTING explains local reproduction and how to compare results while Actions is unavailable.
+
+- Consolidated the current architecture in `docs/DESIGN.md`, archived historical proposals under `docs/design/`, removed duplicate root designs and refreshed AGENTS/Claude/Copilot guidance for current APIs and release verification.
+
+- Split collection state/DDL/read/write logic, query caching/operators and public contracts into focused source modules. All source files remain below 600 lines. Event registration uses a typed facade, and collection complexity suppressions were removed without changing behavior.
+
+- Updated Biome to 2.6.6, Ultracite to 8.1.1, commitlint to 21.2.4, validator test libraries and remaining development tools. Kept TypeScript 7.0.2 for development and TypeScript 6.0.3 for TypeDoc; 7.1 remains advisory beta. Lint configuration preserves meaningful object order, public type/method styles and sequential database operations.
+
 ## [0.6.0] - 2026-11-09
 
 ### Breaking changes

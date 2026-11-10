@@ -1,14 +1,14 @@
-import type { Database as SQLiteDatabase } from "bun:sqlite"
 import type { Collection } from "./collection-types.js"
 import type { Document } from "./core-types.js"
-import type { JsonPath } from "./path-types.js"
+import type { JsonPath, SchemaFieldName } from "./path-types.js"
+import type { FieldDefinitionOptions } from "./schema-builder-types.js"
 import type {
   CompoundIndex,
   SchemaDefinition,
   SchemaField,
+  SQLiteType,
   TypeScriptToSQLite,
 } from "./schema-types.js"
-import { SQLiteCollection } from "./sqlite-collection.js"
 
 /**
  * Fluent builder for creating collections with inline schema definition.
@@ -34,16 +34,22 @@ export type CollectionBuilder<T extends Document> = {
   /**
    * Define an indexed field with type checking.
    */
-  field<K extends keyof T>(
+  field<K extends SchemaFieldName<T>>(
     name: K,
     options: {
       readonly path?: JsonPath
-      readonly type: TypeScriptToSQLite<T[K]>
+      readonly type: K extends keyof T ? TypeScriptToSQLite<T[K]> : SQLiteType
       readonly nullable?: boolean
       readonly indexed?: boolean
       readonly unique?: boolean
-      readonly default?: T[K]
+      readonly default?: K extends keyof T ? T[K] : unknown
     }
+  ): CollectionBuilder<T>
+
+  /** Declare dynamic names with runtime identifier validation on build. */
+  fieldUnchecked(
+    name: string,
+    options: FieldDefinitionOptions
   ): CollectionBuilder<T>
 
   /**
@@ -51,7 +57,14 @@ export type CollectionBuilder<T extends Document> = {
    */
   compoundIndex(
     name: string,
-    fields: readonly (keyof T)[],
+    fields: readonly SchemaFieldName<T>[],
+    options?: { readonly unique?: boolean }
+  ): CollectionBuilder<T>
+
+  /** Explicit escape hatch for dynamic compound-index field names. */
+  compoundIndexUnchecked(
+    name: string,
+    fields: readonly string[],
     options?: { readonly unique?: boolean }
   ): CollectionBuilder<T>
 
@@ -101,38 +114,44 @@ export type CollectionBuilder<T extends Document> = {
 export class CollectionBuilderImpl<T extends Document>
   implements CollectionBuilder<T>
 {
-  private readonly db: SQLiteDatabase
-  private readonly collectionName: string
-  private readonly idGenerator: () => string
+  private readonly createCollection: (
+    schema: SchemaDefinition<T>,
+    enableCache: boolean
+  ) => Collection<T>
   private readonly fieldDefs: SchemaField<T, keyof T>[] = []
   private readonly compoundIndexDefs: CompoundIndex<T>[] = []
-  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: used in timestamps() and build()
-  private enableTimestamps = false
+  private enableTimestamps: boolean | undefined
   private validatorFn: ((doc: unknown) => doc is T) | undefined
   private enableCacheOption: boolean
 
   constructor(
-    db: SQLiteDatabase,
-    collectionName: string,
-    idGenerator: () => string,
+    createCollection: (
+      schema: SchemaDefinition<T>,
+      enableCache: boolean
+    ) => Collection<T>,
     defaultEnableCache: boolean
   ) {
-    this.db = db
-    this.collectionName = collectionName
-    this.idGenerator = idGenerator
+    this.createCollection = createCollection
     this.enableCacheOption = defaultEnableCache
   }
 
-  field<K extends keyof T>(
+  field<K extends SchemaFieldName<T>>(
     name: K,
     options: {
       readonly path?: JsonPath
-      readonly type: TypeScriptToSQLite<T[K]>
+      readonly type: K extends keyof T ? TypeScriptToSQLite<T[K]> : SQLiteType
       readonly nullable?: boolean
       readonly indexed?: boolean
       readonly unique?: boolean
-      readonly default?: T[K]
+      readonly default?: K extends keyof T ? T[K] : unknown
     }
+  ): CollectionBuilder<T> {
+    return this.fieldUnchecked(name, options)
+  }
+
+  fieldUnchecked(
+    name: string,
+    options: FieldDefinitionOptions
   ): CollectionBuilder<T> {
     // Build field object, only adding defined properties
     const field = {
@@ -163,7 +182,15 @@ export class CollectionBuilderImpl<T extends Document>
 
   compoundIndex(
     name: string,
-    fields: readonly (keyof T)[],
+    fields: readonly SchemaFieldName<T>[],
+    options?: { readonly unique?: boolean }
+  ): CollectionBuilder<T> {
+    return this.compoundIndexUnchecked(name, fields, options)
+  }
+
+  compoundIndexUnchecked(
+    name: string,
+    fields: readonly string[],
     options?: { readonly unique?: boolean }
   ): CollectionBuilder<T> {
     const index = { name, fields } as CompoundIndex<T>
@@ -192,7 +219,9 @@ export class CollectionBuilderImpl<T extends Document>
   build(): Collection<T> {
     const schema = {
       fields: this.fieldDefs,
-      timestamps: this.enableTimestamps,
+      ...(this.enableTimestamps === undefined
+        ? {}
+        : { timestamps: this.enableTimestamps }),
     } as SchemaDefinition<T>
 
     if (this.compoundIndexDefs.length > 0) {
@@ -205,14 +234,6 @@ export class CollectionBuilderImpl<T extends Document>
         this.validatorFn
     }
 
-    return new SQLiteCollection<T>(
-      this.db,
-      this.collectionName,
-      schema,
-      this.idGenerator,
-      this.enableCacheOption,
-      undefined,
-      undefined
-    )
+    return this.createCollection(schema, this.enableCacheOption)
   }
 }

@@ -1,5 +1,6 @@
 import { InvalidQueryOperatorError, QueryError } from "./errors.js"
 import { assertNonNegativeInt, fieldPath } from "./field-resolver.js"
+import { regexPattern } from "./sqlite-regex.js"
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return (
@@ -36,6 +37,9 @@ function validateCondition(value: unknown): void {
 
 function validateOperator(operator: string, value: unknown): void {
   switch (operator) {
+    case "$regex":
+      regexPattern(value)
+      return
     case "$eq":
     case "$ne":
     case "$gt":
@@ -144,7 +148,9 @@ function validateElement(value: unknown): void {
     throw new QueryError("$elemMatch requires a nonempty object")
   }
   for (const [key, operand] of Object.entries(value)) {
-    if (key.startsWith("$")) {
+    if (["$and", "$or", "$nor", "$not"].includes(key)) {
+      validateQuery({ [key]: operand })
+    } else if (key.startsWith("$")) {
       validateOperator(key, operand)
     } else {
       fieldPath(key)

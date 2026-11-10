@@ -354,8 +354,7 @@ describe("Complex Query Integration Tests", () => {
       expect(results[0].name).toBe("Mouse")
     })
 
-    // biome-ignore lint/suspicious/noSkippedTests: TODO: $elemMatch translation needs debugging - SQL syntax error
-    it.skip("should handle $elemMatch operator with complex conditions", async () => {
+    it("should handle $elemMatch operator with complex conditions", async () => {
       type Order = Document<{
         customer: string
         items: Array<{ name: string; quantity: number; price: number }>
@@ -364,7 +363,7 @@ describe("Complex Query Integration Tests", () => {
 
       const schema = createSchema<Order>()
         .field("customer", { type: "TEXT", indexed: true })
-        .field("items", { type: "JSON" })
+        .field("items", { type: "BLOB" })
         .field("total", { type: "REAL", indexed: true })
         .build()
 
@@ -681,8 +680,7 @@ describe("Complex Query Integration Tests", () => {
       expect(results[1].name).toBe("C") // 300
     })
 
-    // biome-ignore lint/suspicious/noSkippedTests: TODO: Projection implementation needs to exclude non-selected fields
-    it.skip("should handle projection with complex queries", async () => {
+    it("should handle projection with complex queries", async () => {
       const schema = createSchema<Product>()
         .field("name", { type: "TEXT", indexed: true })
         .field("category", { type: "TEXT", indexed: true })
@@ -713,7 +711,7 @@ describe("Complex Query Integration Tests", () => {
       const results = await products.find(
         { category: "Electronics" },
         {
-          projection: { name: 1, price: 1 },
+          projection: { name: 1, price: 1, createdAt: 1, updatedAt: 1 },
         }
       )
 

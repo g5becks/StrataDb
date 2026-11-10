@@ -206,7 +206,7 @@ test("A9 [TASK-236] timestamps(false) omits timestamp fields", async () => {
   expect(inserted).not.toHaveProperty("updatedAt")
 })
 
-test.failing("A10 [TASK-243] reopened collection adds indexed field", async () => {
+test("A10 [TASK-243] reopened collection adds indexed field", async () => {
   const directory = mkdtempSync(join(tmpdir(), "stratadb-evolution-"))
   const filename = join(directory, "evolution.db")
   try {
@@ -245,13 +245,13 @@ test("A11 [TASK-237] $ne includes missing and null for non-null operand", async 
   expect(await users.count({ nick: { $ne: "B" } })).toBe(3)
 })
 
-test.failing("A12 [TASK-245] $elemMatch resolves object fields", async () => {
+test("A12 [TASK-245] $elemMatch resolves object fields", async () => {
   expect(
     await users.find({ items: { $elemMatch: { sku: "X" } } } as never)
   ).toMatchObject([{ name: "alice" }])
 })
 
-test.failing("A12 [TASK-245] $elemMatch resolves nested operators", async () => {
+test("A12 [TASK-245] $elemMatch resolves nested operators", async () => {
   expect(
     await users.find({ items: { $elemMatch: { qty: { $gte: 2 } } } } as never)
   ).toMatchObject([{ name: "alice" }])
@@ -284,7 +284,7 @@ test("A14 [TASK-239] skip without limit returns remaining rows", async () => {
   ).toEqual(["alice", "bob", "carol"])
 })
 
-test.failing("A15 [TASK-246] unknown cursor raises QueryError", async () => {
+test("A15 [TASK-246] unknown cursor raises QueryError", async () => {
   await expect(
     Promise.resolve().then(() =>
       users.find(
@@ -300,6 +300,7 @@ test.failing("A15 [TASK-246] unknown cursor raises QueryError", async () => {
 })
 
 for (const name of ["order", "user-data"]) {
+  // biome-ignore lint/suspicious/noLoopFunc: db is initialized separately by beforeEach for each registered test
   test(`A16 [TASK-228] quoted collection name ${name} supports CRUD`, async () => {
     const collection = db.collection(name, schema())
     const inserted = await collection.insertOne({ name: "legal", role: "user" })
@@ -309,7 +310,7 @@ for (const name of ["order", "user-data"]) {
   })
 }
 
-test.failing("A17 [TASK-244] delete event carries resolved id", async () => {
+test("A17 [TASK-244] delete event carries resolved id", async () => {
   const document = await users.findOne({ name: "alice" })
   const events: unknown[] = []
   users.on("delete", (event) => events.push(event))
@@ -317,7 +318,7 @@ test.failing("A17 [TASK-244] delete event carries resolved id", async () => {
   expect(events).toMatchObject([{ _id: document?._id, deleted: true }])
 })
 
-test.failing("A17 [TASK-244] deleteMany event carries exact ids", async () => {
+test("A17 [TASK-244] deleteMany event carries exact ids", async () => {
   const documents = await users.find({ role: "user" })
   const events: unknown[] = []
   users.on("deleteMany", (event) => events.push(event))

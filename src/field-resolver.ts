@@ -1,7 +1,7 @@
 import { QueryError, SchemaValidationError } from "./errors.js"
 import type { SQLiteBindValue } from "./query-translator-types.js"
 
-const SEGMENT = /^[A-Za-z_][A-Za-z0-9_]*$/
+const SEGMENT = /^[A-Za-z_][A-Za-z0-9_]*$/u
 
 export function quoteIdent(name: string): string {
   if (typeof name !== "string" || name.length === 0 || name.includes("\0")) {
@@ -20,6 +20,11 @@ export function fieldPath(name: string): string {
     throw new QueryError(`Invalid field path: ${String(name)}`)
   }
   return `$.${name}`
+}
+
+/** Projection keys are literal own properties, rather than dotted query paths. */
+export function literalFieldPath(name: string): string {
+  return `$.${JSON.stringify(name)}`
 }
 
 export function generatedColumn(name: string): string {
@@ -45,9 +50,13 @@ export function bind(
 export function resolveField(
   name: string,
   fields: readonly { readonly name: PropertyKey; readonly indexed?: boolean }[],
-  params: SQLiteBindValue[]
+  params: SQLiteBindValue[],
+  root?: string
 ): string {
   const path = fieldPath(name)
+  if (root !== undefined) {
+    return `jsonb_extract(${root}, ${bind(path, params)})`
+  }
   if (name === "_id" || name === "createdAt" || name === "updatedAt") {
     return quoteIdent(name)
   }
@@ -59,15 +68,19 @@ export function resolveField(
 
 export function resolvePresence(
   name: string,
-  params: SQLiteBindValue[]
+  params: SQLiteBindValue[],
+  root?: string
 ): string {
   const path = fieldPath(name)
-  if (name === "_id" || name === "createdAt" || name === "updatedAt") {
+  if (
+    root === undefined &&
+    (name === "_id" || name === "createdAt" || name === "updatedAt")
+  ) {
     return quoteIdent(name)
   }
   // Inspect the original JSON: extraction and generated columns conflate
   // explicit JSON null with missing paths, and extracted text isn't JSON.
-  return `json_type(body, ${bind(path, params)})`
+  return `json_type(${root ?? "body"}, ${bind(path, params)})`
 }
 
 // SQLite forbids parameters in generated-column/index DDL. Only this validated
@@ -115,6 +128,15 @@ export function arrayElement(
   return `json_extract(${fieldSql}, ${bind(`$[${index}]`, params)})`
 }
 
+export function arrayElementPresence(
+  fieldSql: string,
+  index: unknown,
+  params: SQLiteBindValue[]
+): string {
+  assertNonNegativeInt(index, "$index.index")
+  return `json_type(${fieldSql}, ${bind(`$[${index}]`, params)})`
+}
+
 // Internal numbered bindings allow a field expression to occur several times
 // (ranges, array operators). Expand in SQL order at the public SQL boundary so
 // callers can safely concatenate fragments and use ordinary positional binds.
@@ -127,7 +149,7 @@ export function positional(
   indexes: number[]
 } {
   const indexes: number[] = []
-  const expanded = sql.replace(/\?(\d+)/g, (_, number: string) => {
+  const expanded = sql.replace(/\?(?<binding>\d+)/gu, (_, number: string) => {
     indexes.push(Number(number) - 1)
     return "?"
   })

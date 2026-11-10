@@ -14,10 +14,17 @@ import {
   StrataDBError,
   UniqueConstraintError,
 } from "./errors.js"
+import {
+  clearStatementCaches,
+  type NativeStatement,
+  StatementCache,
+} from "./statement-cache.js"
 
 export const sqliteOperation: AsyncLocalStorage<string> =
   new AsyncLocalStorage<string>()
-const UNIQUE_FIELD = /UNIQUE constraint failed: .+\.(_?[A-Za-z_][A-Za-z0-9_]*)/
+const UNIQUE_FIELD =
+  /UNIQUE constraint failed: .+\.(?<field>_?[A-Za-z_][A-Za-z0-9_]*)/u
+const DDL = /^\s*(?:CREATE|ALTER|DROP|REINDEX|VACUUM)\b/iu
 
 /** Preserve library errors and classify native SQLite errors only by errno. */
 export function wrapSqliteError(
@@ -27,7 +34,7 @@ export function wrapSqliteError(
   if (error instanceof StrataDBError || !(error instanceof SQLiteError)) {
     return error
   }
-  const errno = error.errno
+  const { errno } = error
   const primary = errno % 256
   let wrapped: StrataDBError
   if (primary === 5 || primary === 6 || primary === 14) {
@@ -66,10 +73,20 @@ export function sqliteCall<R>(
 export class SQLiteBoundary {
   private readonly database: Database
   private readonly collection: string
+  private readonly cache: StatementCache
 
-  constructor(database: Database, collection: string) {
+  constructor(database: Database, collection: string, capacity = 64) {
     this.database = database
     this.collection = collection
+    this.cache = new StatementCache(database, capacity, (sql) => {
+      let native: NativeStatement
+      try {
+        native = this.database.prepare(sql)
+      } catch (error) {
+        throw wrapSqliteError(error, this.context(sql))
+      }
+      return { native, wrapped: this.wrap(native, sql) }
+    })
   }
 
   private context(sql: string): SQLiteErrorContext {
@@ -83,27 +100,62 @@ export class SQLiteBoundary {
   prepare<Row, Params extends SQLQueryBindings[]>(
     sql: string
   ): Statement<Row, Params> {
-    const context = this.context(sql)
-    const statement = sqliteCall(
-      () => this.database.prepare<Row, Params>(sql),
-      context
-    )
+    return this.cache.get(sql).wrapped as Statement<Row, Params>
+  }
+
+  private wrap(statement: NativeStatement, sql: string): NativeStatement {
+    const methods = new Map<PropertyKey, (...args: unknown[]) => unknown>()
+    const owner = this
     return new Proxy(statement, {
       get(target, key) {
-        const value: unknown = Reflect.get(target, key, target)
+        const method = methods.get(key)
+        if (method) {
+          return method
+        }
+        const current =
+          target.isFinalized && key !== "isFinalized" && key !== "finalize"
+            ? owner.cache.get(sql).native
+            : target
+        const value: unknown = Reflect.get(current, key, current)
         if (typeof value !== "function") {
           return value
         }
-        return (...args: unknown[]) =>
-          sqliteCall(() => Reflect.apply(value, target, args), context)
+        const wrapped = (...args: unknown[]) => {
+          const active =
+            target.isFinalized && key !== "finalize"
+              ? owner.cache.get(sql).native
+              : target
+          const fn =
+            active === current ? value : Reflect.get(active, key, active)
+          try {
+            return Reflect.apply(fn, active, args)
+          } catch (error) {
+            throw wrapSqliteError(error, owner.context(sql))
+          }
+        }
+        methods.set(key, wrapped)
+        return wrapped
       },
-    }) as Statement<Row, Params>
+    })
+  }
+
+  dispose(): void {
+    this.cache.dispose()
+  }
+
+  private invalidateDDL(sql: string): void {
+    if (DDL.test(sql)) {
+      clearStatementCaches(this.database)
+      this.database.clearQueryCache()
+    }
   }
 
   run(sql: string): void {
+    this.invalidateDDL(sql)
     sqliteCall(() => this.database.run(sql), this.context(sql))
   }
   exec(sql: string): void {
+    this.invalidateDDL(sql)
     sqliteCall(() => this.database.exec(sql), this.context(sql))
   }
 }

@@ -1,4 +1,4 @@
-// biome-ignore-all lint/nursery/noUnusedExpressions: Type tests intentionally use expressions to verify TypeScript errors on projected types
+// biome-ignore-all lint/suspicious/noUnusedExpressions: Type tests intentionally use expressions to verify TypeScript errors on projected types
 // biome-ignore-all lint/complexity/noVoid: Using void to suppress unused function warnings in type tests
 import { expectTypeOf } from "expect-type"
 import type {
@@ -211,7 +211,7 @@ async function testFindNoProjection() {
   expectTypeOf(results).toEqualTypeOf<readonly User[]>()
 
   // All fields should be accessible
-  const user = results[0]
+  const [user] = results
   if (!user) {
     return
   }
@@ -230,7 +230,7 @@ async function testFindWithSelect() {
   )
 
   // Should return Pick<User, '_id' | 'name' | 'email'>[]
-  const user = results[0]
+  const [user] = results
   if (!user) {
     return
   }
@@ -255,7 +255,7 @@ async function testFindWithOmit() {
   )
 
   // Should return Omit<User, 'password' | 'email'>[]
-  const user = results[0]
+  const [user] = results
   if (!user) {
     return
   }
@@ -359,7 +359,7 @@ async function testSearchNoProjection() {
   const results = await users.search("alice", ["name", "email"])
   expectTypeOf(results).toEqualTypeOf<readonly User[]>()
 
-  const user = results[0]
+  const [user] = results
   if (!user) {
     return
   }
@@ -374,7 +374,7 @@ async function testSearchWithSelect() {
     select: ["name", "age"] as const,
   })
 
-  const user = results[0]
+  const [user] = results
   if (!user) {
     return
   }
@@ -394,7 +394,7 @@ async function testSearchWithOmit() {
     omit: ["password", "profile"] as const,
   })
 
-  const user = results[0]
+  const [user] = results
   if (!user) {
     return
   }
@@ -417,7 +417,7 @@ async function testSearchWithSelectAndFilter() {
     limit: 10,
   })
 
-  const user = results[0]
+  const [user] = results
   if (!user) {
     return
   }
@@ -444,7 +444,7 @@ async function testSelectManyFields() {
     { select: ["name", "email", "age", "active", "role"] as const }
   )
 
-  const user = results[0]
+  const [user] = results
   if (!user) {
     return
   }
@@ -470,7 +470,7 @@ async function testOmitManyFields() {
     { omit: ["password", "profile", "tags", "updatedAt"] as const }
   )
 
-  const user = results[0]
+  const [user] = results
   if (!user) {
     return
   }
@@ -494,7 +494,7 @@ async function testOmitManyFields() {
 async function testSelectArrayField() {
   const results = await users.find({}, { select: ["name", "tags"] as const })
 
-  const user = results[0]
+  const [user] = results
   if (!user) {
     return
   }
@@ -510,7 +510,7 @@ async function testSelectArrayField() {
 async function testSelectNestedField() {
   const results = await users.find({}, { select: ["name", "profile"] as const })
 
-  const user = results[0]
+  const [user] = results
   if (!user) {
     return
   }

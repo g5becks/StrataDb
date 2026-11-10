@@ -161,6 +161,8 @@ export type ComparisonOperator<T> = T extends number | Date
  * ```
  */
 export type StringOperator = {
+  /** JavaScript Unicode regex string, case-sensitive and non-indexable. */
+  readonly $regex?: string
   /** SQL-style LIKE pattern matching (case-sensitive) */
   readonly $like?: string
 
@@ -256,7 +258,7 @@ export type StringOperator = {
  * const tagsQuery: ArrayOperator<User['tags']> = {
  *   $all: ['developer', 'typescript'],  // Contains all specified values
  *   $size: 3,                           // Exactly 3 elements
- *   $index: 0                           // First element equals 'admin'
+ *   $index: { index: 0, condition: 'admin' } // First element equals 'admin'
  * };
  *
  * const scoresQuery: ArrayOperator<User['scores']> = {
@@ -286,11 +288,18 @@ export type ArrayOperator<T> = T extends readonly (infer U)[]
       /** Array has exactly the specified number of elements */
       readonly $size?: number
 
-      /** Array element at specified index matches (0-based or negative) */
-      readonly $index?: number
+      /** Existing element at a nonnegative, zero-based index matches the condition. */
+      readonly $index?: {
+        readonly index: number
+        readonly condition:
+          | Extract<U, string | number | boolean | null>
+          | FieldOperator<U>
+      }
 
       /** At least one array element matches the nested query filter */
-      readonly $elemMatch?: QueryFilter<U>
+      readonly $elemMatch?:
+        | FieldOperator<U>
+        | (U extends object ? QueryFilter<U> : never)
     }
   : never
 

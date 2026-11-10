@@ -7,7 +7,12 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from "bun:test"
-import { createSchema, type Document, Strata } from "../../src/index.js"
+import {
+  createSchema,
+  type Document,
+  QueryError,
+  Strata,
+} from "../../src/index.js"
 
 // ============================================================================
 // Test Document Types
@@ -426,38 +431,34 @@ describe("Cursor Pagination Integration", () => {
       expect(nextPage).toHaveLength(0)
     })
 
-    it("should return all items when cursor document not found", async () => {
+    it("should reject when cursor document is not found", async () => {
       const posts = db.collection("posts", createPostSchema())
 
       // Use non-existent cursor
-      const results = await posts.find(
-        {},
-        {
-          sort: { publishedAt: 1 },
-          limit: 3,
-          cursor: { after: "non-existent-id" },
-        }
-      )
-
-      // Should return first page as if no cursor was provided
-      expect(results).toHaveLength(3)
-      expect(results[0].title).toBe("First Post")
+      await expect(
+        posts.find(
+          {},
+          {
+            sort: { publishedAt: 1 },
+            limit: 3,
+            cursor: { after: "non-existent-id" },
+          }
+        )
+      ).rejects.toBeInstanceOf(QueryError)
     })
 
-    it("should ignore cursor when sort is not provided", async () => {
+    it("should reject a cursor when sort is not provided", async () => {
       const posts = db.collection("posts", createPostSchema())
 
-      // Cursor without sort should be ignored
-      const results = await posts.find(
-        {},
-        {
-          limit: 3,
-          cursor: { after: "post-003" },
-        }
-      )
-
-      // Should return results without cursor filtering
-      expect(results).toHaveLength(3)
+      await expect(
+        posts.find(
+          {},
+          {
+            limit: 3,
+            cursor: { after: "post-003" },
+          }
+        )
+      ).rejects.toBeInstanceOf(QueryError)
     })
 
     it("should handle duplicate sort values correctly", async () => {

@@ -13,7 +13,7 @@
  */
 
 import { EventEmitter } from "node:events"
-import type { Document } from "./core-types.js"
+import type { Document, DocumentUpdate } from "./core-types.js"
 import type { QueryFilter } from "./query-types.js"
 
 /**
@@ -67,8 +67,8 @@ export type InsertManyEvent<T extends Document> = {
  *
  * @remarks
  * Emitted after `updateOne()` successfully updates or upserts a document.
- * The `document` field contains the updated document, or `null` if no match
- * was found and upsert was not enabled. The `upserted` flag indicates whether
+ * Emitted only for a successful update or upsert; `document` is non-null.
+ * The `upserted` flag indicates whether
  * a new document was created via upsert.
  *
  * @example
@@ -86,12 +86,11 @@ export type UpdateEvent<T extends Document> = {
   /** The filter used to find the document (string ID or QueryFilter) */
   readonly filter: string | QueryFilter<T>
   /** The update that was applied */
-  readonly update: Partial<T>
-  /** The document after update, or null if not found (without upsert) */
-  readonly document: T | null
-  /** Whether this was an upsert (document was created) */
-  readonly upserted: boolean
-}
+  readonly update: DocumentUpdate<T>
+} & (
+  | { readonly upserted: false; readonly document: T }
+  | { readonly upserted: true; readonly document: T }
+)
 
 /**
  * Event payload for batch update operations.
@@ -112,10 +111,12 @@ export type UpdateEvent<T extends Document> = {
  * ```
  */
 export type UpdateManyEvent<T extends Document> = {
+  /** IDs of rows actually updated, in SQLite RETURNING order. */
+  readonly ids: readonly string[]
   /** The filter used to find documents */
   readonly filter: QueryFilter<T>
   /** The update that was applied */
-  readonly update: Partial<T>
+  readonly update: DocumentUpdate<T>
   /** Number of documents that matched the filter */
   readonly matchedCount: number
   /** Number of documents that were modified */
@@ -169,9 +170,15 @@ export type ReplaceEvent<T extends Document> = {
 export type DeleteEvent<T extends Document> = {
   /** The filter used to find the document */
   readonly filter: string | QueryFilter<T>
-  /** Whether a document was deleted */
-  readonly deleted: boolean
-}
+} & (
+  | {
+      readonly deleted: true
+      readonly _id: string
+      /** Included only when deleteOne requests includeDocument. */
+      readonly document?: T
+    }
+  | { readonly deleted: false; readonly _id: null; readonly document?: never }
+)
 
 /**
  * Event payload for batch delete operations.
@@ -190,6 +197,8 @@ export type DeleteEvent<T extends Document> = {
  * ```
  */
 export type DeleteManyEvent<T extends Document> = {
+  /** IDs of deleted rows, in SQLite RETURNING order. */
+  readonly ids: readonly string[]
   /** The filter used to find documents */
   readonly filter: QueryFilter<T>
   /** Number of documents deleted */
@@ -248,7 +257,7 @@ export type FindOneAndUpdateEvent<T extends Document> = {
   /** The filter used to find the document */
   readonly filter: string | QueryFilter<T>
   /** The update that was applied */
-  readonly update: Partial<T>
+  readonly update: DocumentUpdate<T>
   /** The document (before or after based on options), or null if not found */
   readonly document: T | null
   /** Whether this was an upsert (document was created) */

@@ -6,7 +6,7 @@
 type ArrayOperator<T> = T extends readonly infer U[] ? object : never;
 ```
 
-Defined in: [src/query-types.ts:281](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/query-types.ts#L281)
+Defined in: [src/query-types.ts:283](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/query-types.ts#L283)
 
 Array-specific query operators for MongoDB-like array operations.
 
@@ -38,7 +38,7 @@ type User = Document<{
 const tagsQuery: ArrayOperator<User['tags']> = {
   $all: ['developer', 'typescript'],  // Contains all specified values
   $size: 3,                           // Exactly 3 elements
-  $index: 0                           // First element equals 'admin'
+  $index: { index: 0, condition: 'admin' } // First element equals 'admin'
 };
 
 const scoresQuery: ArrayOperator<User['scores']> = {

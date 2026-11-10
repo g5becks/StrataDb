@@ -3,18 +3,52 @@
 # Type Alias: UpdateEvent&lt;T&gt;
 
 ```ts
-type UpdateEvent<T> = object;
+type UpdateEvent<T> = object & (
+  | {
+  document: T;
+  upserted: false;
+}
+  | {
+  document: T;
+  upserted: true;
+});
 ```
 
-Defined in: [src/collection-events.ts:85](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L85)
+Defined in: [src/collection-events.ts:85](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/collection-events.ts#L85)
 
 Event payload for single document update operations.
+
+## Type Parameters
+
+### T
+
+`T` *extends* [`Document`](Document.md)
+
+The document type extending Document
+
+## Type Declaration
+
+### filter
+
+```ts
+readonly filter: string | QueryFilter<T>;
+```
+
+The filter used to find the document (string ID or QueryFilter)
+
+### update
+
+```ts
+readonly update: DocumentUpdate<T>;
+```
+
+The update that was applied
 
 ## Remarks
 
 Emitted after `updateOne()` successfully updates or upserts a document.
-The `document` field contains the updated document, or `null` if no match
-was found and upsert was not enabled. The `upserted` flag indicates whether
+Emitted only for a successful update or upsert; `document` is non-null.
+The `upserted` flag indicates whether
 a new document was created via upsert.
 
 ## Example
@@ -28,59 +62,3 @@ collection.on('update', (event) => {
   }
 })
 ```
-
-## Type Parameters
-
-### T
-
-`T` *extends* [`Document`](Document.md)
-
-The document type extending Document
-
-## Properties
-
-### document
-
-```ts
-readonly document: T | null;
-```
-
-Defined in: [src/collection-events.ts:91](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L91)
-
-The document after update, or null if not found (without upsert)
-
-***
-
-### filter
-
-```ts
-readonly filter: string | QueryFilter<T>;
-```
-
-Defined in: [src/collection-events.ts:87](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L87)
-
-The filter used to find the document (string ID or QueryFilter)
-
-***
-
-### update
-
-```ts
-readonly update: Partial<T>;
-```
-
-Defined in: [src/collection-events.ts:89](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L89)
-
-The update that was applied
-
-***
-
-### upserted
-
-```ts
-readonly upserted: boolean;
-```
-
-Defined in: [src/collection-events.ts:93](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L93)
-
-Whether this was an upsert (document was created)

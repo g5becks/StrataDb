@@ -227,7 +227,13 @@ expectTypeOf({ $regex: 123 } satisfies StringOperator)
 declare const strArrayOps: ArrayOperator<string[]>
 expectTypeOf(strArrayOps.$all).toEqualTypeOf<readonly string[] | undefined>()
 expectTypeOf(strArrayOps.$size).toEqualTypeOf<number | undefined>()
-expectTypeOf(strArrayOps.$index).toEqualTypeOf<number | undefined>()
+expectTypeOf(strArrayOps.$index).toEqualTypeOf<
+  | {
+      readonly index: number
+      readonly condition: string | FieldOperator<string>
+    }
+  | undefined
+>()
 
 // ✅ Valid array operators for number arrays
 declare const numArrayOps: ArrayOperator<number[]>

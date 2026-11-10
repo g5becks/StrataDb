@@ -6,7 +6,7 @@
 type DropEvent = object;
 ```
 
-Defined in: [src/collection-events.ts:303](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L303)
+Defined in: [src/collection-events.ts:312](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/collection-events.ts#L312)
 
 Event payload for drop operations.
 
@@ -31,6 +31,6 @@ collection.on('drop', (event) => {
 readonly name: string;
 ```
 
-Defined in: [src/collection-events.ts:305](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/collection-events.ts#L305)
+Defined in: [src/collection-events.ts:314](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/collection-events.ts#L314)
 
 The collection name that was dropped

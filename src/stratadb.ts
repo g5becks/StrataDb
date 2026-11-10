@@ -6,20 +6,33 @@ import {
 } from "./collection-builder.js"
 import type { Collection } from "./collection-types.js"
 import type { Document } from "./core-types.js"
-import { assertDatabaseOpen, markDatabaseClosed } from "./database-state.js"
+import {
+  assertDatabaseOpen,
+  markDatabaseClosed,
+  markDatabaseReadonly,
+} from "./database-state.js"
 import type {
   CollectionOptions,
   DatabaseOptions,
   StrataDB as StrataDBInterface,
   Transaction,
 } from "./database-types.js"
-import { ConnectionError } from "./errors.js"
+import { ConnectionError, SchemaValidationError } from "./errors.js"
 import { quoteIdent } from "./field-resolver.js"
 import { generateId } from "./id-generator.js"
+import { captureRawChanges } from "./raw-changes.js"
 import type { RetryOptions } from "./retry-types.js"
+import { mergeRetryOptions } from "./retry-utils.js"
+import { configureSchemaDrift } from "./schema-evolution.js"
+import { schemaSignature } from "./schema-signature.js"
 import type { SchemaDefinition } from "./schema-types.js"
 import { sqliteCall } from "./sqlite-boundary.js"
 import { SQLiteCollection } from "./sqlite-collection.js"
+import { registerRegex } from "./sqlite-regex.js"
+import {
+  disposeStatementCaches,
+  validateStatementCacheSize,
+} from "./statement-cache.js"
 import {
   type TransactionFrame,
   transactionManager,
@@ -67,7 +80,10 @@ export class Strata implements StrataDBInterface {
   private readonly onCloseCallback: (() => void) | undefined
   private readonly enableCacheDefault: boolean
   private readonly retryOptionsDefault: RetryOptions | undefined
+  private readonly statementCacheSizeDefault: number
+  private readonly releaseRawCapture: () => void
   private readonly collections = new Map<string, Collection<Document>>()
+  private readonly schemaSignatures = new Map<string, string>()
 
   /**
    * Creates a new StrataDB instance.
@@ -75,10 +91,17 @@ export class Strata implements StrataDBInterface {
    * @param options - Database configuration options
    */
   constructor(options: DatabaseOptions) {
+    this.statementCacheSizeDefault = validateStatementCacheSize(
+      options.statementCacheSize ?? 64
+    )
     // Initialize database connection
     if (typeof options.database === "string") {
       this.sqliteDb = sqliteCall(
-        () => new SQLiteDatabase(options.database as string),
+        () =>
+          new SQLiteDatabase(
+            options.database as string,
+            options.readonly ? { readonly: true } : {}
+          ),
         { operation: "open" }
       )
     } else {
@@ -86,6 +109,9 @@ export class Strata implements StrataDBInterface {
     }
 
     assertDatabaseOpen(this.sqliteDb)
+    if (options.readonly) {
+      markDatabaseReadonly(this.sqliteDb)
+    }
     const version = sqliteCall(
       () =>
         this.sqliteDb
@@ -107,6 +133,12 @@ export class Strata implements StrataDBInterface {
     this.onCloseCallback = options.onClose
     this.enableCacheDefault = options.enableCache ?? false
     this.retryOptionsDefault = options.retry
+    configureSchemaDrift(this.sqliteDb, options.onSchemaDrift)
+    registerRegex(this.sqliteDb)
+    this.releaseRawCapture = captureRawChanges(
+      this.sqliteDb,
+      options.onRawChange
+    )
   }
 
   /**
@@ -145,15 +177,20 @@ export class Strata implements StrataDBInterface {
       assertDatabaseOpen(this.sqliteDb)
       // Return builder for fluent schema definition
       return new CollectionBuilderImpl<T>(
-        this.sqliteDb,
-        name,
-        this.idGeneratorFn,
+        (built, cacheEnabled) =>
+          this.collection(name, built, { enableCache: cacheEnabled }),
         this.enableCacheDefault
       )
     }
 
+    const signature = schemaSignature(schema)
     const existing = this.collections.get(name)
     if (existing) {
+      if (this.schemaSignatures.get(name) !== signature) {
+        throw new SchemaValidationError(
+          `Collection ${name} is already cached with a different schema`
+        )
+      }
       return existing as Collection<T>
     }
     assertDatabaseOpen(this.sqliteDb)
@@ -161,16 +198,19 @@ export class Strata implements StrataDBInterface {
     // Determine cache setting: collection option > database default
     const enableCache = options?.enableCache ?? this.enableCacheDefault
 
-    const collection = new SQLiteCollection<T>(
-      this.sqliteDb,
-      name,
-      schema,
-      this.idGeneratorFn,
+    const collection = new SQLiteCollection<T>(this.sqliteDb, name, schema, {
+      idGenerator: this.idGeneratorFn,
       enableCache,
-      this.retryOptionsDefault,
-      options?.retry
-    )
+      retryOptions: mergeRetryOptions(this.retryOptionsDefault, options?.retry),
+      statementCacheSize:
+        options?.statementCacheSize ?? this.statementCacheSizeDefault,
+      onDrop: () => {
+        this.collections.delete(name)
+        this.schemaSignatures.delete(name)
+      },
+    })
     this.collections.set(name, collection as Collection<Document>)
+    this.schemaSignatures.set(name, signature)
 
     return collection
   }
@@ -224,6 +264,8 @@ export class Strata implements StrataDBInterface {
     }
 
     this.onCloseCallback?.()
+    disposeStatementCaches(this.sqliteDb)
+    this.releaseRawCapture()
     sqliteCall(() => this.sqliteDb.close(), { operation: "close" })
     markDatabaseClosed(this.sqliteDb)
   }

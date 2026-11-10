@@ -6,7 +6,7 @@
 type Document<T> = object & ReadonlyDeep<T>;
 ```
 
-Defined in: [src/core-types.ts:60](https://github.com/g5becks/StrataDb/blob/b779de76674dc987e520cac4208deb63cba043bc/src/core-types.ts#L60)
+Defined in: [src/core-types.ts:61](https://github.com/g5becks/StrataDb/blob/847caea40144e6ce38b2b65a82ec03db6216b58f/src/core-types.ts#L61)
 
 Document type with immutable ID.
 

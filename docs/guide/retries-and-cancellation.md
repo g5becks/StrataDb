@@ -1,5 +1,17 @@
 # Retries & Cancellation
 
+Retry callbacks use p-retry 9 semantics: `shouldConsumeRetry` runs before
+`onFailedAttempt`, followed by `shouldRetry`. Context includes `retryDelay` in
+milliseconds. When the signal aborts during an attempt or callback, its reason
+wins and remaining callbacks are suppressed. Retrying remains opt-in.
+
+`updateOne` honors operation retry options just like other write APIs:
+`updateOne(id, update, { retry: false })` disables inherited retries. An explicit
+operation retry policy merges over collection/database defaults, including its
+custom predicate. Failed validation still rejects through the returned promise
+and leaves the stored row and events unchanged. A custom predicate is authoritative
+and can elect to retry errors the default classifier would reject.
+
 StrataDB v0.4.0 introduces automatic retry logic for transient failures and AbortSignal support for canceling long-running operations.
 
 ## Operation Cancellation

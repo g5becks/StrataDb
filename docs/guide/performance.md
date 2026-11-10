@@ -2,6 +2,41 @@
 
 StrataDB provides several features to optimize query performance. This guide covers query caching, benchmarking, and performance best practices.
 
+## Inclusion projections
+
+`select` and inclusion `projection` build JSON in SQLite so Bun parses only the
+requested properties. Missing keys remain absent, and `_id` is included unless
+explicitly excluded. Timestamp properties must be selected explicitly and remain
+hidden with `timestamps(false)`. Exclusion projections still filter in JavaScript.
+
+`bun bench/projection.bench.ts` measures 50 fields of 512 bytes each, selecting two,
+with 5,000 warmup reads and five trials of 50,000 reads. On Bun 1.4.4/macOS arm64,
+the median fell from 9.99 to 8.46 µs/read (15% lower latency). Wide selections use
+ordered JSON aggregation to avoid SQLite function-argument limits.
+
+## Prepared statements
+
+Collections cache up to 64 prepared statements by default. Set a positive integer
+`statementCacheSize` on the database or override it in collection options. Each
+collection owns its LRU; StrataDB does not change Bun's global query-cache limit.
+Eviction, schema DDL, drop and close finalize native statements. A committed drop
+also invalidates the collection factory entry; a rollback preserves it.
+
+The optional `enableCache` setting controls a separate translator template cache.
+It remains opt-in: with the statement cache, the recorded 50k indexed-read test
+still improved from 1.38 to 1.12 µs/op when translator caching was enabled.
+The same test measured 7.40/7.13 µs/op on v0.6.0 (translator off/on), on macOS
+arm64 with Bun 1.4.4 and SQLite 3.54.0. These measurements describe that fixture
+and host; reproduce them with:
+
+```bash
+bun bench/statement-cache.bench.ts /path/to/v0.6.0/worktree
+bun bench/statement-cache.bench.ts
+```
+
+The script checks the result row, warms up 5,000 calls, and records five trials
+of 50,000 awaited indexed `findOne` calls for each translator-cache setting.
+
 ## Query Caching
 
 Query caching stores SQL templates for queries with the same structure, significantly improving performance for repeated query patterns.
