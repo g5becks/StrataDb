@@ -2,6 +2,18 @@
 
 StrataDB provides several features to optimize query performance. This guide covers query caching, benchmarking, and performance best practices.
 
+## Inclusion projections
+
+`select` and inclusion `projection` build JSON in SQLite so Bun parses only the
+requested properties. Missing keys remain absent, and `_id` is included unless
+explicitly excluded. Timestamp properties must be selected explicitly and remain
+hidden with `timestamps(false)`. Exclusion projections still filter in JavaScript.
+
+`bun bench/projection.bench.ts` measures 50 fields of 512 bytes each, selecting two,
+with 5,000 warmup reads and five trials of 50,000 reads. On Bun 1.4.4/macOS arm64,
+the median fell from 9.99 to 8.38 µs/read (16% lower latency). Wide selections use
+ordered JSON aggregation to avoid SQLite function-argument limits.
+
 ## Prepared statements
 
 Collections cache up to 64 prepared statements by default. Set a positive integer

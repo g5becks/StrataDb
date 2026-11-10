@@ -22,6 +22,11 @@ export function fieldPath(name: string): string {
   return `$.${name}`
 }
 
+/** Projection keys are literal own properties, rather than dotted query paths. */
+export function literalFieldPath(name: string): string {
+  return `$.${JSON.stringify(name)}`
+}
+
 export function generatedColumn(name: string): string {
   fieldPath(name)
   // Length-prefix each segment for dotted paths; avoid aliasing a__b with a.b.

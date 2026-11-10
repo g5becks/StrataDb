@@ -51,6 +51,7 @@ import {
   resolveField,
 } from "./field-resolver.js"
 import { generateId } from "./id-generator.js"
+import { inclusionSQL } from "./projection-sql.js"
 import type {
   CursorSpec,
   ProjectionSpec,
@@ -1024,11 +1025,19 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
 
         const cursorPlan = cursorOrder(options?.sort, options?.cursor)
 
-        let sql = `SELECT _id, json(body) as body, createdAt, updatedAt FROM ${this.tableSql}`
+        const projection = this.normalizeProjection(options)
+        const inclusion = inclusionSQL(
+          projection,
+          this.schema.timestamps !== false
+        )
+        let sql = `SELECT _id, ${inclusion?.sql ?? "json(body)"} as body, createdAt, updatedAt FROM ${this.tableSql}`
 
         // Build WHERE clause combining filter and search
         const whereParts: string[] = []
-        const allParams: SQLQueryBindings[] = [...params]
+        const allParams: SQLQueryBindings[] = [
+          ...(inclusion?.params ?? []),
+          ...params,
+        ]
 
         if (whereClause) {
           whereParts.push(whereClause)
@@ -1081,12 +1090,11 @@ export class SQLiteCollection<T extends Document> implements Collection<T> {
         throwIfAborted(options?.signal)
 
         let results = (cursorPlan.reverse ? rows.reverse() : rows).map((row) =>
-          this.hydrate(row)
+          inclusion ? (JSON.parse(row.body) as T) : this.hydrate(row)
         )
 
         // Apply projection (select/omit/projection)
-        const projection = this.normalizeProjection(options)
-        if (projection) {
+        if (projection && !inclusion) {
           results = this.applyProjection(results, projection) as T[]
         }
 

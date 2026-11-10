@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Performance
+
+- Inclusion projections (`select` and inclusion `projection`) construct only the requested JSON in SQLite. Literal property names, missing fields, JSON types and timestamp visibility are preserved; exclusion projections retain their JavaScript path. A 50-field/two-field benchmark improved from 9.99 to 8.38 µs/read (16% lower latency) on Bun 1.4.4, macOS arm64.
+
 ### Breaking changes
 
 - Differential testing corrected query edge cases: empty `$or` matches nothing; `$in` lists containing null include null/missing scalar fields; `$all` can require actual null array elements; `$index` requires an existing array element and distinguishes present null from a missing index. Review bulk-write filters using these forms.
