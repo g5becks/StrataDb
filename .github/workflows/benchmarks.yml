@@ -1,0 +1,53 @@
+name: Benchmarks
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "45 3 * * 0"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: benchmarks-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: true
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
+        with:
+          bun-version: "1.4.4"
+      - run: bun install --frozen-lockfile
+      - name: Record environment
+        shell: bash
+        run: |
+          mkdir -p benchmark-results
+          {
+            git rev-parse HEAD
+            bun --version
+            uname -a
+            bun -e 'import { Database } from "bun:sqlite"; using db = new Database(":memory:"); console.log(db.query("SELECT sqlite_version() AS sqlite").get())'
+          } > benchmark-results/environment.txt
+      - name: Run all benchmarks
+        shell: bash
+        run: |
+          set -o pipefail
+          bun run bench:all 2>&1 | tee benchmark-results/bench-all.txt
+      - name: Record fixed comparison protocols
+        run: |
+          bun bench/statement-cache.bench.ts > benchmark-results/statement-cache.json
+          bun bench/projection.bench.ts > benchmark-results/projection.json
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: benchmarks-${{ github.sha }}
+          path: benchmark-results/
+          if-no-files-found: error
+          retention-days: 90

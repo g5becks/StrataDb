@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Tooling
 
+- Added a SHA-pinned weekly/manual benchmark workflow with environment metadata, strict query/CRUD/batch results and fixed-protocol JSON artifacts. CONTRIBUTING explains local reproduction and how to compare results while Actions is unavailable.
+
 - Consolidated the current architecture in `docs/DESIGN.md`, archived historical proposals under `docs/design/`, removed duplicate root designs and refreshed AGENTS/Claude/Copilot guidance for current APIs and release verification.
 
 - Split collection state/DDL/read/write logic, query caching/operators and public contracts into focused source modules. All source files remain below 600 lines. Event registration uses a typed facade, and collection complexity suppressions were removed without changing behavior.
