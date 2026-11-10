@@ -1,11 +1,11 @@
 ---
 id: TASK-257
 title: 'Performance: benchmark tracking workflow'
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-11-09T04:01:00Z'
-updated_date: '2026-11-10T13:41:00Z'
+updated_date: '2026-11-10T13:43:00Z'
 labels:
   - performance
   - build-release
@@ -31,7 +31,7 @@ Add a workflow (workflow_dispatch + weekly schedule) that runs `bun run bench:al
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A workflow runs bench:all on demand and weekly and uploads results as an artifact
+- [x] #1 A workflow runs bench:all on demand and weekly and uploads results as an artifact
 - [x] #2 README or CONTRIBUTING explains how to read the benchmark artifact
 <!-- AC:END -->
 
@@ -52,4 +52,6 @@ Add a workflow (workflow_dispatch + weekly schedule) that runs `bun run bench:al
 - Local baseline reused from TASK-267 successful bench:all:103 result rows,43 retained CRUD cases; Bun1.4.4/Apple M5/macOS arm64. Means: cached translation179.50ns, findById866.10ns, indexed findOne1.51us, atomic findOneAndUpdate6.24us; raw /Users/takinprofit/Dev/StrataDb-release/benchmarks/TASK-267/after-all.log. Fixed-protocol before/after medians remain in TASK-252/253/258 and their raw JSON artifacts.
 - Decisions: keep artifacts and environment metadata, without automatic PR comments or uncalibrated regression thresholds. CONTRIBUTING distinguishes means/medians and partial failure artifacts and documents local reproduction during billing lock.
 - Follow-ups: none.
+
+Verified with scripts/ci-local.sh (7701141de7e8f60268bc98c684684dca63d00727, PASS); GitHub Actions unavailable (billing lock). macOS/Linux Bun pinned/latest1.4.4, source/type suites TS5.9.3/6.0.3/7.0.2 and advisory7.1-beta all PASS; actionlint PASS. Weekly/manual triggers, strict benchmark command and artifact upload verified from the file; no GitHub execution claimed.
 <!-- SECTION:NOTES:END -->
